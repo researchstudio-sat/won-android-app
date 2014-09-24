@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="admob_id">test</string>
+
+    <string name="app_name">won</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_search">Search</string>
+    <string name="action_share">Share</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_compose">Compose</string>
+
+    <!-- Generic Items -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="sharechooser">Share through...</string>
+
+    <!-- MENU ITEMS -->
+    <string name="mi_profile">Profile</string>
+    <string name="mi_mailbox">Mailbox</string>
+    <string name="mi_createpost">Create Post</string>
+    <string name="mi_myneeds">My Needs</string>
+
+    <!-- PREFERENCES -->
+    <string name="pref_header">Preferences</string>
+    <string name="pref_header_general">General</string>
+    <string name="pref_header_notification">Notification</string>
+    <string name="pref_general">General</string>
+
+    <string name="pref_general_showstartup">Show Startup Screen</string>
+    <string name="pref_general_setting2">GeneralSetting2</string>
+    <string name="pref_general_setting3">GeneralSetting3</string>
+    <string name="pref_general_setting4">GeneralSetting4</string>
+    <string name="pref_notification_setting1">NotificationSetting1</string>
+    <string name="pref_notification_setting2">NotificationSetting2</string>
+    <string name="pref_notification_setting3">NotificationSetting3</string>
+    <string name="pref_notification_setting4">NotificationSetting4</string>
+
+    <string name="pref_general_showstartup_summary">Shows the Info-Pages to the WoN-App</string>
+    <string name="pref_general_setting2_summary">GeneralSetting2 Summary</string>
+    <string name="pref_general_setting3_summary">GeneralSetting3 Summary</string>
+    <string name="pref_general_setting4_summary">GeneralSetting4 Summary</string>
+    <string name="pref_notification_setting1_summary">NotificationSetting1 Summary</string>
+    <string name="pref_notification_setting2_summary">NotificationSetting2 Summary</string>
+    <string name="pref_notification_setting3_summary">NotificationSetting3 Summary</string>
+    <string name="pref_notification_setting4_summary">NotificationSetting4 Summary</string>
+
+    <!-- WELCOME TEXT -->
+    <string name="welcome_page_create">Create a new post and choose its type: offer, want, do something together or change something.</string>
+    <string name="welcome_page_add">Add optional information like time or location to refine your post.</string>
+    <string name="welcome_page_match">Get notified by matches that fit best your individual post.</string>
+    <string name="welcome_page_create_header">Create</string>
+    <string name="welcome_page_add_header">Add</string>
+    <string name="welcome_page_match_header">Match!</string>
+
+    <!-- Create Post View -->
+    <string name="create_title">Title</string>
+    <string name="create_title_hint">Roughly, what\'s it about?</string>
+    <string name="create_description">Description</string>
+    <string name="create_description_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like pickup adress or time of availability)</string>
+    <string name="create_tags">Tags</string>
+    <string name="create_tags_2">Using tags improves results by a great deal.</string>
+    <string name="create_tags_hint">e.g. furniture, electronics, for children,...</string>
+</resources>
