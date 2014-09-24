@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:title="@string/pref_header_general">
+        <CheckBoxPreference
+                android:key="showStartupScreen"
+                android:summary="@string/pref_general_showstartup_summary"
+                android:title="@string/pref_general_showstartup"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:key="pref_key_general3"
+                android:summary="@string/pref_general_setting3_summary"
+                android:title="@string/pref_general_setting3"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:key="pref_key_general4"
+                android:summary="@string/pref_general_setting4_summary"
+                android:title="@string/pref_general_setting4"
+                android:defaultValue="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+            android:title="@string/pref_header_notification">
+        <CheckBoxPreference
+                android:key="pref_key_notification1"
+                android:summary="@string/pref_notification_setting1_summary"
+                android:title="@string/pref_notification_setting1"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:key="pref_key_notification2"
+                android:summary="@string/pref_notification_setting2_summary"
+                android:title="@string/pref_notification_setting2"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:key="pref_key_notification3"
+                android:summary="@string/pref_notification_setting3_summary"
+                android:title="@string/pref_notification_setting3"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:key="pref_key_notification4"
+                android:summary="@string/pref_notification_setting4_summary"
+                android:title="@string/pref_notification_setting4"
+                android:defaultValue="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

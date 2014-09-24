@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">won</string>
+    <string name="title_section1">Sektion 1</string>
+    <string name="title_section2">Sektion 2</string>
+    <string name="title_section3">Sektion 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Beispiel Aktion</string>
+    <string name="action_settings">Einstellungen</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_search">Suche</string>
+    <string name="action_compose">Verfassen</string>
+
+    <!-- Generic Items -->
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Abbrechen</string>
+
+    <!-- MENU ITEMS -->
+    <string name="mi_profile">Profil</string>
+    <string name="mi_mailbox">Mailbox</string>
+    <string name="mi_createpost">Eintrag erstellen</string>
+    <string name="mi_myneeds">Meine Bedürfnisse</string>
+</resources>

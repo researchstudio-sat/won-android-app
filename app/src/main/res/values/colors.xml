@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ActionBar -->
+    <color name="actionbar_bg">#178acc</color>
+    <color name="actionbar_text">#FFF</color>
+
+    <!-- Navigation Drawer -->
+    <color name="navdrawer_bg">#CCC</color>
+    <color name="navdrawer_divider">#DFDFDF</color>
+    <color name="menuitem_bg_sel">#333</color>
+    <color name="menuitem_text_sel">#FFF</color>
+    <color name="menuitem_bg">#CCC</color>
+    <color name="menuitem_text">#000</color>
+    <color name="menuitem_counter_text">#FFFFFF</color>
+    <color name="menuitem_counter_bg_outline">#19CC4D</color>
+    <color name="menuitem_counter_bg">#16A843</color>
+</resources>
