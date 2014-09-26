@@ -52,7 +52,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
             //OPEN NEEDS FRAGMENT RIGHT AWAY
             showMainMenu();
-            getFragmentManager().beginTransaction().replace(R.id.container, new NeedsFragment(getIntent().getData())).commit();
+            getFragmentManager().beginTransaction().replace(R.id.container, new ProfileFragment(getIntent().getData())).commit();
         }else{
             Log.d("INTENT","Opened from launcher");
             Log.d("INTENT",""+getIntent().getData());
@@ -112,7 +112,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
                 break;
             case 3:
                 mTitle = getString(R.string.mi_myneeds);
-                fragment = new NeedsFragment();
+                fragment = new NeedListFragment();
                 break;
         }
         if(mNavigationDrawerFragment!=null) {

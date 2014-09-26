@@ -14,4 +14,12 @@
     <color name="menuitem_counter_text">#FFFFFF</color>
     <color name="menuitem_counter_bg_outline">#19CC4D</color>
     <color name="menuitem_counter_bg">#16A843</color>
+
+    <!-- NeedList-->
+    <color name="needlist_bg">#FFF</color>
+    <color name="needlist_divider">#DFDFDF</color>
+
+    <!-- Create Post -->
+    <color name="createpost_edit_outline">#DFDFDF</color>
+    <color name="createpost_edit_bg">#FFFFFF</color>
 </resources>

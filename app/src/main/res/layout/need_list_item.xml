@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/swipe_needs"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="96dp"
+              android:weightSum="1">
+    <TableRow>
+    <ImageView
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:id="@+id/need_list_image"
+            android:src="@drawable/rectangle"
+            android:layout_margin="4dp"
+            />
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_margin="4dp"
+            android:layout_weight="0.8">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Need Title Long title this is longer than expected oh my"
+                    android:id="@+id/need_list_title"
+                    android:gravity="left"
+                    android:singleLine="true"/>
+            <TextView
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Tag1, Tag2, Tag3, Tag, Tag, Tag, Tag, Tag, Tag, Tag"
+                    android:id="@+id/need_list_tags"
+                    android:gravity="left|bottom"
+                    android:layout_marginTop="4dp"
+                    android:singleLine="true"/>
+    </RelativeLayout>
+    <TextView
+            android:id="@+id/need_list_matches"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/circle"
+            android:text="5"
+            android:gravity="center"
+            android:minHeight="?android:attr/listPreferredItemHeightSmall"
+            android:padding="6dp"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textColor="@color/menuitem_counter_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </TableRow>
+</TableLayout>

@@ -4,14 +4,38 @@
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="android:actionBarStyle">@style/WoNActionBar</item>
+        <item name="android:editTextStyle">@style/WoNEditText</item>
+        <item name="android:spinnerStyle">@style/WoNSpinner</item>
     </style>
 
+    <!-- General ActionBar Style -->
     <style name="WoNActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@color/actionbar_bg</item>
         <item name="android:titleTextStyle">@style/WoNActionBarTitleText</item>
     </style>
-
     <style name="WoNActionBarTitleText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/actionbar_text</item>
+    </style>
+
+    <!-- General Edit Text Style -->
+    <style name="WoNEditText" parent="@android:style/Widget.EditText">
+        <item name="android:background">@drawable/edittext_style</item>
+        <item name="android:titleTextStyle">@android:color/black</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:windowFrame">@color/actionbar_bg</item>
+    </style>
+
+    <!-- General Spinner(Dropdown) Style -->
+    <style name="WoNSpinner" parent="@android:style/Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/dropdown_style</item>
+        <item name="android:titleTextStyle">@android:color/black</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:windowFrame">@color/actionbar_bg</item>
     </style>
 </resources>

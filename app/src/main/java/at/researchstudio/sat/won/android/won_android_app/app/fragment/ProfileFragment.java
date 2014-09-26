@@ -3,6 +3,7 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
@@ -21,6 +23,18 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.LocationSer
 public class ProfileFragment extends Fragment {
     private Button dialogButton;
     private Button toastButton;
+    private Uri uri;
+    private Button notificationButton;
+
+    public ProfileFragment() {
+        super();
+    }
+
+    public ProfileFragment(Uri uri) {
+        this();
+        this.uri = uri;
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,6 +50,8 @@ public class ProfileFragment extends Fragment {
 
         dialogButton = (Button) rootView.findViewById(R.id.opendialog);
         toastButton = (Button) rootView.findViewById(R.id.showtoast);
+        notificationButton = (Button) rootView.findViewById(R.id.sharewith);
+        WebView myWebView = (WebView) rootView.findViewById(R.id.webview);
 
         dialogButton.setOnClickListener(new Button.OnClickListener(){
             public void onClick(View v) {
@@ -67,6 +83,23 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getActivity().getApplicationContext(), "Location:"+LocationService.getCurrentLocation()+" Accuracy: "+LocationService.getCurrentLocation().getAccuracy(), Toast.LENGTH_SHORT).show();
             }
         });
+
+
+
+        myWebView.getSettings().setJavaScriptEnabled(true);
+        if(uri!=null) {
+            Log.d("URI", uri.toString());
+            myWebView.loadUrl(uri.toString());
+        }else{
+            myWebView.loadUrl("http://www.orf.at");
+        }
+
+        notificationButton.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                Log.d("BUTTON", "NOTIFICATION BUTTON CLICKED");
+            }
+        });
+
         getActivity().setTitle(R.string.mi_profile);
         return rootView;
     }

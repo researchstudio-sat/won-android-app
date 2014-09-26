@@ -69,6 +69,15 @@
     <string name="create_description">Description</string>
     <string name="create_description_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like pickup adress or time of availability)</string>
     <string name="create_tags">Tags</string>
+    <string name="create_images">Images</string>
+    <string name="create_location">Location</string>
     <string name="create_tags_2">Using tags improves results by a great deal.</string>
     <string name="create_tags_hint">e.g. furniture, electronics, for children,...</string>
+    <string name="create_type">Type</string>
+    <string name="create_type_spinner_choose">Select a Type</string>
+    <string name="create_type_spinner_offer">Offer</string>
+    <string name="create_type_spinner_want">Want</string>
+    <string name="create_type_spinner_activity">Activity</string>
+    <string name="create_type_spinner_change">Change</string>
+
 </resources>
