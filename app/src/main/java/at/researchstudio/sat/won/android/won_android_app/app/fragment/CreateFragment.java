@@ -56,12 +56,6 @@ public class CreateFragment extends Fragment {
 
         mImagePager = (ViewPager) rootView.findViewById(R.id.create_image_pager);
         mImagePager.setAdapter(mImagePagerAdapter);
-        mImagePager.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("mImagePager", "clicked");
-            }
-        });
 
         //Initialize GMaps
         MapsInitializer.initialize(getActivity());

@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.ImageFragment;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.WelcomeScreenFragment;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 /**
  * Created by fsuda on 26.09.2014.
  */
@@ -17,8 +20,18 @@ public class ImagePagerAdapter extends FragmentStatePagerAdapter {
             "http://placehold.it/120x120&text=image3",
             "http://placehold.it/120x120&text=image4"};
 
+    private ArrayList<ImageFragment> imageFragments;
+    private boolean editable = true;
+
     public ImagePagerAdapter(FragmentManager fm) {
         super(fm);
+        imageFragments = new ArrayList<ImageFragment>();
+    }
+
+    public ImagePagerAdapter(FragmentManager fm, boolean editable) {
+        super(fm);
+        imageFragments = new ArrayList<ImageFragment>();
+        this.editable = editable;
     }
 
     @Override
@@ -37,6 +50,10 @@ public class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return field.length+1; //TODO: MAKE THIS DYNAMIC
+        return editable ? imageFragments.size()+1 : imageFragments.size();
     }
+
+    //Implement this like http://stackoverflow.com/questions/13664155/dynamically-add-and-remove-view-to-viewpager
+    //On Click should also be set   --> on click on existing image invokes delete dialog
+    //                              --> on click on placeholder should invoke image picker (camera / gallery)
 }
