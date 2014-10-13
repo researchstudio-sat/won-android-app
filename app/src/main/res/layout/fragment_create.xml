@@ -102,14 +102,23 @@
                 android:id="@+id/createImages"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-               android:id="@+id/create_image_pager"
-               android:layout_width="match_parent"
-               android:layout_height="240dp"
-               android:layout_centerVertical="true"
-               android:layout_marginBottom="@dimen/create_edit_margin_bottom"
-               android:layout_marginTop="@dimen/create_edit_margin_top"
-               android:background="@drawable/edittext_style"/>
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/edittext_style"
+                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
+                android:layout_marginTop="@dimen/create_edit_margin_top">
+            <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+                   android:id="@+id/create_image_pager"
+                   android:layout_width="match_parent"
+                   android:layout_height="240dp"/>
+            <com.viewpagerindicator.IconPageIndicator
+                    android:id="@+id/create_image_pager_indicator"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    android:layout_marginBottom="@dimen/create_edit_margin_bottom"/>
+        </LinearLayout>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -118,11 +127,58 @@
                 android:id="@+id/createLocation"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+        <EditText
+                android:id="@+id/create_location"
+                android:hint="@string/create_location_hint"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:layout_marginTop="@dimen/create_edit_margin_top"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"
+                android:imeOptions="actionSearch"/>
         <com.google.android.gms.maps.MapView
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:id="@+id/map"
                 android:layout_marginBottom="@dimen/create_edit_margin_bottom"
-                android:layout_marginTop="@dimen/create_edit_margin_top"/>
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/create_startdate"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/createStartDate"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+        <Button
+                android:id="@+id/create_startdatetime_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/create_choosedatetime"
+                style="?android:attr/spinnerStyle"
+                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
+                android:layout_marginTop="@dimen/create_edit_margin_top"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/create_enddate"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/createEndDate"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+        <Button
+                android:id="@+id/create_enddatetime_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/create_choosedatetime"
+                style="?android:attr/spinnerStyle"
+                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
+                android:layout_marginTop="@dimen/create_edit_margin_top"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
     </LinearLayout>
 </ScrollView>

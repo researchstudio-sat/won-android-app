@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="admob_id">test</string>
+    <string name="admob_id">test</string> <!-- AdMob Id for test purposes only-->
 
-    <string name="app_name">won</string>
+    <string name="app_name">WebOfNeeds</string>
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
@@ -29,7 +29,7 @@
     <string name="mi_profile">Profile</string>
     <string name="mi_mailbox">Mailbox</string>
     <string name="mi_createpost">Create Post</string>
-    <string name="mi_myneeds">My Needs</string>
+    <string name="mi_postbox">Postbox</string>
 
     <!-- PREFERENCES -->
     <string name="pref_header">Preferences</string>
@@ -67,10 +67,14 @@
     <string name="create_title">Title</string>
     <string name="create_title_hint">Roughly, what\'s it about?</string>
     <string name="create_description">Description</string>
-    <string name="create_description_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like pickup adress or time of availability)</string>
+    <string name="create_description_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like pickup address or time of availability)</string>
     <string name="create_tags">Tags</string>
     <string name="create_images">Images</string>
     <string name="create_location">Location</string>
+    <string name="create_location_hint">Where?</string>
+    <string name="create_startdate">Start Date</string>
+    <string name="create_enddate">End Date</string>
+    <string name="create_choosedatetime">Choose Date/Time</string>
     <string name="create_tags_2">Using tags improves results by a great deal.</string>
     <string name="create_tags_hint">e.g. furniture, electronics, for children,...</string>
     <string name="create_type">Type</string>
@@ -80,4 +84,19 @@
     <string name="create_type_spinner_activity">Activity</string>
     <string name="create_type_spinner_change">Change</string>
 
+    <!-- TOAST TEXTS -->
+    <string name="error_no_camera">Camera is not available on the device</string>
+    <string name="error_saving_picture">Error saving imagefile</string>
+
+    <!-- DIALOG TEXTS -->
+    <string name="dialog_delete_image_text">Do you want to remove the Image from the Post?</string>
+    <string name="dialog_delete_image_title">Remove Image</string>
+    <string name="dialog_set_title_image_text">Do you want to set this Image as your title image?</string>
+    <string name="dialog_set_title_image_title">Title Image</string>
+
+    <!-- MYPOST -->
+    <string name="post">Post</string>
+    <string name="conversations">Conversations</string>
+    <string name="matches">Matches</string>
+    <string name="requests">Requests</string>
 </resources>

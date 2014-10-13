@@ -9,6 +9,7 @@ import java.util.Map;
  * Created by fsuda on 26.08.2014.
  */
 public class SettingsService {
+    private static final String LOG_TAG = SettingsService.class.getSimpleName();
     public static final String PREFS_NAME = "WoNprefs";
 
     public static final String PREF_SHOW_STARTUP = "showStartupScreen";
@@ -30,7 +31,7 @@ public class SettingsService {
 
         Map<String, ?> allEntries = settings.getAll();
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+            Log.d(LOG_TAG, entry.getKey() + ": " + entry.getValue().toString());
         }
 
         showStartupScreen = settings.getBoolean(PREF_SHOW_STARTUP, true);

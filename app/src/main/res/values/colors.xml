@@ -16,8 +16,14 @@
     <color name="menuitem_counter_bg">#16A843</color>
 
     <!-- NeedList-->
+    <color name="needlist_type_bg">#FFF</color>
     <color name="needlist_bg">#FFF</color>
     <color name="needlist_divider">#DFDFDF</color>
+    <color name="needlist_description">#BBBBBB</color>
+
+    <color name="requests">#19cc4d</color>
+    <color name="conversations">#0000ff</color>
+    <color name="matches">#FF0000</color>
 
     <!-- Create Post -->
     <color name="createpost_edit_outline">#DFDFDF</color>

@@ -26,9 +26,10 @@ import com.google.android.gms.location.LocationClient;
 public class MainActivity extends FragmentActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
                                                               GooglePlayServicesClient.ConnectionCallbacks,
                                                               GooglePlayServicesClient.OnConnectionFailedListener {
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    private WelcomeScreenPagerAdapter mWelcomeScreenPagerAdapater;
+    private WelcomeScreenPagerAdapter mWelcomeScreenPagerAdapter;
     private ViewPager mWelcomeScreenViewPager;
 
     /**
@@ -46,16 +47,18 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
 
 
+        //TODO: THIS OPEN VIA URI DOES NOT NECESSARILY WORK
         if(getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            Log.d("INTENT","Opened via url");
-            Log.d("INTENT",""+getIntent().getData());
+            Log.d(LOG_TAG,"Opened via url");
+            Log.d(LOG_TAG,""+getIntent().getData());
 
             //OPEN NEEDS FRAGMENT RIGHT AWAY
             showMainMenu();
-            getFragmentManager().beginTransaction().replace(R.id.container, new ProfileFragment(getIntent().getData())).commit();
+            //getFragmentManager().beginTransaction().replace(R.id.container, new ProfileFragment(getIntent().getData())).commit();
+            getFragmentManager().beginTransaction().replace(R.id.container, new PostBoxFragment()).commit();
         }else{
-            Log.d("INTENT","Opened from launcher");
-            Log.d("INTENT",""+getIntent().getData());
+            Log.d(LOG_TAG,"Opened from launcher");
+            Log.d(LOG_TAG,""+getIntent().getData());
 
             if((SettingsService.appStarts > 0) && !SettingsService.showStartupScreen) {
                 showMainMenu();
@@ -99,20 +102,16 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
         switch(position){
             case 0:
-                mTitle = getString(R.string.mi_profile);
-                fragment = new ProfileFragment();
+                mTitle = getString(R.string.mi_postbox);
+                fragment = new PostBoxFragment();
                 break;
             case 1:
-                mTitle = getString(R.string.mi_createpost);
-                fragment = new CreateFragment();
+                mTitle = getString(R.string.mi_mailbox);
+                fragment = new ConversationListFragment();
                 break;
             case 2:
-                mTitle = getString(R.string.mi_mailbox);
-                fragment = new MailboxFragment();
-                break;
-            case 3:
-                mTitle = getString(R.string.mi_myneeds);
-                fragment = new NeedListFragment();
+                mTitle = getString(R.string.mi_createpost);
+                fragment = new CreateFragment();
                 break;
         }
         if(mNavigationDrawerFragment!=null) {
@@ -142,14 +141,14 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    Log.d("SEARCH","SEARCHQUERY: "+query);
+                    Log.d(LOG_TAG,"SEARCHQUERY: "+query);
                     //TODO: INVOKE SEARCH
                     return true;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    Log.d("SEARCH","SEARCHTEXT: "+newText);
+                    Log.d(LOG_TAG,"SEARCHTEXT: "+newText);
                     //TODO: CHANGE SEARCH RESULTS MAYBE
                     return true;
                 }
@@ -195,10 +194,10 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         getActionBar().hide();
         setContentView(R.layout.welcome_screen);
 
-        mWelcomeScreenPagerAdapater = new WelcomeScreenPagerAdapter(getFragmentManager());
+        mWelcomeScreenPagerAdapter = new WelcomeScreenPagerAdapter(getFragmentManager());
 
         mWelcomeScreenViewPager = (ViewPager) findViewById(R.id.welcome_screen_pager);
-        mWelcomeScreenViewPager.setAdapter(mWelcomeScreenPagerAdapater);
+        mWelcomeScreenViewPager.setAdapter(mWelcomeScreenPagerAdapter);
     }
 
     private void showSettings() {
@@ -210,5 +209,9 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         FragmentManager fragmentManager = getFragmentManager();
         Fragment fragment = new SettingsFragment();
         fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+    }
+
+    public void setTitle(String title){
+        this.mTitle = title;
     }
 }

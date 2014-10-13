@@ -3,13 +3,15 @@ package at.researchstudio.sat.won.android.won_android_app.app.model;
 /**
  * Created by fsuda on 26.09.2014.
  */
-public class TypeSpinnerModel {
+public class PostTypeSpinnerModel {
     private int titleRes;
     private int iconRes;
+    private PostType type;
 
-    public TypeSpinnerModel(int titleRes, int iconRes) {
+    public PostTypeSpinnerModel(int titleRes, int iconRes, PostType type) {
         this.titleRes = titleRes;
         this.iconRes = iconRes;
+        this.type = type;
     }
 
     public int getTitleRes() {
@@ -26,5 +28,13 @@ public class TypeSpinnerModel {
 
     public void setIconRes(int iconRes) {
         this.iconRes = iconRes;
+    }
+
+    public PostType getType() {
+        return type;
+    }
+
+    public void setType(PostType type) {
+        this.type = type;
     }
 }

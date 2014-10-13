@@ -1,7 +1,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.model.TypeSpinnerModel;
+import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
 
 /**
  * Created by fsuda on 26.09.2014.
@@ -22,7 +21,7 @@ public class TypeSpinnerAdapter extends ArrayAdapter {
         mContext = context;
     }
 
-    public void addItem(TypeSpinnerModel spinnerModel) {
+    public void addItem(PostTypeSpinnerModel spinnerModel) {
         add(spinnerModel);
     }
 
@@ -48,7 +47,7 @@ public class TypeSpinnerAdapter extends ArrayAdapter {
     }
 
     public View getCustomView(int position, View convertView, ViewGroup parent) {
-        TypeSpinnerModel item = (TypeSpinnerModel) getItem(position);
+        PostTypeSpinnerModel item = (PostTypeSpinnerModel) getItem(position);
         ViewHolder holder = null;
         View view = convertView;
 

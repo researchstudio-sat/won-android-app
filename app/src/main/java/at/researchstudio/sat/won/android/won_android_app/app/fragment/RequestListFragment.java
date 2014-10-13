@@ -1,69 +1,36 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.app.*;
-import android.content.DialogInterface;
-import android.content.Loader;
-import android.database.Cursor;
+import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.adapter.NeedListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.components.LoadingDialog;
-import at.researchstudio.sat.won.android.won_android_app.app.model.NeedListItemModel;
+import at.researchstudio.sat.won.android.won_android_app.app.adapter.RequestListItemAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListItemModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
- * Created by fsuda on 21.08.2014.
+ * Created by fsuda on 10.10.2014.
  */
-public class NeedListFragment extends ListFragment {
+public class RequestListFragment extends ListFragment {
+    private static final String LOG_TAG = RequestListFragment.class.getSimpleName();
+
     private CreateListTask createListTask;
-    private ListView mNeedListView;
-    private NeedListItemAdapter mNeedListItemAdapter;
+    private ListView mRequestListView;
+    private RequestListItemAdapter mRequestListItemAdapter;
+
+    private String postId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mNeedListView = (ListView) inflater.inflate(R.layout.fragment_needlist, container, false);
-
-        return mNeedListView;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
-        getActivity().getMenuInflater().inflate(R.menu.needlist, menu);
-        MenuItem searchViewItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchViewItem.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Log.d("SEARCH FROM LISTFRAGMENT","SEARCHQUERY: "+query);
-                //TODO: INVOKE SEARCH
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                Log.d("SEARCH FROM LISTFRAGMENT","SEARCHTEXT: "+newText);
-                //TODO: CHANGE SEARCH RESULTS MAYBE
-                return true;
-            }
-        });
     }
 
     @Override
@@ -76,7 +43,7 @@ public class NeedListFragment extends ListFragment {
 
     @Override
     public void onDestroy() {
-        Log.d("NeedListFragment","onDestroy trying to cancel createListTask");
+        Log.d(LOG_TAG,"onDestroy trying to cancel createListTask");
         super.onDestroy();
         if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
             createListTask.cancel(true);
@@ -84,19 +51,45 @@ public class NeedListFragment extends ListFragment {
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        //TODO: Implement "Real" list item clicking
-        NeedListItemModel needListItemModel = (NeedListItemModel) mNeedListItemAdapter.getItem(position);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle args = getArguments();
 
-        Toast.makeText(getActivity().getApplicationContext(), needListItemModel.toString(), Toast.LENGTH_SHORT).show();
-        needListItemModel.setMatches(0);
+        if(args!=null){
+            postId=args.getString(Post.ID_REF);
+            Log.d(LOG_TAG, "Fragment started with postId: " + postId);
+        }
+        Log.d(LOG_TAG,"postId: "+postId);
 
-        mNeedListItemAdapter.notifyDataSetChanged();
+        mRequestListView = (ListView) inflater.inflate(R.layout.fragment_requests, container, false);
+
+        return mRequestListView;
     }
 
-    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<NeedListItemModel>> {
-        private LoadingDialog progress;
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
+        getActivity().getMenuInflater().inflate(R.menu.needlist, menu);
+        MenuItem searchViewItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchViewItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(LOG_TAG,"SEARCHQUERY: "+query);
+                //TODO: INVOKE SEARCH
+                return true;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(LOG_TAG,"SEARCHTEXT: "+newText);
+                //TODO: CHANGE SEARCH RESULTS MAYBE
+                return true;
+            }
+        });
+    }
+
+    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<RequestListItemModel>> {
         private final String[] CHEESES = {
                 "Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi",
                 "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale",
@@ -231,74 +224,18 @@ public class NeedListFragment extends ListFragment {
         };
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progress = new LoadingDialog(getActivity(),this);
-            progress.show();
+        protected ArrayList<RequestListItemModel> doInBackground(String... params) {
+            ArrayList<RequestListItemModel> retrievedList = new ArrayList<RequestListItemModel>();
 
-            progress.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    Log.d("Progress setOnCancelListener", "called onCancel");
-                    if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-                        createListTask.cancel(true);
-                    }
-                }
-            });
-        }
+            int amount = 50000;
 
-        @Override
-        protected ArrayList<NeedListItemModel> doInBackground(String... params) {
-            ArrayList<NeedListItemModel> retrievedList = new ArrayList<NeedListItemModel>();
             //TODO: DUMMY DATA RETRIEVAL MOVE THIS TO THE BACKEND
-            for(int i = 0; i < 500000; i++) {
-                if(isCancelled()){
-                    Log.d("CreateListTask", "GOT CANCELLED DURING BG WORK");
-                    break;
-                }
-
-                int matches = (int)(Math.random()*100);
-
-                if(matches > 50){
-                    matches = 0;
-                }
-
-                int tags = (int)(Math.random()*100);
-                tags=tags%10;
-
-                List<String> tagList = new ArrayList<String>();
-
-                for(int j = 0; j < tags; j++){
-                    tagList.add("tag "+j);
-                }
-
-                int imgResNr = (int)(Math.random()*100)%5;
-                int imgRes;
-
-                switch(imgResNr) {
-                    case 0:
-                    default:
-                        imgRes= 0;
-                        break;
-                    case 1:
-                        imgRes= R.drawable.stock_1;
-                        break;
-                    case 2:
-                        imgRes= R.drawable.stock_2;
-                        break;
-                    case 3:
-                        imgRes= R.drawable.stock_3;
-                        break;
-                    case 4:
-                        imgRes= R.drawable.stock4;
-                        break;
-                }
+            for(int i = 0; i < amount; i++) {
                 String title = CHEESES[i%CHEESES.length];
 
-                NeedListItemModel need = new NeedListItemModel(title, tagList, matches, imgRes);
-
+                RequestListItemModel request = new RequestListItemModel(postId == null? title: postId+" "+title); //TODO: THIS JUST VISUALIZES WHETHER THE LIST IS RETRIEVED VIA POSTID OR WITHOUT
                 if(((int)(Math.random()*1000)) == 0) {
-                    retrievedList.add(need);
+                    retrievedList.add(request);
                 }
             }
 
@@ -306,25 +243,24 @@ public class NeedListFragment extends ListFragment {
         }
 
         @Override
-        protected void onCancelled(ArrayList<NeedListItemModel> linkArray) {
-            Log.d("CreateListTask", "ON CANCELED WAS CALLED");
+        protected void onCancelled(ArrayList<RequestListItemModel> linkArray) {
+            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
             //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
             if(linkArray != null) {
-                mNeedListItemAdapter = new NeedListItemAdapter(getActivity());
-                for (NeedListItemModel need : linkArray) {
-                    mNeedListItemAdapter.addItem(need); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                mRequestListItemAdapter = new RequestListItemAdapter(getActivity());
+                for (RequestListItemModel request : linkArray) {
+                    mRequestListItemAdapter.addItem(request); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
                 }
-                setListAdapter(mNeedListItemAdapter);
+                setListAdapter(mRequestListItemAdapter);
             }
         }
 
-        protected void onPostExecute(ArrayList<NeedListItemModel> linkArray) {
-            mNeedListItemAdapter = new NeedListItemAdapter(getActivity());
-            for(NeedListItemModel need : linkArray) {
-                mNeedListItemAdapter.addItem(need); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+        protected void onPostExecute(ArrayList<RequestListItemModel> linkArray) {
+            mRequestListItemAdapter = new RequestListItemAdapter(getActivity());
+            for(RequestListItemModel request : linkArray) {
+                mRequestListItemAdapter.addItem(request); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
             }
-            setListAdapter(mNeedListItemAdapter);
-            progress.dismiss();
+            setListAdapter(mRequestListItemAdapter);
         }
     }
 }

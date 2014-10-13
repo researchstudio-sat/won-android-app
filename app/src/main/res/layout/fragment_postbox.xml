@@ -8,4 +8,4 @@
               android:divider="@color/needlist_divider"
               android:dividerHeight="1dp"
               android:background="@color/needlist_bg"
-              tools:context="at.researchstudio.sat.won.android.won_android_app.app.fragment.NeedListFragment" />
+              tools:context="at.researchstudio.sat.won.android.won_android_app.app.fragment.PostBoxFragment" />

@@ -21,6 +21,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.LocationSer
  * Created by fsuda on 21.08.2014.
  */
 public class ProfileFragment extends Fragment {
+    private static final String LOG_TAG = ProfileFragment.class.getSimpleName();
     private Button dialogButton;
     private Button toastButton;
     private Uri uri;
@@ -62,13 +63,13 @@ public class ProfileFragment extends Fragment {
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d("Dialog","DIALOG YES");
+                        Log.d(LOG_TAG,"DIALOG YES");
                     }
                 });
                 builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d("Dialog", "DIALOG NO");
+                        Log.d(LOG_TAG, "DIALOG NO");
                     }
                 });
 
@@ -88,7 +89,7 @@ public class ProfileFragment extends Fragment {
 
         myWebView.getSettings().setJavaScriptEnabled(true);
         if(uri!=null) {
-            Log.d("URI", uri.toString());
+            Log.d(LOG_TAG, uri.toString());
             myWebView.loadUrl(uri.toString());
         }else{
             myWebView.loadUrl("http://www.orf.at");
@@ -96,7 +97,7 @@ public class ProfileFragment extends Fragment {
 
         notificationButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Log.d("BUTTON", "NOTIFICATION BUTTON CLICKED");
+                Log.d(LOG_TAG, "NOTIFICATION BUTTON CLICKED");
             }
         });
 

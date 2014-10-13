@@ -88,10 +88,10 @@ public class NavigationDrawerFragment extends Fragment {
         mMenuItemAdapter = new MenuItemAdapter(getActivity());
 
         //TODO: Change Icons
-        mMenuItemAdapter.addItem(R.string.mi_profile, R.drawable.ic_action_profile, mCurrentSelectedPosition == 0);
-        mMenuItemAdapter.addItem(R.string.mi_createpost, R.drawable.ic_action_create, mCurrentSelectedPosition == 1);
-        mMenuItemAdapter.addItem(R.string.mi_mailbox, R.drawable.ic_action_mailbox, SettingsService.appStarts, mCurrentSelectedPosition == 2); //TODO: REMOVE FIXED COUNTER
-        mMenuItemAdapter.addItem(R.string.mi_myneeds, R.drawable.ic_action_needs, mCurrentSelectedPosition == 3);
+        mMenuItemAdapter.addItem(R.string.mi_postbox, R.drawable.ic_action_needs, mCurrentSelectedPosition == 0);
+        mMenuItemAdapter.addItem(R.string.mi_mailbox, R.drawable.ic_action_mailbox, SettingsService.appStarts, mCurrentSelectedPosition == 1); //TODO: REMOVE FIXED COUNTER
+        mMenuItemAdapter.addItem(R.string.mi_createpost, R.drawable.ic_action_create, mCurrentSelectedPosition == 2);
+
 
         mDrawerListView.setAdapter(mMenuItemAdapter);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
@@ -285,6 +285,5 @@ public class NavigationDrawerFragment extends Fragment {
         ((MenuItemModel) mMenuItemAdapter.getItem(0)).setSelected(false);
         ((MenuItemModel) mMenuItemAdapter.getItem(1)).setSelected(false);
         ((MenuItemModel) mMenuItemAdapter.getItem(2)).setSelected(false);
-        ((MenuItemModel) mMenuItemAdapter.getItem(3)).setSelected(false);
     }
 }

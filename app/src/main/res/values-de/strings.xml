@@ -24,5 +24,5 @@
     <string name="mi_profile">Profil</string>
     <string name="mi_mailbox">Mailbox</string>
     <string name="mi_createpost">Eintrag erstellen</string>
-    <string name="mi_myneeds">Meine Bedürfnisse</string>
+    <string name="mi_postbox">Meine Bedürfnisse</string>
 </resources>

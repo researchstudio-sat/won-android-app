@@ -2,6 +2,5 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <solid android:color="@color/menuitem_counter_bg"></solid>
-    <corners android:radius="8px"></corners>
-    <stroke  android:width="2dip" android:color="@color/menuitem_counter_bg_outline"></stroke>
+    <!-- TODO: http://stackoverflow.com/questions/23080934/draw-triangle-background-in-android FOR DROP DOWN FIELDS-->
 </shape>
