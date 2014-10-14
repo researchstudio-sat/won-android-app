@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.utils.StreamUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -16,8 +15,6 @@ import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -74,11 +71,11 @@ public class ImageLoaderService {
 
         //from web
         try {
-            Bitmap bitmap=null;
+            Bitmap bitmap;
 
             HttpGet request = new HttpGet(url);
             HttpClient client = new DefaultHttpClient();
-            HttpResponse response = (HttpResponse)client.execute(request);
+            HttpResponse response = client.execute(request);
             HttpEntity entity = response.getEntity();
             BufferedHttpEntity bufferedEntity = new BufferedHttpEntity(entity);
             InputStream inputStream = bufferedEntity.getContent();

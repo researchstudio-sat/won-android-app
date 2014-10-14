@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 import com.viewpagerindicator.IconPageIndicator;
 
@@ -114,14 +115,7 @@ public class ImageFragment extends Fragment{
             public void onClick(View v) {
                 if(addFlag) {
                     Log.d(LOG_TAG, "ADD IMAGE WAS CLICKED!");
-                    int width = (int) (Math.random()*1600);
-                    int height = (int) (Math.random()*1600);
-
-                    String imageUrl = "http://placesheen.com/"+width+"/"+height;
-
-
-                    mImagePagerAdapter.addItem(imageUrl);
-
+                    mImagePagerAdapter.addItem(Mock.generateRandomImageUrl());
                     mImgLoader.displayImage(imageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
                     mImagePagerAdapter.notifyDataSetChanged();
                     mIconPageIndicator.notifyDataSetChanged();

@@ -1,9 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:weightSum="1">
-
-</LinearLayout>
+    <ListView android:id="@+id/conversation_messages"
+              android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:layout_above="@+id/conversation_footer"/>
+    <LinearLayout
+            android:id="@+id/conversation_footer"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:weightSum="30">
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/conversation_text_message"
+                android:layout_weight="29"
+                android:imeOptions="actionSend"/>
+        <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/conversation_send_message"
+                android:src="@drawable/ic_action_send_now"
+                android:layout_toRightOf="@+id/conversation_text_message"
+                style="@android:style/Widget.DeviceDefault.Light.ActionButton"
+                android:layout_weight="1"/>
+    </LinearLayout>
+</RelativeLayout>

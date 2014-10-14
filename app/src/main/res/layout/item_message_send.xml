@@ -4,12 +4,13 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
+
     <TextView
             android:layout_width="250dp"
-            android:background="#666"
+            android:background="#CCC"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Large Text"
-            android:id="@+id/textView"
-            android:layout_gravity="left"/>
+            android:id="@+id/message_item_text"
+            android:layout_gravity="right"/>
 </LinearLayout>
