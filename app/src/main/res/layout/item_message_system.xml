@@ -3,13 +3,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+        >
     <TextView
-            android:layout_width="250dp"
-            android:background="#FFAABB"
+            android:layout_width="wrap_content"
+            android:maxWidth="@dimen/message_item_system_maxwidth"
+            android:background="@drawable/message_system_bg"
+            android:textColor="@color/conversation_message_system_text"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Large Text"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="System Message"
             android:id="@+id/message_item_text"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/message_item_system_margin"
+            android:autoText="false"/>
 </LinearLayout>

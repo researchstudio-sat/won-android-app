@@ -99,4 +99,7 @@
     <string name="conversations">Conversations</string>
     <string name="matches">Matches</string>
     <string name="requests">Requests</string>
+
+    <!-- Conversation -->
+    <string name="conversation_message_hint">Send message</string>
 </resources>

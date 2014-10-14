@@ -56,4 +56,9 @@
     <style name="CustomTabPageIndicator.Text" parent="android:TextAppearance.Medium">
         <!--<item name="android:typeface">monospace</item>-->
     </style>
+
+    <!-- Send Message Style (Conversation)-->
+    <style name="WoNSendMessageText" parent="@android:style/Widget.EditText">
+        <!-- NOTHING TO DO HERE YET -->
+    </style>
 </resources>

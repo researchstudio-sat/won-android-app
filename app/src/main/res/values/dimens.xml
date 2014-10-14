@@ -9,4 +9,15 @@
     <dimen name="create_edit_margin_lr">4dp</dimen>
     <dimen name="create_edit_margin_top">8dp</dimen>
     <dimen name="create_edit_margin_bottom">16dp</dimen>
+
+    <!-- Conversation(Message) dimensions -->
+    <dimen name="message_item_system_margin">5dp</dimen>
+    <dimen name="message_item_system_padding">5dp</dimen>
+    <dimen name="message_item_system_maxwidth">275dp</dimen>
+
+    <dimen name="message_item_margin">5dp</dimen>
+    <dimen name="message_item_padding">5dp</dimen>
+
+    <dimen name="message_item_corner_radius">10dp</dimen>
+    <dimen name="message_item_maxwidth">275dp</dimen>
 </resources>

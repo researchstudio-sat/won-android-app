@@ -34,29 +34,29 @@ public class MessageListItemAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         MessageItemModel item = (MessageItemModel) getItem(position);
         ViewHolder holder = null;
-        View view = convertView;
+        View view;
 
-        if(view == null){
-            int layout=0;
 
-            switch(item.type){
-                case SEND:
-                    layout = R.layout.item_message_send;
-                    break;
-                case RECEIVE:
-                    layout = R.layout.item_message_receive;
-                    break;
-                case SYSTEM:
-                    layout = R.layout.item_message_system;
-                    break;
-            }
+        int layout=0;
 
-            view = LayoutInflater.from(getContext()).inflate(layout, null);
-
-            TextView title = (TextView) view.findViewById(R.id.message_item_text);
-
-            view.setTag(new ViewHolder(title));
+        switch(item.type){
+            case SEND:
+                layout = R.layout.item_message_send;
+                break;
+            case RECEIVE:
+                layout = R.layout.item_message_receive;
+                break;
+            case SYSTEM:
+                layout = R.layout.item_message_system;
+                break;
         }
+
+        view = LayoutInflater.from(getContext()).inflate(layout, null);
+
+        TextView title = (TextView) view.findViewById(R.id.message_item_text);
+
+        view.setTag(new ViewHolder(title));
+
 
         if (holder == null && view != null) {
             Object tag = view.getTag();

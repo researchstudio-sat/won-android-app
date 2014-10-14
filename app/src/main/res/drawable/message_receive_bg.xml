@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/conversation_message_receive_bg"/>
+
+    <padding
+            android:left="@dimen/message_item_padding"
+            android:top="@dimen/message_item_padding"
+            android:right="@dimen/message_item_padding"
+            android:bottom="@dimen/message_item_padding" />
+
+    <corners android:radius="@dimen/message_item_corner_radius" />
+</shape>

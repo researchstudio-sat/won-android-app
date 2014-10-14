@@ -22,10 +22,19 @@
     <color name="needlist_description">#BBBBBB</color>
 
     <color name="requests">#19cc4d</color>
-    <color name="conversations">#0000ff</color>
+    <color name="conversations">#0000FF</color>
     <color name="matches">#FF0000</color>
 
     <!-- Create Post -->
     <color name="createpost_edit_outline">#DFDFDF</color>
     <color name="createpost_edit_bg">#FFFFFF</color>
+
+    <!-- Conversation -->
+    <color name="conversation_message_divider">#FFFFFFFF</color>
+    <color name="conversation_message_system_bg">#EEEEEE</color>
+    <color name="conversation_message_system_text">#AAAAAA</color>
+    <color name="conversation_message_send_bg">#4cc5ff</color>
+    <color name="conversation_message_send_text">#000000</color>
+    <color name="conversation_message_receive_bg">#08cdb9</color>
+    <color name="conversation_message_receive_text">#000000</color>
 </resources>

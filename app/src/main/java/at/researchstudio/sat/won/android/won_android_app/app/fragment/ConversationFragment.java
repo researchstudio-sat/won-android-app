@@ -3,6 +3,8 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
@@ -74,6 +76,9 @@ public class ConversationFragment extends Fragment {
                 sendMessage();
             }
         });
+        mSendMessage.setEnabled(false); //DO NOT ALLOW EMPTY MESSAGES
+
+
         mMessageText = (EditText) rootView.findViewById(R.id.conversation_text_message);
         mMessageText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -84,6 +89,22 @@ public class ConversationFragment extends Fragment {
                     handled = true;
                 }
                 return handled;
+            }
+        });
+        mMessageText.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                String message = mMessageText.getText().toString().trim();
+                if (!"".equals(message)) {
+                    mSendMessage.setEnabled(true);
+                } else {
+                    mSendMessage.setEnabled(false);
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
 
@@ -154,11 +175,16 @@ public class ConversationFragment extends Fragment {
     }
 
     private void sendMessage(){
-        MessageItemModel message = new MessageItemModel(MessageType.SEND, mMessageText.getText().toString());
+        String messageText = mMessageText.getText().toString();
 
-        mMessageListItemAdapter.addItem(message);
-        mMessageListView.setAdapter(mMessageListItemAdapter);
-        mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
+        if(messageText!= null && !"".equals(messageText.trim())) {
+            MessageItemModel message = new MessageItemModel(MessageType.SEND, mMessageText.getText().toString());
+
+            //TODO: SEND MESSAGE IN BACKGROUND
+            mMessageListItemAdapter.addItem(message);
+            mMessageListView.setAdapter(mMessageListItemAdapter);
+            mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
+        }
 
         mMessageText.setText("");
     }

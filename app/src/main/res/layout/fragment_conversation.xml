@@ -8,7 +8,8 @@
     <ListView android:id="@+id/conversation_messages"
               android:layout_height="fill_parent"
               android:layout_width="fill_parent"
-              android:layout_above="@+id/conversation_footer"/>
+              android:layout_above="@+id/conversation_footer"
+              android:divider="@color/conversation_message_divider"/>
     <LinearLayout
             android:id="@+id/conversation_footer"
             android:orientation="horizontal"
@@ -21,7 +22,11 @@
                 android:layout_height="fill_parent"
                 android:id="@+id/conversation_text_message"
                 android:layout_weight="29"
-                android:imeOptions="actionSend"/>
+                android:imeOptions="actionSend"
+                android:singleLine="true"
+                android:hint="@string/conversation_message_hint"
+                style="@style/WoNSendMessageText"
+                />
         <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"

@@ -5,11 +5,14 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
     <TextView
-            android:layout_width="250dp"
-            android:background="#666"
+            android:layout_width="wrap_content"
+            android:maxWidth="@dimen/message_item_maxwidth"
+            android:background="@drawable/message_receive_bg"
+            android:textColor="@color/conversation_message_receive_text"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Large Text"
+            android:text="received message"
             android:id="@+id/message_item_text"
+            android:layout_margin="@dimen/message_item_margin"
             android:layout_gravity="left"/>
 </LinearLayout>
