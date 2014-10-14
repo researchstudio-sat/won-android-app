@@ -1,5 +1,7 @@
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
+import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
+
 /**
  * Created by fsuda on 26.09.2014.
  */

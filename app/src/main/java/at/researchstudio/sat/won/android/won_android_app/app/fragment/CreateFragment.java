@@ -1,6 +1,5 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.content.Context;
@@ -20,7 +19,7 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinnerAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.model.PostType;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import com.google.android.gms.maps.*;

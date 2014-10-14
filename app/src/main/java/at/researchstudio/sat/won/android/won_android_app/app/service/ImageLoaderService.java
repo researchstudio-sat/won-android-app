@@ -55,7 +55,6 @@ public class ImageLoaderService {
 
     private void queuePhoto(String url, ImageView imageView)
     {
-        Log.d(LOG_TAG, "New photo to load: " + url);
         PhotoToLoad p=new PhotoToLoad(url, imageView);
         executorService.submit(new PhotosLoader(p));
     }
@@ -176,5 +175,4 @@ public class ImageLoaderService {
         memoryCache.clear();
         fileCache.clear();
     }
-
 }

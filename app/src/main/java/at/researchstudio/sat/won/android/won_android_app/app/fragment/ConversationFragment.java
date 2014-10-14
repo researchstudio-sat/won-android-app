@@ -14,7 +14,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageList
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Conversation;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
-import at.researchstudio.sat.won.android.won_android_app.app.model.MessageType;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 
 import java.util.ArrayList;
 

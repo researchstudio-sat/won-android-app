@@ -14,7 +14,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Conversation;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.ConversationListItemModel;
-import at.researchstudio.sat.won.android.won_android_app.app.model.PostListItemModel;
 
 import java.util.ArrayList;
 

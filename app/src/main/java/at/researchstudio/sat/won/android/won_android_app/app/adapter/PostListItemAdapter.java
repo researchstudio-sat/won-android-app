@@ -1,14 +1,12 @@
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.model.PostListItemModel;
-import at.researchstudio.sat.won.android.won_android_app.app.model.PostType;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 
 /**
@@ -23,8 +21,8 @@ public class PostListItemAdapter extends ArrayAdapter {
         mImgLoader = new ImageLoaderService(context);
     }
 
-    public void addItem(PostListItemModel needListItem) {
-        add(needListItem);
+    public void addItem(Post postListItem) {
+        add(postListItem);
     }
 
     public static class ViewHolder {
@@ -52,7 +50,7 @@ public class PostListItemAdapter extends ArrayAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent){
-        PostListItemModel item = (PostListItemModel) getItem(position);
+        Post item = (Post) getItem(position);
         ViewHolder holder = null;
         View view = convertView;
 
@@ -83,13 +81,13 @@ public class PostListItemAdapter extends ArrayAdapter {
 
         if(item != null && holder != null) {
             if (holder.titleHolder != null)
-                holder.titleHolder.setText(item.title);
+                holder.titleHolder.setText(item.getTitle());
 
             if (holder.descriptionHolder != null)
-                holder.descriptionHolder.setText(item.description);
+                holder.descriptionHolder.setText(item.getDescription());
 
             if (holder.tagHolder != null){
-                if (item.tags != null && item.tags.size() > 0){
+                if (item.getTags() != null && item.getTags().size() > 0){
                     holder.tagHolder.setVisibility(View.VISIBLE);
                     holder.tagHolder.setText(item.getTagsAsString());
 
@@ -102,24 +100,24 @@ public class PostListItemAdapter extends ArrayAdapter {
 
             if(item.hasNotifications()) {
                 setCountersVisible(holder);
-                setCounter(holder.matchesHolder, item.matches, 9);
-                setCounter(holder.requestHolder, item.requests, 9);
-                setCounter(holder.conversationsHolder, item.conversations, 9);
+                setCounter(holder.matchesHolder, item.getMatches(), 9);
+                setCounter(holder.requestHolder, item.getRequests(), 9);
+                setCounter(holder.conversationsHolder, item.getConversations(), 9);
             }else{
                 setCountersInvisible(holder);
             }
 
             if (holder.imageHolder != null){
-                if (item.imageUrl == null){
+                if (item.getTitleImageUrl() == null){
                     //TODO: Implement this for GMAIL APP STYLE DEFAULT ICONS: http://stackoverflow.com/questions/23122088/colored-boxed-with-letters-a-la-gmail
                     holder.imageHolder.setImageResource(R.drawable.image_placeholder_donotcommit);
                 }else {
-                    mImgLoader.displayImage(item.imageUrl, R.drawable.image_placeholder_donotcommit, holder.imageHolder);
+                    mImgLoader.displayImage(item.getTitleImageUrl(), R.drawable.image_placeholder_donotcommit, holder.imageHolder);
                 }
             }
 
             if (holder.typeHolder != null) {
-                switch(item.type){
+                switch(item.getType()){
                     case OFFER:
                         holder.typeHolder.setImageResource(R.drawable.offer);
                         break;

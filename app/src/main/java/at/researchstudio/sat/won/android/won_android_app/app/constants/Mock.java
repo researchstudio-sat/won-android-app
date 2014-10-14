@@ -1,7 +1,12 @@
 package at.researchstudio.sat.won.android.won_android_app.app.constants;
 
+import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.*;
+import com.google.android.gms.maps.model.LatLng;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -167,6 +172,8 @@ public class Mock {
 
     public static final MessageType[] messageTypes = MessageType.values();
 
+    public static final RepeatType[] repeatTypes = RepeatType.values();
+
     public static final String[] tags = {"couch","soccer","running","free","help","tennis","car","donaudampfschiff","irreregulär","nsa","music","guitar","running","yoga","movies","cinema","bar","translation"};
 
 
@@ -179,6 +186,10 @@ public class Mock {
     }
 
     public static MessageType getRandomFromField(MessageType[] field){
+        return field[((int)(Math.random()*100))%field.length];
+    }
+
+    public static RepeatType getRandomFromField(RepeatType[] field){
         return field[((int)(Math.random()*100))%field.length];
     }
 
@@ -208,13 +219,22 @@ public class Mock {
         return list;
     }
 
-    //MOCK MODEL GENERATOR
-    public static PostListItemModel getRandomPost(){
-        return new PostListItemModel(getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomFromField(imgUrls),getRandomFromField(postTypes));
+    public static LatLng getRandomLocation(){
+        DecimalFormat df = new DecimalFormat("0.000");
+
+        double latitude = (Math.random() * (180 - (-180)) + (-180));
+        double longitude = (Math.random() * (180 - (-180)) + (-180));
+
+        return new LatLng(Double.valueOf(df.format(latitude)), Double.valueOf(df.format(longitude)));
     }
 
-    public static PostListItemModel getRandomMatch(){
-        return new PostListItemModel(getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),0,0,0,getRandomFromField(imgUrls),getRandomFromField(postTypes));
+    //MOCK MODEL GENERATOR
+    public static Post getRandomPost() {
+       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes));
+    }
+
+    public static Post getRandomMatch(){
+        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes));
     }
 
     public static ConversationListItemModel getRandomConversation(){
@@ -242,5 +262,9 @@ public class Mock {
         }
 
         return message.toString();
+    }
+
+    public static void main(String args) {
+
     }
 }

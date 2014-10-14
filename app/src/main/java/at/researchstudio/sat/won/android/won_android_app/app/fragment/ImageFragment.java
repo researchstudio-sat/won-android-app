@@ -115,7 +115,8 @@ public class ImageFragment extends Fragment{
             public void onClick(View v) {
                 if(addFlag) {
                     Log.d(LOG_TAG, "ADD IMAGE WAS CLICKED!");
-                    mImagePagerAdapter.addItem(Mock.generateRandomImageUrl());
+                    imageUrl = Mock.generateRandomImageUrl();
+                    mImagePagerAdapter.addItem(imageUrl);
                     mImgLoader.displayImage(imageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
                     mImagePagerAdapter.notifyDataSetChanged();
                     mIconPageIndicator.notifyDataSetChanged();

@@ -4,23 +4,17 @@ import android.app.*;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.adapter.WelcomeScreenPagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LoadingDialog;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
-import at.researchstudio.sat.won.android.won_android_app.app.model.PostListItemModel;
-import at.researchstudio.sat.won.android.won_android_app.app.model.PostType;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by fsuda on 21.08.2014.
@@ -30,7 +24,7 @@ public class PostBoxFragment extends ListFragment {
 
     private CreateListTask createListTask;
     private ListView mNeedListView;
-    private PostListItemAdapter mNeedListItemAdapter;
+    private PostListItemAdapter mPostListItemAdapter;
 
     private String postId;
 
@@ -100,28 +94,21 @@ public class PostBoxFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(LOG_TAG,"LIST ITEM CLICKED!!");
         //TODO: Implement "Real" list item clicking
-        PostListItemModel needListItemModel = (PostListItemModel) mNeedListItemAdapter.getItem(position);
+        Post post = (Post) mPostListItemAdapter.getItem(position);
         Fragment fragment;
 
         Bundle args = new Bundle();
 
         if(!isMatchesList()) { //IF IT IS ONE OF YOUR OWN POSTS
-            Log.d(LOG_TAG,"Clicked ownitem");
-            postId=needListItemModel.getTitle();
-            Log.d(LOG_TAG,"NEW POSTID: "+postId);
-            args.putString(Post.ID_REF, postId); //TODO: CHANGE THIS TO ID
-
             fragment = new MyPostFragment();
         }else{ //IF ITS A POST FROM SOMEBODY ELSE
-            //needListItemModel.setMatches(0);
-            //mNeedListItemAdapter.notifyDataSetChanged();
-            Log.d(LOG_TAG,"Clicked foreignitem");
-            postId=needListItemModel.getTitle();
-            Log.d(LOG_TAG,"NEW POSTID: "+postId);
-            args.putString(Post.ID_REF, postId); //TODO: CHANGE THIS TO ID
-
+            //post.setMatches(0);
+            //mPostListItemAdapter.notifyDataSetChanged();
             fragment = new PostFragment();
         }
+
+        postId = post.getUuidString();
+        args.putString(Post.ID_REF, postId);
 
         fragment.setArguments(args);
         getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
@@ -135,7 +122,7 @@ public class PostBoxFragment extends ListFragment {
         return postId != null;
     }
 
-    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<PostListItemModel>> {
+    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Post>> {
         private LoadingDialog progress;
 
         @Override
@@ -159,9 +146,9 @@ public class PostBoxFragment extends ListFragment {
         }
 
         @Override
-        protected ArrayList<PostListItemModel> doInBackground(String... params) {
+        protected ArrayList<Post> doInBackground(String... params) {
 
-            ArrayList<PostListItemModel> retrievedList = new ArrayList<PostListItemModel>();
+            ArrayList<Post> retrievedList = new ArrayList<Post>();
 
             int amount = 50000;
 
@@ -172,7 +159,7 @@ public class PostBoxFragment extends ListFragment {
                     break;
                 }
 
-                PostListItemModel post;
+                Post post;
 
                 if(isMatchesList()) {
                     post = Mock.getRandomMatch();
@@ -189,24 +176,24 @@ public class PostBoxFragment extends ListFragment {
         }
 
         @Override
-        protected void onCancelled(ArrayList<PostListItemModel> linkArray) {
+        protected void onCancelled(ArrayList<Post> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
             //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
             if(linkArray != null) {
-                mNeedListItemAdapter = new PostListItemAdapter(getActivity());
-                for (PostListItemModel need : linkArray) {
-                    mNeedListItemAdapter.addItem(need); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                mPostListItemAdapter = new PostListItemAdapter(getActivity());
+                for (Post post : linkArray) {
+                    mPostListItemAdapter.addItem(post); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
                 }
-                setListAdapter(mNeedListItemAdapter);
+                setListAdapter(mPostListItemAdapter);
             }
         }
 
-        protected void onPostExecute(ArrayList<PostListItemModel> linkArray) {
-            mNeedListItemAdapter = new PostListItemAdapter(getActivity());
-            for(PostListItemModel need : linkArray) {
-                mNeedListItemAdapter.addItem(need); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+        protected void onPostExecute(ArrayList<Post> linkArray) {
+            mPostListItemAdapter = new PostListItemAdapter(getActivity());
+            for(Post post : linkArray) {
+                mPostListItemAdapter.addItem(post); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
             }
-            setListAdapter(mNeedListItemAdapter);
+            setListAdapter(mPostListItemAdapter);
             if(!isMatchesList()) { //DISMISS PROGRESS DIALOG ONLY IN POSTBOX VIEW
                 progress.dismiss();
             }
