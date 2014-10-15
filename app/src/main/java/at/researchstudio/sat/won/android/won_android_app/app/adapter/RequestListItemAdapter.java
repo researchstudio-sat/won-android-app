@@ -36,7 +36,7 @@ public class RequestListItemAdapter extends ArrayAdapter {
         View view = convertView;
 
         if(view == null){
-            int layout = R.layout.request_list_item;
+            int layout = R.layout.item_request_list;
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 

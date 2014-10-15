@@ -22,6 +22,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinner
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
+import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -53,6 +54,7 @@ public class CreateFragment extends Fragment {
     private EditText mLocationText;
 
     private GoogleMap map;
+    private Geocoder mGeocoder;
 
     @Nullable
     @Override
@@ -78,10 +80,10 @@ public class CreateFragment extends Fragment {
         //Initialize ImagePager
         mImagePagerAdapter = new ImagePagerAdapter(getActivity().getFragmentManager());
 
-        mImagePager = (ViewPager) rootView.findViewById(R.id.create_image_pager);
+        mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
         mImagePager.setAdapter(mImagePagerAdapter);
 
-        mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.create_image_pager_indicator);
+        mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
 
         mIconPageIndicator.setViewPager(mImagePager);
 
@@ -136,6 +138,7 @@ public class CreateFragment extends Fragment {
 
         //Initialize GMaps
         MapsInitializer.initialize(getActivity());
+        mGeocoder = new Geocoder(getActivity(), Locale.getDefault());
 
         mLocationText = (EditText) rootView.findViewById(R.id.create_location);
 
@@ -166,22 +169,20 @@ public class CreateFragment extends Fragment {
                 boolean handled = false;
                 if(actionId == EditorInfo.IME_ACTION_SEARCH){
                     //TODO: MAKE ASYNCTASK like here http://developer.android.com/training/location/display-address.html
-                    Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
                     try {
                         map.clear();
                         Log.d(LOG_TAG,"ENTERED TEXT:"+ v.getText());
 
-                        List<Address> addressList = geocoder.getFromLocationName(v.getText().toString(), 100);
+                        List<Address> addressList = mGeocoder.getFromLocationName(v.getText().toString(), 1);
 
                         for(Address a : addressList){
                             Marker marker = map.addMarker(new MarkerOptions()
                                     .position(new LatLng(a.getLatitude(), a.getLongitude()))
-                                    .title(a.getAddressLine(0)) //TODO: PARSE CORRECT ADRESS LINES
-                                    .snippet("WTF IS A SNIPPET"));
+                                    .title(getString(R.string.create_location))
+                                    .snippet(StringUtils.getFormattedAddress(a)) //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+                                    .draggable(false)); //TODO: DRAG MARKER IMPLEMENTATION
                             Log.d(LOG_TAG,a.toString());
                         }
-
-
 
                         if(addressList.size() > 0) {
                             Address usedAddress = addressList.get(0);
@@ -194,7 +195,8 @@ public class CreateFragment extends Fragment {
 
                         handled = true;
                     }catch (IOException ioe){
-                        Log.e("geocoder",ioe.getMessage());
+                        //TODO ERROR TOAST
+                        Log.e(LOG_TAG,ioe.getMessage());
                     }
 
                 }

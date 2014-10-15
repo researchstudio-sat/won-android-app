@@ -55,7 +55,7 @@ public class PostListItemAdapter extends ArrayAdapter {
         View view = convertView;
 
         if(view == null) {
-            int layout = R.layout.post_list_item;
+            int layout = R.layout.item_post_list;
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 
@@ -136,7 +136,7 @@ public class PostListItemAdapter extends ArrayAdapter {
         return view;
     }
 
-    private void setCounter(TextView counter, int value, int maxVisibleValue){
+    private static void setCounter(TextView counter, int value, int maxVisibleValue){
         if (counter != null){
             if(value > maxVisibleValue){
                 counter.setAlpha(1);
@@ -154,11 +154,11 @@ public class PostListItemAdapter extends ArrayAdapter {
         }
     }
 
-    private void setCountersVisible(ViewHolder holder){
+    private static void setCountersVisible(ViewHolder holder){
         holder.notificationTable.setVisibility(View.VISIBLE);
     }
 
-    private void setCountersInvisible(ViewHolder holder){
+    private static void setCountersInvisible(ViewHolder holder){
         holder.notificationTable.setVisibility(View.GONE);
     }
 }

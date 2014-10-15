@@ -1,7 +1,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,7 +89,7 @@ public class MenuItemAdapter extends ArrayAdapter{
         }
 
         if (view == null) {
-            int layout = R.layout.menu_item_counter;
+            int layout = R.layout.item_menu;
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 

@@ -52,7 +52,7 @@ public class TypeSpinnerAdapter extends ArrayAdapter {
         View view = convertView;
 
         if (view == null) {
-            int layout = R.layout.type_spinner_item;
+            int layout = R.layout.item_type_spinner;
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 

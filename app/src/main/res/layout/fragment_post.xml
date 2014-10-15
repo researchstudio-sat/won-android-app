@@ -8,12 +8,45 @@
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
             >
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <ImageView
+                    android:id="@+id/post_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/offer"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:id="@+id/post_title"
+                    android:layout_toRightOf="@id/post_type"
+                    android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                    android:layout_marginRight="@dimen/create_edit_margin_lr"
+                    android:layout_centerVertical="true"/>
+        </RelativeLayout>
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/post_description"
+                android:layout_toRightOf="@id/post_description"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+        <include layout="@layout/include_image_pager"/>
+        <com.google.android.gms.maps.MapView
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:id="@+id/map"
+                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/create_type"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/post_title"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/post_object"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
     </LinearLayout>

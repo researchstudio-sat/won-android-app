@@ -83,7 +83,6 @@ public class ImageLoaderService {
             return bitmap;
         } catch (Exception ex){
             Log.e(LOG_TAG, "Error while loading image: "+ex.getMessage());
-            ex.printStackTrace();
             return null;
         }
     }

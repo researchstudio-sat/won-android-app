@@ -21,32 +21,29 @@ public class ImagePagerAdapter extends FragmentStatePagerAdapter implements Icon
     private ArrayList<ImageFragment> imageFragments;
     private boolean editable = true;
 
+
     public ImagePagerAdapter(FragmentManager fm) {
         super(fm);
         imageFragments = new ArrayList<ImageFragment>();
-        /*imageFragments.add(new ImageFragment("http://placehold.it/800x450&text=image1"));
-        imageFragments.add(new ImageFragment("http://placehold.it/450x800&text=image2"));
-        imageFragments.add(new ImageFragment("http://placehold.it/400x300&text=image3"));
-        imageFragments.add(new ImageFragment("http://placehold.it/300x400&text=image4"));
-        imageFragments.add(new ImageFragment("http://placehold.it/600x400&text=image5"));
-        imageFragments.add(new ImageFragment("http://placehold.it/400x600&text=image6"));*/
     }
 
     public ImagePagerAdapter(FragmentManager fm, boolean editable) {
-        super(fm);
-        imageFragments = new ArrayList<ImageFragment>();
+        this(fm);
         this.editable = editable;
     }
 
     public void addItem(String imageUrl){
-        ImageFragment fragment = new ImageFragment();
+        if(imageUrl!=null && !"".equals(imageUrl.trim())) {
+            ImageFragment fragment = new ImageFragment();
 
-        Bundle args = new Bundle();
+            Bundle args = new Bundle();
 
-        args.putString(ImageFragment.ARG_IMAGE_URL,imageUrl);
-        fragment.setArguments(args);
+            args.putString(ImageFragment.ARG_IMAGE_URL, imageUrl);
+            args.putBoolean(ImageFragment.ARG_IMAGE_EDITABLE, editable);
+            fragment.setArguments(args);
 
-        imageFragments.add(fragment);
+            imageFragments.add(fragment);
+        }
     }
 
     public void removeItem(int i){

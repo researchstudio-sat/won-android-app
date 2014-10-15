@@ -147,32 +147,11 @@ public class PostBoxFragment extends ListFragment {
 
         @Override
         protected ArrayList<Post> doInBackground(String... params) {
-
-            ArrayList<Post> retrievedList = new ArrayList<Post>();
-
-            int amount = 50000;
-
-            //TODO: DUMMY DATA RETRIEVAL MOVE THIS TO THE BACKEND
-            for(int i = 0; i < amount; i++) {
-                if(isCancelled()){
-                    Log.d(LOG_TAG, "GOT CANCELLED DURING BG WORK");
-                    break;
-                }
-
-                Post post;
-
-                if(isMatchesList()) {
-                    post = Mock.getRandomMatch();
-                }else{
-                    post = Mock.getRandomPost();
-                }
-
-                if(((int)(Math.random()*1000)) == 0) {
-                    retrievedList.add(post);
-                }
+            if(isMatchesList()) {
+                return new ArrayList<Post>(Mock.myMockMatches.values());
+            }else{
+                return new ArrayList<Post>(Mock.myMockPosts.values());
             }
-
-            return retrievedList;
         }
 
         @Override

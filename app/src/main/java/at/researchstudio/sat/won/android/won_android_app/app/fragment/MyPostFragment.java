@@ -26,6 +26,7 @@ public class MyPostFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "*****************************************");
         Log.d(LOG_TAG, "ON CREATE VIEW");
         Bundle args = getArguments();
         if(args!=null){
@@ -40,10 +41,16 @@ public class MyPostFragment extends Fragment {
 
         mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_screen_pager);
         mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
-
+        mMyPostViewPager.setOffscreenPageLimit(2);
         TabPageIndicator indicator = (TabPageIndicator)rootView.findViewById(R.id.mypost_screen_pager_indicator);
         indicator.setViewPager(mMyPostViewPager);
-
+        Log.d(LOG_TAG, "*****************************************");
         return rootView;
+    }
+
+    @Override
+    public void onLowMemory() {
+        mMyPostViewPager.setOffscreenPageLimit(1);
+        super.onLowMemory();
     }
 }

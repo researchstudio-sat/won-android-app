@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.*;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.WelcomeScreenPagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsService;
@@ -46,6 +47,11 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         //Initialize PreferencesService
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
 
+
+        //MOCK DATA RETRIEVAL TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
+        Mock.fillMyMockMatches();
+        Mock.fillMyMockPosts();
+        Mock.fillMyMockConversations();
 
         //TODO: THIS OPEN VIA URI DOES NOT NECESSARILY WORK
         if(getIntent().getAction().equals(Intent.ACTION_VIEW)) {
@@ -130,6 +136,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d(LOG_TAG, "onCreateOptionsMenu in Activity");
         if ((mNavigationDrawerFragment != null) && (!mNavigationDrawerFragment.isDrawerOpen())) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
@@ -214,4 +221,6 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     public void setTitle(String title){
         this.mTitle = title;
     }
+
+
 }

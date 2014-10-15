@@ -1,5 +1,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import com.google.android.gms.maps.model.LatLng;
@@ -92,7 +93,7 @@ public class Post extends Model {
     }
 
     public int getMatches() {
-        return matches;
+        return 0;//matches; //TODO: REMOVE THIS AGAIN
     }
 
     public void setMatches(int matches) {
@@ -100,6 +101,8 @@ public class Post extends Model {
     }
 
     public int getConversations() {
+        conversations = Mock.getConversationsByPostId(this.getUuid()).size(); //TODO: REMOVE THIS AGAIN
+
         return conversations;
     }
 
@@ -108,7 +111,7 @@ public class Post extends Model {
     }
 
     public int getRequests() {
-        return requests;
+        return 0; //requests; //TODO REMOVE THIS AGAIN
     }
 
     public void setRequests(int requests) {

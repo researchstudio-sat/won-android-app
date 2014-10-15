@@ -5,6 +5,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:weightSum="1">
+    <!-- TODO: SET A DIFFERENT ACTIONBAR TO INDICATE WHAT CONVERSATION IS CURRENTLY VIEWED http://stackoverflow.com/questions/11259311/action-bar-title-with-more-than-one-line -->
     <ListView android:id="@+id/conversation_messages"
               android:layout_height="fill_parent"
               android:layout_width="fill_parent"

@@ -5,6 +5,8 @@ import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v13.app.FragmentStatePagerAdapter;
+import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
@@ -12,7 +14,8 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 /**
  * Created by fsuda on 10.10.2014.
  */
-public class MyPostPagerAdapter extends FragmentPagerAdapter{
+public class MyPostPagerAdapter extends FragmentStatePagerAdapter{
+    private static final String LOG_TAG = MyPostPagerAdapter.class.getSimpleName();
     private String postId;
 
     public MyPostPagerAdapter(FragmentManager fm) {
@@ -26,6 +29,7 @@ public class MyPostPagerAdapter extends FragmentPagerAdapter{
 
     @Override
     public Fragment getItem(int position) {
+        Log.d(LOG_TAG, "postId: " + postId);
         Fragment fragment=null;
 
         switch(position){

@@ -17,6 +17,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemMo
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by fsuda on 14.10.2014.
@@ -63,7 +64,6 @@ public class ConversationFragment extends Fragment {
             conversationId=args.getString(Conversation.ID_REF);
             Log.d(LOG_TAG, "Fragment started with conversationId: " + conversationId);
         }
-        Log.d(LOG_TAG,"conversationId: "+conversationId);
 
         View rootView = inflater.inflate(R.layout.fragment_conversation, container, false);
 
@@ -138,16 +138,7 @@ public class ConversationFragment extends Fragment {
     private class CreateListTask extends AsyncTask<String, Integer, ArrayList<MessageItemModel>> {
         @Override
         protected ArrayList<MessageItemModel> doInBackground(String... params) {
-            ArrayList<MessageItemModel> retrievedList = new ArrayList<MessageItemModel>();
-
-            int amount = Mock.getRandom(5,100);
-
-            //TODO: DUMMY DATA RETRIEVAL MOVE THIS TO THE BACKEND
-            for(int i = 0; i < amount; i++) {
-                retrievedList.add(Mock.getRandomMessage());
-            }
-
-            return retrievedList;
+            return Mock.getMessagesByConversationId(UUID.fromString(conversationId));
         }
 
         @Override

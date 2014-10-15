@@ -16,6 +16,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.ConversationListItemModel;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by fsuda on 10.10.2014.
@@ -94,12 +95,12 @@ public class ConversationListFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(LOG_TAG,"LIST ITEM CLICKED!!");
         //TODO: Implement "Real" list item clicking
-        ConversationListItemModel conversationListItemModel = (ConversationListItemModel) mConversationListItemAdapter.getItem(position);
+        Conversation conversation = (Conversation) mConversationListItemAdapter.getItem(position);
         Fragment fragment;
 
         Bundle args = new Bundle();
-        Log.d(LOG_TAG, "CONVERSATIONID: " + conversationListItemModel.title);
-        args.putString(Conversation.ID_REF, conversationListItemModel.title); //TODO: CHANGE THIS TO ID
+        Log.d(LOG_TAG, "CONVERSATIONID: " + conversation.getUuid());
+        args.putString(Conversation.ID_REF, conversation.getUuidString());
 
         fragment = new ConversationFragment();
 
@@ -107,40 +108,37 @@ public class ConversationListFragment extends ListFragment {
         getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
     }
 
-    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<ConversationListItemModel>> {
+    public boolean isMailbox(){
+        return postId==null;
+    }
+
+    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Conversation>> {
         @Override
-        protected ArrayList<ConversationListItemModel> doInBackground(String... params) {
-            ArrayList<ConversationListItemModel> retrievedList = new ArrayList<ConversationListItemModel>();
+        protected ArrayList<Conversation> doInBackground(String... params) {
 
-            int amount = 50000;
-
-            //TODO: DUMMY DATA RETRIEVAL MOVE THIS TO THE BACKEND
-            for(int i = 0; i < amount; i++) {
-                ConversationListItemModel conversation = Mock.getRandomConversation();
-                if(((int)(Math.random()*1000)) == 0) {
-                    retrievedList.add(conversation);
-                }
+            if(isMailbox()) {
+                return new ArrayList<Conversation>(Mock.myMockConversations.values());
+            }else{
+                return Mock.getConversationsByPostId(UUID.fromString(postId));
             }
-
-            return retrievedList;
         }
 
         @Override
-        protected void onCancelled(ArrayList<ConversationListItemModel> linkArray) {
+        protected void onCancelled(ArrayList<Conversation> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
             //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
             if(linkArray != null) {
-                mConversationListItemAdapter = new ConversationListItemAdapter(getActivity());
-                for (ConversationListItemModel conversation : linkArray) {
+                mConversationListItemAdapter = new ConversationListItemAdapter(getActivity(), isMailbox());
+                for (Conversation conversation : linkArray) {
                     mConversationListItemAdapter.addItem(conversation); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
                 }
                 setListAdapter(mConversationListItemAdapter);
             }
         }
 
-        protected void onPostExecute(ArrayList<ConversationListItemModel> linkArray) {
-            mConversationListItemAdapter = new ConversationListItemAdapter(getActivity());
-            for(ConversationListItemModel conversation : linkArray) {
+        protected void onPostExecute(ArrayList<Conversation> linkArray) {
+            mConversationListItemAdapter = new ConversationListItemAdapter(getActivity(), isMailbox());
+            for(Conversation conversation : linkArray) {
                 mConversationListItemAdapter.addItem(conversation); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
             }
             setListAdapter(mConversationListItemAdapter);

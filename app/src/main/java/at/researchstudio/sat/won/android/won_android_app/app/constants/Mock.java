@@ -1,5 +1,7 @@
 package at.researchstudio.sat.won.android.won_android_app.app.constants;
 
+import android.os.Message;
+import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
@@ -7,15 +9,17 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.*;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Sole purpose of this class is to mock objects for the interface before it is implemented
  * Created by fsuda on 13.10.2014.
  */
 public class Mock {
+    public static Map<UUID, Post> myMockPosts = new HashMap<UUID, Post>();
+    public static Map<UUID, Post> myMockMatches = new HashMap<UUID, Post>();
+    public static Map<UUID, Conversation> myMockConversations = new HashMap<UUID, Conversation>();
+
     public static final String[] CHEESES = {
             "Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi",
             "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale",
@@ -193,6 +197,14 @@ public class Mock {
         return field[((int)(Math.random()*100))%field.length];
     }
 
+    public static Post getRandomFromList(List<Post> list){
+        if(list!=null && list.size()>0) {
+            return list.get(((int)(Math.random()*100))%list.size());
+        }else{
+            return null;
+        }
+    }
+
     public static int getRandom(int upperBound){
         return getRandom(0, upperBound);
     }
@@ -250,7 +262,24 @@ public class Mock {
     }
 
     public static MessageItemModel getRandomMessage(){
-        return new MessageItemModel(getRandomFromField(messageTypes),getRandomText());
+        return getRandomMessage(getRandomFromField(messageTypes));
+    }
+
+    public static MessageItemModel getRandomMessage(MessageType messageType) {
+        return new MessageItemModel(messageType,getRandomText());
+    }
+
+    public static List<MessageItemModel> getRandomMessages() {
+        ArrayList<MessageItemModel> messageList = new ArrayList<MessageItemModel>();
+
+        int amount = Mock.getRandom(0,100);
+
+        messageList.add(getRandomMessage(MessageType.RECEIVE)); //TODO: HAVE RECEIVED INIT CONVERSATIONS AND SENT RECEIVED CONVERSATIONS
+
+        for(int i = 0; i < amount; i++) {
+            messageList.add(Mock.getRandomMessage());
+        }
+        return messageList;
     }
 
     public static String getRandomText(){
@@ -264,7 +293,61 @@ public class Mock {
         return message.toString();
     }
 
-    public static void main(String args) {
+    public static void fillMyMockPosts(){
+        int amount = 1000;
 
+        for(int i = 0; i < amount; i++) {
+            Post post = Mock.getRandomPost();
+
+            if(((int)(Math.random()*100)) == 0) {
+                myMockPosts.put(post.getUuid(),post);
+            }
+        }
+    }
+
+    public static void fillMyMockMatches(){
+        int amount = 2500;
+
+        for(int i = 0; i < amount; i++) {
+            Post post = Mock.getRandomMatch();
+
+            if(((int)(Math.random()*100)) == 0) {
+                myMockMatches.put(post.getUuid(),post);
+            }
+        }
+    }
+
+    public static void fillMyMockConversations(){
+        int amount = 2500;
+
+        for(int i = 0; i < amount; i++){
+            Conversation conversation = new Conversation(getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages());
+
+            if(((int)(Math.random()*100)) == 0) {
+                myMockConversations.put(conversation.getUuid(), conversation);
+            }
+        }
+    }
+
+    public static ArrayList<Conversation> getConversationsByPostId(UUID postId) {
+        ArrayList<Conversation> conversations = new ArrayList<Conversation>(myMockConversations.values());
+        ArrayList<Conversation> foundConversations = new ArrayList<Conversation>();
+
+        for(Conversation conversation : conversations) {
+            if(conversation.getMyPost().getUuid().equals(postId)){
+                foundConversations.add(conversation);
+            }
+        }
+        return foundConversations;
+    }
+
+    public static ArrayList<MessageItemModel> getMessagesByConversationId(UUID conversationId) {
+        Conversation conversation = myMockConversations.get(conversationId);
+
+        if(conversation != null){
+            return new ArrayList<MessageItemModel>(conversation.getMessages());
+        }else{
+            return new ArrayList<MessageItemModel>();
+        }
     }
 }
