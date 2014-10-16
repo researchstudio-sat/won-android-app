@@ -1,7 +1,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.content.Context;
-import android.opengl.Visibility;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,14 +67,14 @@ public class ConversationListItemAdapter extends ArrayAdapter {
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 
             TextView title = (TextView) view.findViewById(R.id.item_conversation_list_title);
-            TextView refTitle = (TextView) view.findViewById(R.id.item_conversation_reference_title);
-            TextView counterHolder = (TextView) view.findViewById(R.id.item_conversation_message_counter);
-            ImageView typeHolder = (ImageView) view.findViewById(R.id.item_conversation_type);
-            ImageView refTypeHolder = (ImageView) view.findViewById(R.id.item_conversation_reference_type);
-            ImageView messageTypeHolder = (ImageView) view.findViewById(R.id.item_conversation_message_type);
-            TextView messageHolder = (TextView) view.findViewById(R.id.item_conversation_message_text);
-            ImageView imageHolder = (ImageView) view.findViewById(R.id.item_conversation_image);
-            RelativeLayout referenceLayout = (RelativeLayout) view.findViewById(R.id.item_conversation_reference);
+            TextView refTitle = (TextView) view.findViewById(R.id.item_conversation_list_reference_title);
+            TextView counterHolder = (TextView) view.findViewById(R.id.item_conversation_list_message_counter);
+            ImageView typeHolder = (ImageView) view.findViewById(R.id.item_conversation_list_type);
+            ImageView refTypeHolder = (ImageView) view.findViewById(R.id.item_conversation_list_reference_type);
+            ImageView messageTypeHolder = (ImageView) view.findViewById(R.id.item_conversation_list_message_type);
+            TextView messageHolder = (TextView) view.findViewById(R.id.item_conversation_list_message_text);
+            ImageView imageHolder = (ImageView) view.findViewById(R.id.item_conversation_list_image);
+            RelativeLayout referenceLayout = (RelativeLayout) view.findViewById(R.id.item_conversation_list_reference);
 
             view.setTag(new ViewHolder(title, refTitle, counterHolder, typeHolder, refTypeHolder, messageTypeHolder, messageHolder, imageHolder, referenceLayout));
         }

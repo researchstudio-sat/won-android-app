@@ -69,7 +69,7 @@ public class ConversationFragment extends Fragment {
 
         mMessageListView = (ListView) rootView.findViewById(R.id.conversation_messages);
 
-        mSendMessage = (ImageButton) rootView.findViewById(R.id.conversation_send_message);
+        mSendMessage = (ImageButton) rootView.findViewById(R.id.conversation_send);
         mSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,7 +79,7 @@ public class ConversationFragment extends Fragment {
         mSendMessage.setEnabled(false); //DO NOT ALLOW EMPTY MESSAGES
 
 
-        mMessageText = (EditText) rootView.findViewById(R.id.conversation_text_message);
+        mMessageText = (EditText) rootView.findViewById(R.id.conversation_message);
         mMessageText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

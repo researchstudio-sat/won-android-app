@@ -14,7 +14,7 @@
         <ImageView
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                android:id="@+id/need_list_image"
+                android:id="@+id/item_post_list_image"
                 android:src="@drawable/rectangle"
                 android:scaleType="centerCrop"/>
         <ImageView
@@ -24,7 +24,7 @@
         <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:id="@+id/need_list_type"
+                android:id="@+id/item_post_list_type"
                 android:src="@drawable/offer"/>
     </RelativeLayout>
 
@@ -40,7 +40,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="Need Title Long title this is longer than expected oh my"
-                    android:id="@+id/need_list_title"
+                    android:id="@+id/item_post_list_title"
                     android:gravity="left"
                     android:singleLine="true"/>
 
@@ -50,7 +50,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/needlist_description"
                 android:text="This is a long description it might be cut off but it is not necessarily going to be cut off depending on the length of the text"
-                android:id="@+id/need_list_description"
+                android:id="@+id/item_post_list_description"
                 android:singleLine="false"
                 android:gravity="left"
                 android:layout_alignParentTop="false"
@@ -68,7 +68,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:text="Tag1, Tag2, Tag3, Tag, Tag, Tag, Tag, Tag, Tag, Tag"
-                    android:id="@+id/need_list_tags"
+                    android:id="@+id/item_post_list_tags"
                     android:singleLine="true"
                     android:layout_marginTop="4dp"/>
         </LinearLayout>
@@ -84,7 +84,7 @@
                       android:layout_height="fill_parent">
                 <TextView
                         android:layout_span="2"
-                        android:id="@+id/need_list_requests"
+                        android:id="@+id/item_post_list_requests"
                         android:background="@color/requests"
                         android:text="5"
                         android:textColor="@color/menuitem_counter_text"
@@ -98,7 +98,7 @@
             </TableRow>
             <TableRow>
                 <TextView
-                        android:id="@+id/need_list_conversations"
+                        android:id="@+id/item_post_list_conversations"
                         android:background="@color/conversations"
                         android:text="5"
                         android:padding="3dp"
@@ -110,7 +110,7 @@
                         android:gravity="center"
                         />
                 <TextView
-                        android:id="@+id/need_list_matches"
+                        android:id="@+id/item_post_list_matches"
                         android:background="@color/matches"
                         android:text="5"
                         android:padding="3dp"

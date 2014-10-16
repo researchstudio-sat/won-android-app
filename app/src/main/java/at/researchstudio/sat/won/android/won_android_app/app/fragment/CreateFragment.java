@@ -144,7 +144,7 @@ public class CreateFragment extends Fragment {
 
 
 
-        mMapView = (MapView) rootView.findViewById(R.id.map);
+        mMapView = (MapView) rootView.findViewById(R.id.post_map);
         mMapView.onCreate(savedInstanceState);
         // Gets to GoogleMap from the MapView and does initialization stuff
         if(mMapView!=null)

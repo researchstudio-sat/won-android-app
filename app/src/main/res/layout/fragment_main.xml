@@ -12,5 +12,5 @@
         android:id="@+id/section_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
+    <!-- TODO: check if this is needed, not sure at all, if not delete this file -->
 </RelativeLayout>

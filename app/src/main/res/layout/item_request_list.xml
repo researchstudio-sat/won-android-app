@@ -10,5 +10,5 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Large Text"
-            android:id="@+id/request_list_item_title"/>
+            android:id="@+id/item_request_list_title"/>
 </LinearLayout>

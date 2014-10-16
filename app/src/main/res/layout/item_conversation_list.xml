@@ -14,7 +14,7 @@
         <ImageView
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:id="@+id/item_conversation_image"
+                android:id="@+id/item_conversation_list_image"
                 android:src="@drawable/rectangle"
                 android:scaleType="centerCrop"/>
         <ImageView
@@ -24,7 +24,7 @@
         <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:id="@+id/item_conversation_type"
+                android:id="@+id/item_conversation_list_type"
                 android:src="@drawable/offer"/>
     </RelativeLayout>
 
@@ -47,7 +47,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:id="@+id/item_conversation_reference">
+                android:id="@+id/item_conversation_list_reference">
             <ImageView
                     android:layout_width="10dp"
                     android:layout_height="10dp"
@@ -58,7 +58,7 @@
             <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:id="@+id/item_conversation_reference_type"
+                    android:id="@+id/item_conversation_list_reference_type"
                     android:layout_marginRight="2dp"
                     android:src="@drawable/want"
                     android:layout_toRightOf="@id/arrow_symbol"/>
@@ -67,10 +67,10 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:text="Need Title Long title this is longer than expected oh my"
-                    android:id="@+id/item_conversation_reference_title"
+                    android:id="@+id/item_conversation_list_reference_title"
                     android:gravity="left"
                     android:singleLine="true"
-                    android:layout_toRightOf="@id/item_conversation_reference_type"/>
+                    android:layout_toRightOf="@id/item_conversation_list_reference_type"/>
         </RelativeLayout>
         <RelativeLayout
                 android:layout_width="fill_parent"
@@ -78,7 +78,7 @@
             <ImageView
                     android:layout_width="12dp"
                     android:layout_height="12dp"
-                    android:id="@+id/item_conversation_message_type"
+                    android:id="@+id/item_conversation_list_message_type"
                     android:layout_marginRight="2dp"
                     android:src="@drawable/message_receive"
                     android:layout_centerVertical="true"/>
@@ -88,7 +88,7 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/needlist_description"
                     android:text="I would like to have this item please"
-                    android:id="@+id/item_conversation_message_text"
+                    android:id="@+id/item_conversation_list_message_text"
                     android:singleLine="false"
                     android:gravity="left"
                     android:layout_alignParentTop="false"
@@ -100,13 +100,13 @@
                     android:enabled="false"
                     android:layout_marginTop="4dp"
                     android:layout_centerVertical="true"
-                    android:layout_toRightOf="@id/item_conversation_message_type"/>
+                    android:layout_toRightOf="@id/item_conversation_list_message_type"/>
         </RelativeLayout>
     </LinearLayout>
 
 
     <TextView
-            android:id="@+id/item_conversation_message_counter"
+            android:id="@+id/item_conversation_list_message_counter"
             android:background="@color/conversations"
             android:layout_gravity="center_vertical"
             android:text="5"

@@ -51,7 +51,7 @@ public class ImageFragment extends Fragment{
 
         Bundle args = getArguments();
 
-        final ImageView createPostImage = (ImageView) rootView.findViewById(R.id.create_image);
+        final ImageView createPostImage = (ImageView) rootView.findViewById(R.id.image);
         //TODO: MOVE THIS LOADING THINGY TO AN ASYNCTASK OR SOMETHING
 
         if((imageUrl==null) && (args == null)) {

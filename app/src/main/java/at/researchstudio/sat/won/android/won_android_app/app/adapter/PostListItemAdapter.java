@@ -59,14 +59,14 @@ public class PostListItemAdapter extends ArrayAdapter {
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 
-            TextView title = (TextView) view.findViewById(R.id.need_list_title);
-            TextView description = (TextView) view.findViewById(R.id.need_list_description);
-            TextView tag = (TextView) view.findViewById(R.id.need_list_tags);
-            TextView matches = (TextView) view.findViewById(R.id.need_list_matches);
-            TextView requests = (TextView) view.findViewById(R.id.need_list_requests);
-            TextView conversations = (TextView) view.findViewById(R.id.need_list_conversations);
-            ImageView image = (ImageView) view.findViewById(R.id.need_list_image);
-            ImageView type = (ImageView) view.findViewById(R.id.need_list_type);
+            TextView title = (TextView) view.findViewById(R.id.item_post_list_title);
+            TextView description = (TextView) view.findViewById(R.id.item_post_list_description);
+            TextView tag = (TextView) view.findViewById(R.id.item_post_list_tags);
+            TextView matches = (TextView) view.findViewById(R.id.item_post_list_matches);
+            TextView requests = (TextView) view.findViewById(R.id.item_post_list_requests);
+            TextView conversations = (TextView) view.findViewById(R.id.item_post_list_conversations);
+            ImageView image = (ImageView) view.findViewById(R.id.item_post_list_image);
+            ImageView type = (ImageView) view.findViewById(R.id.item_post_list_type);
             TableLayout notificationTable = (TableLayout) view.findViewById(R.id.postlist_item_notifications);
             view.setTag(new ViewHolder(title,description,matches,requests,conversations,image,tag,type,notificationTable));
         }

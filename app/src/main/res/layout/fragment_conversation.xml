@@ -21,7 +21,7 @@
         <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:id="@+id/conversation_text_message"
+                android:id="@+id/conversation_message"
                 android:layout_weight="29"
                 android:imeOptions="actionSend"
                 android:singleLine="true"
@@ -31,9 +31,9 @@
         <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:id="@+id/conversation_send_message"
+                android:id="@+id/conversation_send"
                 android:src="@drawable/ic_action_send_now"
-                android:layout_toRightOf="@+id/conversation_text_message"
+                android:layout_toRightOf="@+id/conversation_message"
                 style="@android:style/Widget.DeviceDefault.Light.ActionButton"
                 android:layout_weight="1"/>
     </LinearLayout>

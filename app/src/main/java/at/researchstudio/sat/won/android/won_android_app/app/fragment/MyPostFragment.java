@@ -1,6 +1,5 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -39,10 +38,10 @@ public class MyPostFragment extends Fragment {
         //Initialize ViewPager
         mMyPostPagerAdapter = new MyPostPagerAdapter(getActivity().getFragmentManager(),postId);
 
-        mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_screen_pager);
+        mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
         mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
         mMyPostViewPager.setOffscreenPageLimit(2);
-        TabPageIndicator indicator = (TabPageIndicator)rootView.findViewById(R.id.mypost_screen_pager_indicator);
+        TabPageIndicator indicator = (TabPageIndicator)rootView.findViewById(R.id.mypost_viewpager_indicator);
         indicator.setViewPager(mMyPostViewPager);
         Log.d(LOG_TAG, "*****************************************");
         return rootView;

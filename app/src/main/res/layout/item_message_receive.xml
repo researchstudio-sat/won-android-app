@@ -12,7 +12,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="received message"
-            android:id="@+id/message_item_text"
+            android:id="@+id/item_message_text"
             android:layout_margin="@dimen/message_item_margin"
             android:layout_gravity="left"/>
 </LinearLayout>

@@ -38,7 +38,7 @@
         <com.google.android.gms.maps.MapView
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:id="@+id/map"
+                android:id="@+id/post_map"
                 android:layout_marginBottom="@dimen/create_edit_margin_bottom"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>

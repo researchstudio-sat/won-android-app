@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
-import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListItemModel;
 
 /**
  * Created by fsuda on 13.10.2014.
@@ -53,7 +52,7 @@ public class MessageListItemAdapter extends ArrayAdapter {
 
         view = LayoutInflater.from(getContext()).inflate(layout, null);
 
-        TextView title = (TextView) view.findViewById(R.id.message_item_text);
+        TextView title = (TextView) view.findViewById(R.id.item_message_text);
 
         view.setTag(new ViewHolder(title));
 

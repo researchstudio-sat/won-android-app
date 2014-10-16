@@ -4,16 +4,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
     <ImageView
-            android:id="@+id/spinner_type_img"
+            android:id="@+id/item_type_spinner_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/offer"
             android:layout_centerVertical="true"/>
     <TextView
-            android:layout_toRightOf="@+id/spinner_type_img"
+            android:layout_toRightOf="@+id/item_type_spinner_img"
             android:padding="3dip"
             android:layout_marginTop="2dip"
-            android:id="@+id/spinner_type_text"
+            android:id="@+id/item_type_spinner_text"
             android:text="dummytext"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginLeft="5dip"

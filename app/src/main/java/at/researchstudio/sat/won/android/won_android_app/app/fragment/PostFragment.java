@@ -64,8 +64,6 @@ public class PostFragment extends Fragment {
         }
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
 
-
-
         postTitle = (TextView) rootView.findViewById(R.id.post_title);
         postTitle.setText(post.getTitle());
 
@@ -120,7 +118,7 @@ public class PostFragment extends Fragment {
         MapsInitializer.initialize(getActivity());
         mGeocoder = new Geocoder(getActivity(), Locale.getDefault());
 
-        mMapView = (MapView) rootView.findViewById(R.id.map);
+        mMapView = (MapView) rootView.findViewById(R.id.post_map);
         mMapView.onCreate(savedInstanceState);
         // Gets to GoogleMap from the MapView and does initialization stuff
         if(mMapView!=null)

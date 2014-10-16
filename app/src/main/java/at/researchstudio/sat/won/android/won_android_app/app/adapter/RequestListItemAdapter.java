@@ -40,7 +40,7 @@ public class RequestListItemAdapter extends ArrayAdapter {
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 
-            TextView title = (TextView) view.findViewById(R.id.request_list_item_title);
+            TextView title = (TextView) view.findViewById(R.id.item_request_list_title);
 
             view.setTag(new ViewHolder(title));
         }

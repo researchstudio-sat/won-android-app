@@ -56,8 +56,8 @@ public class TypeSpinnerAdapter extends ArrayAdapter {
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 
-            TextView text1 = (TextView) view.findViewById(R.id.spinner_type_text);
-            ImageView image1 = (ImageView) view.findViewById(R.id.spinner_type_img);
+            TextView text1 = (TextView) view.findViewById(R.id.item_type_spinner_text);
+            ImageView image1 = (ImageView) view.findViewById(R.id.item_type_spinner_img);
             view.setTag(new ViewHolder(text1, image1));
         }
 

@@ -48,9 +48,9 @@ public class WelcomeScreenFragment extends Fragment {
                 break;
         }
 
-        ImageView welcomeImage = (ImageView) rootView.findViewById(R.id.welcomeImage);
-        TextView welcomeHeaderText = (TextView) rootView.findViewById(R.id.welcomeTextHeader);
-        TextView welcomeText = (TextView) rootView.findViewById(R.id.welcomeText);
+        ImageView welcomeImage = (ImageView) rootView.findViewById(R.id.welcome_image);
+        TextView welcomeHeaderText = (TextView) rootView.findViewById(R.id.welcome_header);
+        TextView welcomeText = (TextView) rootView.findViewById(R.id.welcome_text);
 
         welcomeImage.setImageResource(imageId);
         welcomeText.setText(textId);

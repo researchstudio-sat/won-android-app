@@ -93,9 +93,9 @@ public class MenuItemAdapter extends ArrayAdapter{
 
             view = LayoutInflater.from(getContext()).inflate(layout, null);
 
-            TextView text1 = (TextView) view.findViewById(R.id.menu_item_title);
-            ImageView image1 = (ImageView) view.findViewById(R.id.menu_item_icon);
-            TextView textcounter1 = (TextView) view.findViewById(R.id.menu_item_counter);
+            TextView text1 = (TextView) view.findViewById(R.id.item_menu_title);
+            ImageView image1 = (ImageView) view.findViewById(R.id.item_menu_icon);
+            TextView textcounter1 = (TextView) view.findViewById(R.id.item_menu_counter);
             view.setTag(new ViewHolder(text1, image1,textcounter1));
         }
 
@@ -129,8 +129,8 @@ public class MenuItemAdapter extends ArrayAdapter{
                 }
             }
 
-            TextView text1 = (TextView) view.findViewById(R.id.menu_item_title);
-            ImageView image1 = (ImageView) view.findViewById(R.id.menu_item_icon);
+            TextView text1 = (TextView) view.findViewById(R.id.item_menu_title);
+            ImageView image1 = (ImageView) view.findViewById(R.id.item_menu_icon);
 
             text1.setTextColor(menuItemFontColor);
             view.setBackgroundColor(menuItemBackgroundColor);
