@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.content.Context;
@@ -11,24 +26,26 @@ import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
-import at.researchstudio.sat.won.android.won_android_app.app.model.Conversation;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 
 /**
  * Created by fsuda on 13.10.2014.
  */
-public class ConversationListItemAdapter extends ArrayAdapter {
+public class ConnectionListItemAdapter extends ArrayAdapter {
     private ImageLoaderService mImgLoader;
     private boolean includeReference;
+    private boolean receivedRequestsOnly;
 
-    public ConversationListItemAdapter(Context context, boolean includeReference){
+    public ConnectionListItemAdapter(Context context, boolean includeReference, boolean receivedRequestsOnly){
         super(context, 0);
         mImgLoader = new ImageLoaderService(context);
         this.includeReference = includeReference;
+        this.receivedRequestsOnly = receivedRequestsOnly;
     }
 
-    public void addItem(Conversation conversation){
-        add(conversation);
+    public void addItem(Connection connection){
+        add(connection);
     }
 
     private static class ViewHolder {
@@ -57,7 +74,7 @@ public class ConversationListItemAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Conversation item = (Conversation) getItem(position);
+        Connection item = (Connection) getItem(position);
         ViewHolder holder = null;
         View view = convertView;
 
@@ -87,23 +104,29 @@ public class ConversationListItemAdapter extends ArrayAdapter {
         }
 
         if(item != null && holder != null) {
-            setText(holder.titleHolder,item.getTitle());
-            setCounter(holder.counterHolder, item.getMessageCount(), 99);
-            setType(holder.typeHolder, item.getType());
+            setText(holder.titleHolder, item.getTitle());
+            setCounter(holder.counterHolder, receivedRequestsOnly? 0 : item.getMessageCount(), 99);
+            setType(holder.typeHolder, item.getPostType());
 
             if(includeReference) {
+                if(holder.messageHolder != null) {
+                    holder.messageHolder.setMaxLines(1);
+                }
+
                 if(holder.refLayout != null) {
                     holder.refLayout.setVisibility(View.VISIBLE);
                 }
 
                 setText(holder.refTitleHolder,item.getReferenceTitle());
-                setType(holder.refTypeHolder, item.getReferenceType());
+                setType(holder.refTypeHolder, item.getReferencePostType());
             }else{
                 if(holder.refLayout != null) {
                     holder.refLayout.setVisibility(View.GONE);
                 }
+                if(holder.messageHolder != null) {
+                    holder.messageHolder.setMaxLines(2);
+                }
             }
-
 
             setMsgType(holder.messageTypeHolder, item.getLastUserMessageType());
             setText(holder.messageHolder,item.getLastUserMessageString());

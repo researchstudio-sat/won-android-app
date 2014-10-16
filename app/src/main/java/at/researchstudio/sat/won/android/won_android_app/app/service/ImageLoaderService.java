@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.service;
 
 import android.app.Activity;
@@ -80,6 +95,9 @@ public class ImageLoaderService {
             InputStream inputStream = bufferedEntity.getContent();
             bitmap = BitmapFactory.decodeStream(inputStream);
 
+            FileOutputStream out = new FileOutputStream(f.getAbsolutePath());
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
             return bitmap;
         } catch (Exception ex){
             Log.e(LOG_TAG, "Error while loading image: "+ex.getMessage());
@@ -89,30 +107,11 @@ public class ImageLoaderService {
 
     //decodes image and scales it to reduce memory consumption
     private Bitmap decodeFile(File f){
-        try {
-            //decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
-
-            //Find the correct scale value. It should be the power of 2.
-            final int REQUIRED_SIZE=70;
-            int width_tmp=o.outWidth, height_tmp=o.outHeight;
-            int scale=1;
-            while(true){
-                if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE)
-                    break;
-                width_tmp/=2;
-                height_tmp/=2;
-                scale*=2;
-            }
-
-            //decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize=scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {}
-        return null;
+        if(f.exists()) {
+            return BitmapFactory.decodeFile(f.getAbsolutePath());
+        }else{
+            return null;
+        }
     }
 
     //Task for the queue
@@ -171,6 +170,7 @@ public class ImageLoaderService {
     }
 
     public void clearCache() {
+        //TODO: IMPLEMENT A CYCLIC CLEAR CACHE CALL DEPENDING ON THE DEVICE MEMORY (MAYBE ADD A THRESHOLD IN MB IN THE SETTINGS)
         memoryCache.clear();
         fileCache.clear();
     }

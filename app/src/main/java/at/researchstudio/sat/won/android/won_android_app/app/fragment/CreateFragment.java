@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.DatePickerDialog;
@@ -30,6 +45,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +55,8 @@ import java.util.Locale;
  */
 public class CreateFragment extends Fragment {
     private static final String LOG_TAG = CreateFragment.class.getSimpleName();
+    private static final String MAP_STATE_KEY = "CREATE_MAP_STATE";
+    private static final String IMAGE_URLS = "IMAGE_URLS";
 
     private MapView mMapView;
     private Spinner mTypeSpinner;
@@ -145,7 +163,18 @@ public class CreateFragment extends Fragment {
 
 
         mMapView = (MapView) rootView.findViewById(R.id.post_map);
-        mMapView.onCreate(savedInstanceState);
+
+        //*********** 'HACK' TO FIX PARCEABLE BUG see darnmason post in http://stackoverflow.com/questions/13900322/badparcelableexception-in-google-maps-code
+        Bundle mapState = null;
+        if(savedInstanceState != null) {
+            mapState = new Bundle();
+            mapState.putBundle(MAP_STATE_KEY, savedInstanceState.getBundle(MAP_STATE_KEY));
+        }
+
+        mMapView.onCreate(mapState);
+        //mMapView.onCreate(savedInstanceState);
+        //****************************
+
         // Gets to GoogleMap from the MapView and does initialization stuff
         if(mMapView!=null)
         {
@@ -155,13 +184,6 @@ public class CreateFragment extends Fragment {
 
 
         }
-        //PART CAN BE REMOVED
-        if(LocationService.getCurrentLocation() != null)
-        {
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(LocationService.getCurrentLocation().getLatitude(), LocationService.getCurrentLocation().getLongitude()), 10);
-            map.animateCamera(cameraUpdate);
-        }
-        //*******************
 
         mLocationText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

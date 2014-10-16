@@ -1,5 +1,21 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,7 +28,7 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
-import at.researchstudio.sat.won.android.won_android_app.app.model.Conversation;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 
@@ -59,9 +75,16 @@ public class ConversationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
+        /*************************
+        TEST NEW ACTIONBAR IMPL
+
+        ActionBar actionBar = getActivity().getActionBar();
+        actionBar.setSubtitle("THIS IS THE SUBTITLE");
+        actionBar.setIcon(R.drawable.offer);
+        */
 
         if(args!=null){
-            conversationId=args.getString(Conversation.ID_REF);
+            conversationId=args.getString(Connection.ID_REF);
             Log.d(LOG_TAG, "Fragment started with conversationId: " + conversationId);
         }
 

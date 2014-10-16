@@ -1,14 +1,27 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.util.Log;
-import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 /**
@@ -32,6 +45,10 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter{
         Log.d(LOG_TAG, "postId: " + postId);
         Fragment fragment=null;
 
+        //This will be used to determine where the post came from
+        Bundle args = new Bundle();
+        args.putString(Post.ID_REF, postId);
+
         switch(position){
             case 0:
             default:
@@ -44,18 +61,17 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter{
                 break;
             case 2:
                 //REQUESTS PAGE
-                fragment = new RequestListFragment();
+                fragment = new ConnectionListFragment();
+                args.putBoolean(Connection.TYPE_RECEIVED_ONLY_REF, true);
                 break;
             case 3:
                 //CONVERSATION PAGE
-                fragment = new ConversationListFragment();
+                fragment = new ConnectionListFragment();
+                args.putBoolean(Connection.TYPE_RECEIVED_ONLY_REF, false);
                 break;
         }
-        //This will be used to determine where the post came from
-        Bundle args = new Bundle();
-        args.putString(Post.ID_REF, postId);
-        fragment.setArguments(args);
 
+        fragment.setArguments(args);
         return fragment;
     }
 

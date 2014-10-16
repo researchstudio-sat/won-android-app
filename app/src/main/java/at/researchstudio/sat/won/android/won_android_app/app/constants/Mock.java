@@ -1,7 +1,22 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.constants;
 
 import android.os.Message;
-import android.util.Log;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
@@ -18,7 +33,7 @@ import java.util.*;
 public class Mock {
     public static Map<UUID, Post> myMockPosts = new HashMap<UUID, Post>();
     public static Map<UUID, Post> myMockMatches = new HashMap<UUID, Post>();
-    public static Map<UUID, Conversation> myMockConversations = new HashMap<UUID, Conversation>();
+    public static Map<UUID, Connection> myMockConversations = new HashMap<UUID, Connection>();
 
     public static final String[] CHEESES = {
             "Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi",
@@ -178,6 +193,8 @@ public class Mock {
 
     public static final RepeatType[] repeatTypes = RepeatType.values();
 
+    public static final ConnectionType[] connectionTypes = ConnectionType.values();
+
     public static final String[] tags = {"couch","soccer","running","free","help","tennis","car","donaudampfschiff","irreregulär","nsa","music","guitar","running","yoga","movies","cinema","bar","translation"};
 
 
@@ -194,6 +211,10 @@ public class Mock {
     }
 
     public static RepeatType getRandomFromField(RepeatType[] field){
+        return field[((int)(Math.random()*100))%field.length];
+    }
+
+    public static ConnectionType getRandomFromField(ConnectionType[] field) {
         return field[((int)(Math.random()*100))%field.length];
     }
 
@@ -249,10 +270,6 @@ public class Mock {
         return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes));
     }
 
-    public static ConversationListItemModel getRandomConversation(){
-        return new ConversationListItemModel(getRandomFromField(CHEESES));
-    }
-
     public static RequestListItemModel getRandomRequest(){
         return new RequestListItemModel(getRandomFromField(CHEESES));
     }
@@ -269,12 +286,11 @@ public class Mock {
         return new MessageItemModel(messageType,getRandomText());
     }
 
-    public static List<MessageItemModel> getRandomMessages() {
+    public static ArrayList<MessageItemModel> getRandomMessages() {
         ArrayList<MessageItemModel> messageList = new ArrayList<MessageItemModel>();
 
         int amount = Mock.getRandom(0,100);
-
-        messageList.add(getRandomMessage(MessageType.RECEIVE)); //TODO: HAVE RECEIVED INIT CONVERSATIONS AND SENT RECEIVED CONVERSATIONS
+        messageList.add(getRandomMessage(MessageType.RECEIVE));
 
         for(int i = 0; i < amount; i++) {
             messageList.add(Mock.getRandomMessage());
@@ -294,58 +310,119 @@ public class Mock {
     }
 
     public static void fillMyMockPosts(){
-        int amount = 1000;
+        int amount = 100;
 
         for(int i = 0; i < amount; i++) {
             Post post = Mock.getRandomPost();
 
-            if(((int)(Math.random()*100)) == 0) {
+            if(((int)(Math.random()*100)) < 10) {
                 myMockPosts.put(post.getUuid(),post);
             }
         }
     }
 
     public static void fillMyMockMatches(){
-        int amount = 2500;
+        int amount = 250;
 
         for(int i = 0; i < amount; i++) {
             Post post = Mock.getRandomMatch();
 
-            if(((int)(Math.random()*100)) == 0) {
+            if(((int)(Math.random()*100)) < 10) {
                 myMockMatches.put(post.getUuid(),post);
             }
         }
     }
 
-    public static void fillMyMockConversations(){
-        int amount = 2500;
+    public static void fillMyMockConnections(){
+        int amount = 500;
 
         for(int i = 0; i < amount; i++){
-            Conversation conversation = new Conversation(getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages());
+            Connection connection = new Connection(getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages(),getRandomFromField(connectionTypes));
 
-            if(((int)(Math.random()*100)) == 0) {
-                myMockConversations.put(conversation.getUuid(), conversation);
+            if(((int)(Math.random()*100)) < 10) {
+                ArrayList<MessageItemModel> messages = new ArrayList<MessageItemModel>();
+
+                switch(connection.getType()){
+                    case CLOSED:
+                        //DO NOTHING
+                        break;
+                    case SUGGESTED:
+                        //SET MESSAGES TO ZERO
+                        connection.setMessages(messages);
+                        break;
+                    case CONNECTED:
+                        //DO NOTHING - MESSAGES CAN STAY
+                        break;
+                    case REQUEST_SENT:
+                        messages.clear();
+                        messages.add(getRandomMessage(MessageType.SEND));
+                        connection.setMessages(messages);
+                        break;
+                    case REQUEST_RECEIVED:
+                        messages.clear();
+                        messages.add(getRandomMessage(MessageType.RECEIVE));
+                        connection.setMessages(messages);
+                        break;
+                }
+                myMockConversations.put(connection.getUuid(), connection);
             }
         }
     }
 
-    public static ArrayList<Conversation> getConversationsByPostId(UUID postId) {
-        ArrayList<Conversation> conversations = new ArrayList<Conversation>(myMockConversations.values());
-        ArrayList<Conversation> foundConversations = new ArrayList<Conversation>();
+    public static ArrayList<Connection> getConversationsByPostId(UUID postId) {
+        ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
+        ArrayList<Connection> foundConnections = new ArrayList<Connection>();
 
-        for(Conversation conversation : conversations) {
-            if(conversation.getMyPost().getUuid().equals(postId)){
-                foundConversations.add(conversation);
+        for(Connection connection : connections) {
+            if(connection.getType() != ConnectionType.SUGGESTED && connection.getType() != ConnectionType.REQUEST_RECEIVED && connection.getMyPost().getUuid().equals(postId)){
+                foundConnections.add(connection);
             }
         }
-        return foundConversations;
+        return foundConnections;
+    }
+
+    public static ArrayList<Connection> getConversations() {
+        ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
+        ArrayList<Connection> foundConnections = new ArrayList<Connection>();
+
+        for(Connection connection : connections) {
+            if(connection.getType() != ConnectionType.SUGGESTED && connection.getType() != ConnectionType.REQUEST_RECEIVED){
+                foundConnections.add(connection);
+            }
+        }
+        return foundConnections;
+    }
+
+    public static ArrayList<Connection> getRequestsByPostId(UUID postId) {
+        ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
+        ArrayList<Connection> foundConnections = new ArrayList<Connection>();
+
+        for(Connection connection : connections) {
+            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getUuid().equals(postId))){
+                foundConnections.add(connection);
+            }
+        }
+        return foundConnections;
+    }
+
+    public static ArrayList<Post> getMatchesByPostId(UUID postId) {
+        ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
+        ArrayList<Post> matches = new ArrayList<Post>();
+
+        for(Connection connection : connections) {
+            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getUuid().equals(postId))){
+                matches.add(connection.getMatchedPost());
+            }
+        }
+
+        return matches;
     }
 
     public static ArrayList<MessageItemModel> getMessagesByConversationId(UUID conversationId) {
-        Conversation conversation = myMockConversations.get(conversationId);
+        Connection connection = myMockConversations.get(conversationId);
 
-        if(conversation != null){
-            return new ArrayList<MessageItemModel>(conversation.getMessages());
+        if(connection != null){
+            return new ArrayList<MessageItemModel>(connection.getMessages());
         }else{
             return new ArrayList<MessageItemModel>();
         }

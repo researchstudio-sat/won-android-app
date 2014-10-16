@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-    <!--
+<!--
   ~ Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,10 @@
   -->
 
 <ListView xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:choiceMode="singleChoice"
-              android:divider="@color/list_divider"
-              android:dividerHeight="1dp"
-              tools:context="at.researchstudio.sat.won.android.won_android_app.app.fragment.PostBoxFragment" />
+          xmlns:tools="http://schemas.android.com/tools"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:choiceMode="singleChoice"
+          android:divider="@color/list_divider"
+          android:dividerHeight="1dp"
+          tools:context="at.researchstudio.sat.won.android.won_android_app.app.fragment.ConnectionListFragment" />

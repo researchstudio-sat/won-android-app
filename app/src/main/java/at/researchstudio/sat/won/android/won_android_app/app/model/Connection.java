@@ -1,35 +1,56 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
+import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by fsuda on 14.10.2014.
  */
-public class Conversation extends Model {
-    public static final String ID_REF = "conversation_id_ref";
+public class Connection extends Model {
+    public static final String ID_REF = "connection_id_ref";
+    public static final String TYPE_RECEIVED_ONLY_REF = "connection_received_only";
 
     private Post myPost;
     private Post matchedPost;
 
-    private List<MessageItemModel> messages;
+    private ConnectionType type;
 
-    public Conversation(UUID uuid) {
+    private ArrayList<MessageItemModel> messages;
+
+    public Connection(UUID uuid) {
         super(uuid);
     }
 
-    public Conversation() {
+    public Connection() {
         super(null);
     }
 
-    public Conversation(Post myPost, Post matchedPost, List<MessageItemModel> messages){
+    public Connection(Post myPost, Post matchedPost, ArrayList<MessageItemModel> messages, ConnectionType type){
         super(null);
         this.myPost = myPost;
         this.matchedPost = matchedPost;
         this.messages = messages;
+        this.type = type;
     }
 
     public Post getMyPost() {
@@ -40,6 +61,14 @@ public class Conversation extends Model {
         this.myPost = myPost;
     }
 
+    public void setType(ConnectionType type) {
+        this.type = type;
+    }
+
+    public ConnectionType getType() {
+        return type;
+    }
+
     public Post getMatchedPost() {
         return matchedPost;
     }
@@ -48,11 +77,11 @@ public class Conversation extends Model {
         this.matchedPost = matchedPost;
     }
 
-    public List<MessageItemModel> getMessages() {
+    public ArrayList<MessageItemModel> getMessages() {
         return messages;
     }
 
-    public void setMessages(List<MessageItemModel> messages) {
+    public void setMessages(ArrayList<MessageItemModel> messages) {
         this.messages = messages;
     }
 
@@ -64,7 +93,7 @@ public class Conversation extends Model {
         return (myPost == null) ? "Anonymous Conversation" : myPost.getTitle();
     }
 
-    public PostType getType() {
+    public PostType getPostType() {
         return (matchedPost == null) ? PostType.CHANGE : matchedPost.getType(); //TODO: SET DEFAULT VALUE IF NO POST
     }
 
@@ -72,7 +101,7 @@ public class Conversation extends Model {
         return (matchedPost == null) ? null : matchedPost.getTitleImageUrl();
     }
 
-    public PostType getReferenceType() {
+    public PostType getReferencePostType() {
         return (myPost == null) ? PostType.CHANGE : myPost.getType(); //TODO: SET DEFAULT VALUE IF NO POST
     }
 

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
@@ -7,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MyPostPagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
@@ -20,6 +36,7 @@ public class MyPostFragment extends Fragment {
 
     private MyPostPagerAdapter mMyPostPagerAdapter;
     private ViewPager mMyPostViewPager;
+    private TabPageIndicator mIndicator;
 
     private String postId;
 
@@ -41,8 +58,9 @@ public class MyPostFragment extends Fragment {
         mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
         mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
         mMyPostViewPager.setOffscreenPageLimit(2);
-        TabPageIndicator indicator = (TabPageIndicator)rootView.findViewById(R.id.mypost_viewpager_indicator);
-        indicator.setViewPager(mMyPostViewPager);
+        mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
+
+        mIndicator.setViewPager(mMyPostViewPager);
         Log.d(LOG_TAG, "*****************************************");
         return rootView;
     }

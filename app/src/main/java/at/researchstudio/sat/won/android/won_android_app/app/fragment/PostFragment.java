@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
@@ -32,6 +47,7 @@ import java.util.UUID;
  */
 public class PostFragment extends Fragment {
     private static final String LOG_TAG = PostFragment.class.getSimpleName();
+    private static final String MAP_STATE_KEY = "POST_MAP_STATE";
 
     private String postId;
 
@@ -119,7 +135,18 @@ public class PostFragment extends Fragment {
         mGeocoder = new Geocoder(getActivity(), Locale.getDefault());
 
         mMapView = (MapView) rootView.findViewById(R.id.post_map);
-        mMapView.onCreate(savedInstanceState);
+        //*********** 'HACK' TO FIX PARCEABLE BUG see darnmason post in http://stackoverflow.com/questions/13900322/badparcelableexception-in-google-maps-code
+        Bundle mapState = null;
+        if(savedInstanceState != null) {
+            mapState = new Bundle();
+            mapState.putBundle(MAP_STATE_KEY, savedInstanceState.getBundle(MAP_STATE_KEY));
+        }
+
+        mMapView.onCreate(mapState);
+        //mMapView.onCreate(savedInstanceState);
+        //****************************
+
+
         // Gets to GoogleMap from the MapView and does initialization stuff
         if(mMapView!=null)
         {
@@ -175,4 +202,6 @@ public class PostFragment extends Fragment {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
+
+
 }
