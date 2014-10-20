@@ -15,24 +15,35 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
+import android.app.ActionBar;
 import android.app.Fragment;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MyPostPagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import com.viewpagerindicator.TabPageIndicator;
+
+import java.util.UUID;
 
 /**
  * Created by fsuda on 10.10.2014.
  */
 public class MyPostFragment extends Fragment {
     private static final String LOG_TAG = MyPostFragment.class.getSimpleName();
+
+    private MainActivity activity;
 
     private MyPostPagerAdapter mMyPostPagerAdapter;
     private ViewPager mMyPostViewPager;
@@ -43,8 +54,10 @@ public class MyPostFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(LOG_TAG, "*****************************************");
-        Log.d(LOG_TAG, "ON CREATE VIEW");
+        Log.d(LOG_TAG, "ONCREATEVIEW");
+        activity = (MainActivity) getActivity();
         Bundle args = getArguments();
+
         if(args!=null){
             postId = args.getString(Post.ID_REF);
         }
@@ -53,11 +66,15 @@ public class MyPostFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
 
         //Initialize ViewPager
-        mMyPostPagerAdapter = new MyPostPagerAdapter(getActivity().getFragmentManager(),postId);
+        mMyPostPagerAdapter = new MyPostPagerAdapter(activity.getFragmentManager(), postId);
 
+        Parcelable state = mMyPostPagerAdapter.saveState();
         mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
+
         mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
-        mMyPostViewPager.setOffscreenPageLimit(2);
+        mMyPostViewPager.setOffscreenPageLimit(1);
+        mMyPostViewPager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
+        //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
         mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
 
         mIndicator.setViewPager(mMyPostViewPager);
@@ -66,8 +83,29 @@ public class MyPostFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG,"ONDESTROY");
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        Log.d(LOG_TAG,"ONDESTROYVIEW");
+
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "ONCREATE");
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public void onLowMemory() {
         mMyPostViewPager.setOffscreenPageLimit(1);
         super.onLowMemory();
     }
+
+
 }

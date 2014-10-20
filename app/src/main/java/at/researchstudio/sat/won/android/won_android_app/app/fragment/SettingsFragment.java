@@ -7,16 +7,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsService;
 
 /**
  * Created by fsuda on 22.09.2014.
  */
 public class SettingsFragment extends PreferenceFragment {
+    MainActivity activity;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.getPreferenceManager().setSharedPreferencesName(SettingsService.PREFS_NAME);
+
+        activity = (MainActivity) getActivity();
+        activity.setDrawerToggle(false);
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);

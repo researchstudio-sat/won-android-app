@@ -27,29 +27,26 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 /**
  * Created by fsuda on 10.10.2014.
  */
-public class MyPostPagerAdapter extends FragmentStatePagerAdapter{
+public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
     private static final String LOG_TAG = MyPostPagerAdapter.class.getSimpleName();
     private String postId;
-
-    public MyPostPagerAdapter(FragmentManager fm) {
-        super(fm);
-    }
+    private FragmentManager fm;
 
     public MyPostPagerAdapter(FragmentManager fm, String postId) {
         super(fm);
         this.postId = postId;
+        this.fm = fm;
     }
 
     @Override
     public Fragment getItem(int position) {
         Log.d(LOG_TAG, "postId: " + postId);
-        Fragment fragment=null;
-
-        //This will be used to determine where the post came from
+        Fragment fragment = null;
         Bundle args = new Bundle();
         args.putString(Post.ID_REF, postId);
 
-        switch(position){
+        //This will be used to determine where the post came from
+        switch (position) {
             case 0:
             default:
                 //POST VIEW PAGE
@@ -99,4 +96,5 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter{
                 return "Conversations";
         }
     }
+
 }

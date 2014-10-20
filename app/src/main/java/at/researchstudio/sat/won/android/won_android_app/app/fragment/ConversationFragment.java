@@ -16,7 +16,10 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,11 +29,13 @@ import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -40,6 +45,7 @@ import java.util.UUID;
  */
 public class ConversationFragment extends Fragment {
     private static final String LOG_TAG = ConversationFragment.class.getSimpleName();
+    private MainActivity activity;
 
     private CreateListTask createListTask;
     private ListView mMessageListView;
@@ -48,6 +54,8 @@ public class ConversationFragment extends Fragment {
     private MessageListItemAdapter mMessageListItemAdapter;
 
     private String conversationId;
+
+    private Connection connection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,6 +83,9 @@ public class ConversationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
+
+        activity = (MainActivity) getActivity();
+        activity.setDrawerToggle(false);
         /*************************
         TEST NEW ACTIONBAR IMPL
 
@@ -86,7 +97,13 @@ public class ConversationFragment extends Fragment {
         if(args!=null){
             conversationId=args.getString(Connection.ID_REF);
             Log.d(LOG_TAG, "Fragment started with conversationId: " + conversationId);
+        }else{
+            conversationId=null;
         }
+
+        connection = Mock.myMockConversations.get(UUID.fromString(conversationId));
+
+        styleActionBar();
 
         View rootView = inflater.inflate(R.layout.fragment_conversation, container, false);
 
@@ -201,5 +218,61 @@ public class ConversationFragment extends Fragment {
         }
 
         mMessageText.setText("");
+    }
+
+    private void styleActionBar(){
+        ActionBar ab = activity.getActionBar();
+        Post post = connection.getMatchedPost();
+        Post post2 = connection.getMyPost();
+
+        String titleImageUrl = post.getTitleImageUrl();
+
+        activity.setDrawerToggle(false); //DISABLE THE NAVDRAWER -> POSTFRAGMENT IS A LOWLEVEL VIEW
+        ab.setTitle(post.getTitle());
+        ab.setSubtitle(post2.getTitle() != null ? getString(R.string.to)+" "+post2.getTitle(): null);
+
+        if(titleImageUrl!=null) {
+            Bitmap srcBmp = activity.getImageLoaderService().getBitmap(titleImageUrl);
+            Bitmap dstBmp;
+            //***********CROP BITMAP
+            if (srcBmp.getWidth() >= srcBmp.getHeight()){
+
+                dstBmp = Bitmap.createBitmap(
+                        srcBmp,
+                        srcBmp.getWidth()/2 - srcBmp.getHeight()/2,
+                        0,
+                        srcBmp.getHeight(),
+                        srcBmp.getHeight()
+                );
+
+            }else{
+
+                dstBmp = Bitmap.createBitmap(
+                        srcBmp,
+                        0,
+                        srcBmp.getHeight()/2 - srcBmp.getWidth()/2,
+                        srcBmp.getWidth(),
+                        srcBmp.getWidth()
+                );
+            }
+            //**********************
+
+            ab.setIcon(new BitmapDrawable(getResources(), dstBmp));
+        }else{
+            switch(post.getType()){
+                case OFFER:
+                    ab.setIcon(R.drawable.offer);
+                    break;
+                case WANT:
+                    ab.setIcon(R.drawable.want);
+                    break;
+                case ACTIVITY:
+                    ab.setIcon(R.drawable.activity);
+                    break;
+                case CHANGE:
+                    ab.setIcon(R.drawable.change);
+                    break;
+            }
+        }
     }
 }

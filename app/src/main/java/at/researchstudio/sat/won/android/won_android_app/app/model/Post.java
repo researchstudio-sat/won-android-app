@@ -29,6 +29,7 @@ import java.util.UUID;
  */
 public class Post extends Model {
     public static final String ID_REF = "post_id_ref";
+    public static final String TITLE_REF = "post_title_ref";
     public static final String TAG_SEPARATOR = ", ";
 
     private PostType type;

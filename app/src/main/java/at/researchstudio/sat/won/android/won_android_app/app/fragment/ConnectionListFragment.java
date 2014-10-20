@@ -15,6 +15,7 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.ListFragment;
 import android.os.AsyncTask;
@@ -24,6 +25,7 @@ import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ConnectionListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
@@ -39,6 +41,7 @@ import java.util.UUID;
 public class ConnectionListFragment extends ListFragment {
     private static final String LOG_TAG = ConnectionListFragment.class.getSimpleName();
 
+    private MainActivity activity;
     private CreateListTask createListTask;
     private ListView mConnectionListView;
     private ConnectionListItemAdapter mConnectionListItemAdapter;
@@ -72,13 +75,19 @@ public class ConnectionListFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
+        activity = (MainActivity) getActivity();
 
         if(args!=null){
             postId=args.getString(Post.ID_REF);
             receivedRequestsOnly=args.getBoolean(Connection.TYPE_RECEIVED_ONLY_REF,false);
-
-            Log.d(LOG_TAG, "Fragment started with postId: " + postId+ " recReqOnly: "+receivedRequestsOnly);
+        }else{
+            postId = null;
+            receivedRequestsOnly = false;
         }
+
+        styleActionBar();
+        Log.d(LOG_TAG, "Fragment started with postId: " + postId+ " recReqOnly: "+receivedRequestsOnly);
+
 
         mConnectionListView = (ListView) inflater.inflate(R.layout.fragment_connections, container, false);
 
@@ -118,6 +127,7 @@ public class ConnectionListFragment extends ListFragment {
         if(receivedRequestsOnly){
             Log.d(LOG_TAG, "REQUEST SHOW POST WITH ID: "+ connection.getMatchedPost().getUuid());
             args.putString(Post.ID_REF, connection.getMatchedPost().getUuid().toString());
+            args.putString(Post.TITLE_REF, connection.getMyPost().getTitle().toString());
 
             fragment = new PostFragment();
         }else {
@@ -127,7 +137,7 @@ public class ConnectionListFragment extends ListFragment {
             fragment = new ConversationFragment();
         }
         fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+        getFragmentManager().beginTransaction().replace(R.id.container, fragment).addToBackStack(null).commit();
     }
 
     public boolean isMailbox(){
@@ -166,6 +176,17 @@ public class ConnectionListFragment extends ListFragment {
                 mConnectionListItemAdapter.addItem(connection); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
             }
             setListAdapter(mConnectionListItemAdapter);
+        }
+    }
+
+    private void styleActionBar() {
+        if(isMailbox()){
+            activity.setDrawerToggle(true);
+            ActionBar ab = activity.getActionBar();
+
+            ab.setTitle(getString(R.string.mi_mailbox));
+            ab.setSubtitle(null);
+            ab.setIcon(R.drawable.ic_launcher);
         }
     }
 }

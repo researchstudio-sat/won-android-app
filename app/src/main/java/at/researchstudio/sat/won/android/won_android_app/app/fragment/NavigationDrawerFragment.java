@@ -273,7 +273,7 @@ public class NavigationDrawerFragment extends Fragment {
     public void afterSelectMenuItem(int position) {
         MenuItemModel mMenuItemModel = (MenuItemModel) mMenuItemAdapter.getItem(position);
 
-        mMenuItemModel.setCounter(0);
+        mMenuItemModel.setCounter(0); //TODO: IMPL CORRECT RESET COUNTER METHOD
         deselectAllMenuItems();
         mMenuItemModel.setSelected(true);
 
@@ -285,5 +285,9 @@ public class NavigationDrawerFragment extends Fragment {
         ((MenuItemModel) mMenuItemAdapter.getItem(0)).setSelected(false);
         ((MenuItemModel) mMenuItemAdapter.getItem(1)).setSelected(false);
         ((MenuItemModel) mMenuItemAdapter.getItem(2)).setSelected(false);
+    }
+
+    public void setDrawerToggle(boolean enabled) {
+        mDrawerToggle.setDrawerIndicatorEnabled(enabled);
     }
 }

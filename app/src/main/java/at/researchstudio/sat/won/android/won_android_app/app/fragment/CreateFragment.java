@@ -15,6 +15,7 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
+import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinnerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
@@ -58,6 +60,7 @@ public class CreateFragment extends Fragment {
     private static final String MAP_STATE_KEY = "CREATE_MAP_STATE";
     private static final String IMAGE_URLS = "IMAGE_URLS";
 
+    private MainActivity activity;
     private MapView mMapView;
     private Spinner mTypeSpinner;
     private TypeSpinnerAdapter mTypeSpinnerAdapter;
@@ -80,11 +83,13 @@ public class CreateFragment extends Fragment {
         Log.d(LOG_TAG,"ON CREATE VIEW");
         View rootView = inflater.inflate(R.layout.fragment_create, container, false);
 
-        getActivity().setTitle(R.string.mi_createpost);
+        activity = (MainActivity) getActivity();
+
+        styleActionBar();
 
         //Initialize TypeSpinner
         mTypeSpinner = (Spinner)rootView.findViewById(R.id.typespinner);
-        mTypeSpinnerAdapter = new TypeSpinnerAdapter(getActivity());
+        mTypeSpinnerAdapter = new TypeSpinnerAdapter(activity);
 
         mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_want, R.drawable.want, PostType.WANT));
         mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_offer, R.drawable.offer, PostType.OFFER));
@@ -96,7 +101,7 @@ public class CreateFragment extends Fragment {
         //TODO: SPINNER HANDLING  --> EDIT HELPTEXTS
 
         //Initialize ImagePager
-        mImagePagerAdapter = new ImagePagerAdapter(getActivity().getFragmentManager());
+        mImagePagerAdapter = new ImagePagerAdapter(activity.getFragmentManager());
 
         mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
         mImagePager.setAdapter(mImagePagerAdapter);
@@ -121,7 +126,7 @@ public class CreateFragment extends Fragment {
                 //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
                 //TODO: How to reset Date/Time + Time Picker
                 //TODO: Initialize with set values from view
-                DatePickerDialog dialog = new DatePickerDialog(getActivity(),
+                DatePickerDialog dialog = new DatePickerDialog(activity,
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -143,7 +148,7 @@ public class CreateFragment extends Fragment {
                 //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
                 //TODO: How to reset Date/Time + Time Picker
                 //TODO: Initialize with set values from view
-                DatePickerDialog dialog = new DatePickerDialog(getActivity(),
+                DatePickerDialog dialog = new DatePickerDialog(activity,
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -155,8 +160,8 @@ public class CreateFragment extends Fragment {
         });
 
         //Initialize GMaps
-        MapsInitializer.initialize(getActivity());
-        mGeocoder = new Geocoder(getActivity(), Locale.getDefault());
+        MapsInitializer.initialize(activity);
+        mGeocoder = new Geocoder(activity, Locale.getDefault());
 
         mLocationText = (EditText) rootView.findViewById(R.id.create_location);
 
@@ -212,8 +217,8 @@ public class CreateFragment extends Fragment {
                             map.animateCamera(cameraUpdate);
                         }
                         //Hides the keyboard after search
-                        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+                        InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
 
                         handled = true;
                     }catch (IOException ioe){
@@ -255,5 +260,14 @@ public class CreateFragment extends Fragment {
         Log.d(LOG_TAG,"ON LOW MEMORY");
         super.onLowMemory();
         mMapView.onLowMemory();
+    }
+
+    private void styleActionBar() {
+        activity.setDrawerToggle(true);
+        ActionBar ab = activity.getActionBar();
+
+        ab.setTitle(getString(R.string.mi_createpost));
+        ab.setSubtitle(null);
+        ab.setIcon(R.drawable.ic_launcher);
     }
 }

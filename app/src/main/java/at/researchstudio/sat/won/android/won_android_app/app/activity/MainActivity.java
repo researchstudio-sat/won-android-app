@@ -19,6 +19,7 @@ import android.app.*;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -27,11 +28,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.*;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.WelcomeScreenPagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
+import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsService;
 import com.google.android.gms.common.ConnectionResult;
@@ -43,10 +46,13 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
                                                               GooglePlayServicesClient.ConnectionCallbacks,
                                                               GooglePlayServicesClient.OnConnectionFailedListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private ImageLoaderService mImgLoader;
+
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
     private WelcomeScreenPagerAdapter mWelcomeScreenPagerAdapter;
     private ViewPager mWelcomeScreenViewPager;
+
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -62,6 +68,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         //Initialize PreferencesService
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
 
+        mImgLoader = new ImageLoaderService(this);
 
         //MOCK DATA RETRIEVAL TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
         Mock.fillMyMockMatches();
@@ -146,7 +153,8 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+
+        //actionBar.setTitle(mTitle);
     }
 
     @Override
@@ -194,9 +202,23 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
             return true;
         }
 
+        if (id == android.R.id.home){ //TODO MAKE THIS A SWITCH STATEMENT NOT IFS
+            Log.d(LOG_TAG,"PRESSED HOME BUTTON");
+            if(popBackStackIfPossible()){
+                return true;
+            }
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        //TODO: IMPL A METHOD TO HAVE A TOAST AND ANOTHER BACK TO EXIT THE APP
+        if(!popBackStackIfPossible()) {
+            super.onBackPressed();
+        }
+    }
 
     public void skipWelcome(View v) {
         showMainMenu();
@@ -230,12 +252,38 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
         FragmentManager fragmentManager = getFragmentManager();
         Fragment fragment = new SettingsFragment();
-        fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.container, fragment).addToBackStack(null).commit();
     }
 
     public void setTitle(String title){
         this.mTitle = title;
     }
 
+    public boolean popBackStackIfPossible(){
+        int backStackCount = getFragmentManager().getBackStackEntryCount();
+        if(backStackCount>0){
+            getFragmentManager().popBackStack();
+            return true;
+        }else{
+            return false;
+        }
+    }
 
+    /**
+     * Enables or Disables the NavigationDrawer Item in the ActionBar based on the value of the boolean flag
+     * enabled = true shows the navigation drawer icon
+     * enabled = false shows the back caret icon
+     * @param enabled
+     */
+    public void setDrawerToggle(boolean enabled) {
+        mNavigationDrawerFragment.setDrawerToggle(enabled);
+    }
+
+    public void displayImage(String url, int loader, ImageView imageView) {
+        mImgLoader.displayImage(url, loader, imageView);
+    }
+
+    public ImageLoaderService getImageLoaderService(){
+        return mImgLoader;
+    }
 }

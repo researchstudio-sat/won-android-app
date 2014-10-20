@@ -17,6 +17,8 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.*;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +26,7 @@ import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LoadingDialog;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
@@ -41,6 +44,7 @@ public class PostBoxFragment extends ListFragment {
     private CreateListTask createListTask;
     private ListView mNeedListView;
     private PostListItemAdapter mPostListItemAdapter;
+    private MainActivity activity;
 
     private String postId;
 
@@ -52,13 +56,18 @@ public class PostBoxFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(LOG_TAG,"ON CREATE VIEW");
+        activity = (MainActivity) getActivity();
         Bundle args = getArguments();
 
         if(args!=null){
             postId=args.getString(Post.ID_REF);
-            Log.d(LOG_TAG,"Fragment started with postId: "+postId);
+        }else{
+            postId=null;
         }
-        Log.d(LOG_TAG,"postId: "+postId);
+
+        styleActionBar();
+        Log.d(LOG_TAG,"Fragment started with postId: "+postId);
 
         mNeedListView = (ListView) inflater.inflate(R.layout.fragment_postbox, container, false);
 
@@ -91,6 +100,7 @@ public class PostBoxFragment extends ListFragment {
 
     @Override
     public void onStart() {
+        Log.d(LOG_TAG,"FRAGMENT ONSTART IS CALLED");
         super.onStart();
         createListTask = new CreateListTask();
         createListTask.execute();
@@ -115,27 +125,33 @@ public class PostBoxFragment extends ListFragment {
 
         Bundle args = new Bundle();
 
-        if(!isMatchesList()) { //IF IT IS ONE OF YOUR OWN POSTS
+        if(isPostBox()) { //IF IT IS ONE OF YOUR OWN POSTS
             fragment = new MyPostFragment();
         }else{ //IF ITS A POST FROM SOMEBODY ELSE
             //post.setMatches(0);
             //mPostListItemAdapter.notifyDataSetChanged();
+            args.putString(Post.TITLE_REF, getActivity().getActionBar().getTitle().toString());
             fragment = new PostFragment();
         }
 
         postId = post.getUuidString();
         args.putString(Post.ID_REF, postId);
 
+
         fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     /**
      * Determines whether the Fragment is used for PostBox or for the Matches View
      * @return
      */
-    public boolean isMatchesList(){
-        return postId != null;
+    public boolean isPostBox(){
+        return postId == null;
     }
 
     private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Post>> {
@@ -145,7 +161,7 @@ public class PostBoxFragment extends ListFragment {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            if(!isMatchesList()) { //SHOW LOADING DIALOG ONLY IN POSTBOX VIEW
+            if(isPostBox()) { //SHOW LOADING DIALOG ONLY IN POSTBOX VIEW
                 progress = new LoadingDialog(getActivity(), this);
                 progress.show();
 
@@ -163,10 +179,10 @@ public class PostBoxFragment extends ListFragment {
 
         @Override
         protected ArrayList<Post> doInBackground(String... params) {
-            if(isMatchesList()) {
-                return Mock.getMatchesByPostId(UUID.fromString(postId));
-            }else{
+            if(isPostBox()) {
                 return new ArrayList<Post>(Mock.myMockPosts.values());
+            }else{
+                return Mock.getMatchesByPostId(UUID.fromString(postId));
             }
         }
 
@@ -189,9 +205,20 @@ public class PostBoxFragment extends ListFragment {
                 mPostListItemAdapter.addItem(post); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
             }
             setListAdapter(mPostListItemAdapter);
-            if(!isMatchesList()) { //DISMISS PROGRESS DIALOG ONLY IN POSTBOX VIEW
+            if(isPostBox()) { //DISMISS PROGRESS DIALOG ONLY IN POSTBOX VIEW
                 progress.dismiss();
             }
+        }
+    }
+
+    private void styleActionBar(){
+        if(isPostBox()) {
+            activity.setDrawerToggle(true);
+            ActionBar ab = activity.getActionBar();
+
+            ab.setTitle(getString(R.string.mi_postbox));
+            ab.setSubtitle(null);
+            ab.setIcon(R.drawable.ic_launcher);
         }
     }
 }

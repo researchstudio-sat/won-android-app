@@ -22,12 +22,13 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">Ok</string>
+    <string name="to">matched to</string>
     <string name="cancel">Cancel</string>
     <string name="sharechooser">Share through...</string>
 
     <!-- MENU ITEMS -->
     <string name="mi_profile">Profile</string>
-    <string name="mi_mailbox">Mailbox</string>
+    <string name="mi_mailbox">Conversations</string>
     <string name="mi_createpost">Create Post</string>
     <string name="mi_postbox">Postbox</string>
 
