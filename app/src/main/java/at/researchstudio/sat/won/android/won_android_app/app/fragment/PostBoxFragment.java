@@ -180,9 +180,9 @@ public class PostBoxFragment extends ListFragment {
         @Override
         protected ArrayList<Post> doInBackground(String... params) {
             if(isPostBox()) {
-                return new ArrayList<Post>(Mock.myMockPosts.values());
+                return activity.getPostService().getMyPosts();
             }else{
-                return Mock.getMatchesByPostId(UUID.fromString(postId));
+                return activity.getPostService().getMatchesByPostId(postId);
             }
         }
 

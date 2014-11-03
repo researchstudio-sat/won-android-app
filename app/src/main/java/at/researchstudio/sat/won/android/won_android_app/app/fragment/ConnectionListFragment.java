@@ -149,11 +149,11 @@ public class ConnectionListFragment extends ListFragment {
         protected ArrayList<Connection> doInBackground(String... params) {
 
             if(isMailbox()) {
-                return Mock.getConversations();
+                return activity.getPostService().getConversations();
             }else if(receivedRequestsOnly) {
-                return Mock.getRequestsByPostId(UUID.fromString(postId));
+                return activity.getPostService().getRequestsByPostId(postId);
             }else{
-                return Mock.getConversationsByPostId(UUID.fromString(postId));
+                return activity.getPostService().getConversationsByPostId(postId);
             }
         }
 

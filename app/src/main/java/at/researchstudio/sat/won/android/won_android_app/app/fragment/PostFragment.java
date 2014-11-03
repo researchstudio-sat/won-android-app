@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
@@ -32,7 +33,9 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
+import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
@@ -41,6 +44,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -51,6 +55,8 @@ import java.util.UUID;
 public class PostFragment extends Fragment {
     private static final String LOG_TAG = PostFragment.class.getSimpleName();
     private static final String MAP_STATE_KEY = "POST_MAP_STATE";
+
+    private CreateTask createTask;
 
     private String postId;
     private String refPostTitle; //title of the reference post
@@ -71,6 +77,24 @@ public class PostFragment extends Fragment {
 
     private Post post;
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        createTask = new CreateTask();
+        createTask.execute();
+    }
+
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
+        super.onDestroy();
+        mMapView.onDestroy();
+        if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createTask.cancel(true);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,19 +112,11 @@ public class PostFragment extends Fragment {
             refPostTitle=null;
         }
 
-        post = Mock.myMockPosts.get(UUID.fromString(postId)); //TODO: REMOVE THIS STUFF FROM THE CREATEVIEW PART
-        if(post==null){
-            post = Mock.myMockMatches.get(UUID.fromString(postId)); //TODO: REMOVE THIS STUFF FROM THE CREATEVIEW PART
-        }
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
 
-        styleActionBar();
-
         postDescription = (TextView) rootView.findViewById(R.id.post_description);
-        postDescription.setText(post.getDescription());
-
         postObject = (TextView) rootView.findViewById(R.id.post_object);
-        postObject.setText(post.toString());
+
 
         /*postType = (ImageView) rootView.findViewById(R.id.post_type);
 
@@ -123,23 +139,11 @@ public class PostFragment extends Fragment {
         //Initialize ImagePager
         mImagePagerAdapter = new ImagePagerAdapter(activity.getFragmentManager(),false);
 
-        //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
-        if(post.getTitleImageUrl()!=null) {
-            mImagePagerAdapter.addItem(post.getTitleImageUrl());
-        }
-        if(post.getImageUrls()!=null) {
-            for (String imgUrl : post.getImageUrls()) {
-                mImagePagerAdapter.addItem(imgUrl);
-            }
-        }
-
         mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
         mImagePager.setSaveFromParentEnabled(false);  //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
-        mImagePager.setAdapter(mImagePagerAdapter);
+
 
         mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
-
-        mIconPageIndicator.setViewPager(mImagePager);
 
 
         //Initialize GMaps
@@ -165,6 +169,91 @@ public class PostFragment extends Fragment {
             map = mMapView.getMap();
             map.getUiSettings().setMyLocationButtonEnabled(false);
             map.setMyLocationEnabled(true);
+        }
+
+        Log.d(LOG_TAG,"DONE WITH INITIALIZING THE POST FRAGMENT VIEW");
+        return rootView;
+    }
+
+    private class CreateTask extends AsyncTask<String, Integer, Post> {
+        @Override
+        protected Post doInBackground(String... params) {
+            if(refPostTitle!=null){
+                return activity.getPostService().getMatchById(postId);
+            }else{
+                return activity.getPostService().getMyPostById(postId);
+            }
+        }
+
+        @Override
+        protected void onCancelled(Post tempPost) {
+            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
+            //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
+
+            if(tempPost != null) {
+                post = tempPost;
+
+                //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
+                postObject.setText(post.toString());
+                postDescription.setText(post.getDescription());
+
+                if(post.getTitleImageUrl()!=null) {
+                    mImagePagerAdapter.addItem(post.getTitleImageUrl());
+                }
+                if(post.getImageUrls()!=null) {
+                    for (String imgUrl : post.getImageUrls()) {
+                        mImagePagerAdapter.addItem(imgUrl);
+                    }
+                }
+                mImagePager.setAdapter(mImagePagerAdapter);
+                mIconPageIndicator.setViewPager(mImagePager);
+
+                styleActionBar();
+
+                try {
+                    List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
+
+                    String address="";
+
+                    if(adresses!=null && adresses.size()>0){
+                        address = StringUtils.getFormattedAddress(adresses.get(0));
+                    }else{
+                        Log.d(LOG_TAG, "No Address found");
+                        address=post.getTitle();
+                    }
+
+                    Marker marker = map.addMarker(new MarkerOptions()
+                            .position(post.getLocation())
+                            .title(post.getTitle())
+                            .snippet(address)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
+                    map.animateCamera(cameraUpdate);
+                }catch (IOException ioe){
+                    //TODO: ERROR TOAST
+                    Log.e(LOG_TAG,ioe.getMessage());
+                }
+            }
+        }
+
+        protected void onPostExecute(Post tempPost) {
+            post = tempPost;
+            styleActionBar();
+
+            //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
+            postObject.setText(post.toString());
+            postDescription.setText(post.getDescription());
+
+            if(post.getTitleImageUrl()!=null) {
+                mImagePagerAdapter.addItem(post.getTitleImageUrl());
+            }
+            if(post.getImageUrls()!=null) {
+                for (String imgUrl : post.getImageUrls()) {
+                    mImagePagerAdapter.addItem(imgUrl);
+                }
+            }
+            mImagePager.setAdapter(mImagePagerAdapter);
+            mIconPageIndicator.setViewPager(mImagePager);
 
             try {
                 List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
@@ -190,10 +279,6 @@ public class PostFragment extends Fragment {
                 Log.e(LOG_TAG,ioe.getMessage());
             }
         }
-
-
-        Log.d(LOG_TAG,"DONE WITH INITIALIZING THE POST FRAGMENT VIEW");
-        return rootView;
     }
 
     @Override
@@ -202,12 +287,7 @@ public class PostFragment extends Fragment {
         super.onResume();
         mMapView.onResume();
     }
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG,"ON DESTROY");
-        super.onDestroy();
-        mMapView.onDestroy();
-    }
+
     @Override
     public void onLowMemory() {
         Log.d(LOG_TAG,"ON LOW MEMORY");

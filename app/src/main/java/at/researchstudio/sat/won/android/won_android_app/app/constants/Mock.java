@@ -427,4 +427,12 @@ public class Mock {
             return new ArrayList<MessageItemModel>();
         }
     }
+
+    public static void setNotificationCounters(){
+        for(Post post : myMockPosts.values()){
+            post.setMatches(Mock.getMatchesByPostId(post.getUuid()).size());
+            post.setConversations(Mock.getConversationsByPostId(post.getUuid()).size());
+            post.setRequests(Mock.getRequestsByPostId(post.getUuid()).size());
+        }
+    }
 }

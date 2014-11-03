@@ -109,8 +109,6 @@ public class Post extends Model {
     }
 
     public int getMatches() {
-        matches = Mock.getMatchesByPostId(this.getUuid()).size(); //TODO: REMOVE THIS AGAIN
-
         return matches;
     }
 
@@ -119,8 +117,6 @@ public class Post extends Model {
     }
 
     public int getConversations() {
-        conversations = Mock.getConversationsByPostId(this.getUuid()).size(); //TODO: REMOVE THIS AGAIN
-
         return conversations;
     }
 
@@ -129,8 +125,6 @@ public class Post extends Model {
     }
 
     public int getRequests() {
-        requests = Mock.getRequestsByPostId(this.getUuid()).size(); //TODO REMOVE THIS AGAIN
-
         return requests;
     }
 

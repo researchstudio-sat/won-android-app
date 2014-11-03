@@ -36,6 +36,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
+import at.researchstudio.sat.won.android.won_android_app.app.service.PostService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -52,7 +53,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     private WelcomeScreenPagerAdapter mWelcomeScreenPagerAdapter;
     private ViewPager mWelcomeScreenViewPager;
-
+    private PostService postService;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -63,17 +64,15 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Initialize Connection to the backend
+        postService = new PostService();
+
         //Initialize LocationService
         LocationService.init(new LocationClient(this, this, this));
         //Initialize PreferencesService
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
 
         mImgLoader = new ImageLoaderService(this);
-
-        //MOCK DATA RETRIEVAL TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
-        Mock.fillMyMockMatches();
-        Mock.fillMyMockPosts();
-        Mock.fillMyMockConnections();
 
         //TODO: THIS OPEN VIA URI DOES NOT NECESSARILY WORK
         if(getIntent().getAction().equals(Intent.ACTION_VIEW)) {
@@ -285,5 +284,9 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     public ImageLoaderService getImageLoaderService(){
         return mImgLoader;
+    }
+
+    public PostService getPostService(){
+        return postService;
     }
 }

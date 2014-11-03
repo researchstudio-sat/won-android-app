@@ -101,9 +101,7 @@ public class ConversationFragment extends Fragment {
             conversationId=null;
         }
 
-        connection = Mock.myMockConversations.get(UUID.fromString(conversationId));
 
-        styleActionBar();
 
         View rootView = inflater.inflate(R.layout.fragment_conversation, container, false);
 
@@ -178,7 +176,8 @@ public class ConversationFragment extends Fragment {
     private class CreateListTask extends AsyncTask<String, Integer, ArrayList<MessageItemModel>> {
         @Override
         protected ArrayList<MessageItemModel> doInBackground(String... params) {
-            return Mock.getMessagesByConversationId(UUID.fromString(conversationId));
+            connection = activity.getPostService().getConversationById(conversationId);
+            return activity.getPostService().getMessagesByConversationId(conversationId);
         }
 
         @Override
@@ -188,20 +187,22 @@ public class ConversationFragment extends Fragment {
             if(linkArray != null) {
                 mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
                 for (MessageItemModel message : linkArray) {
-                    mMessageListItemAdapter.addItem(message); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                    mMessageListItemAdapter.addItem(message);
                 }
                 mMessageListView.setAdapter(mMessageListItemAdapter);
                 mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
+                styleActionBar();
             }
         }
 
         protected void onPostExecute(ArrayList<MessageItemModel> linkArray) {
             mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
             for (MessageItemModel message : linkArray) {
-                mMessageListItemAdapter.addItem(message); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                mMessageListItemAdapter.addItem(message);
             }
             mMessageListView.setAdapter(mMessageListItemAdapter);
             mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
+            styleActionBar();
         }
     }
 
