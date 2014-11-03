@@ -17,8 +17,6 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.*;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,11 +27,9 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LoadingDialog;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Created by fsuda on 21.08.2014.
@@ -76,27 +72,34 @@ public class PostBoxFragment extends ListFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
-        getActivity().getMenuInflater().inflate(R.menu.needlist, menu);
-        MenuItem searchViewItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchViewItem.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Log.d(LOG_TAG,"SEARCHQUERY: "+query);
-                //TODO: INVOKE SEARCH
-                return true;
-            }
+        if(activity.isDrawerOpen()){
+            super.onCreateOptionsMenu(menu, inflater);
+        }else {
+            menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
+            getActivity().getMenuInflater().inflate(R.menu.list, menu);
+            MenuItem searchViewItem = menu.findItem(R.id.action_search);
+            SearchView searchView = (SearchView) searchViewItem.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    if(mPostListItemAdapter!=null) {
+                        mPostListItemAdapter.getFilter().filter(query);
+                    }
+                    return true;
+                }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                Log.d(LOG_TAG,"SEARCHTEXT: "+newText);
-                //TODO: CHANGE SEARCH RESULTS MAYBE
-                return true;
-            }
-        });
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if(mPostListItemAdapter!=null) {
+                        mPostListItemAdapter.getFilter().filter(newText);
+                    }
+                    return true;
+                }
+            });
+        }
     }
+
+
 
     @Override
     public void onStart() {

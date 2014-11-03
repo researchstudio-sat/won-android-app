@@ -19,15 +19,15 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by fsuda on 13.10.2014.
@@ -36,16 +36,21 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
     private ImageLoaderService mImgLoader;
     private boolean includeReference;
     private boolean receivedRequestsOnly;
+    private List<Connection> objects;
+
+    private Filter filter;
 
     public ConnectionListItemAdapter(Context context, boolean includeReference, boolean receivedRequestsOnly){
         super(context, 0);
         mImgLoader = new ImageLoaderService(context);
         this.includeReference = includeReference;
         this.receivedRequestsOnly = receivedRequestsOnly;
+        this.objects = new ArrayList<Connection>();
     }
 
     public void addItem(Connection connection){
         add(connection);
+        objects.add(connection);
     }
 
     private static class ViewHolder {
@@ -144,6 +149,14 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
         return view;
     }
 
+    @Override
+    public Filter getFilter() {
+        if(filter == null){
+            filter = new ConnectionListFilter<Connection>(objects);
+        }
+        return filter;
+    }
+
     private static void setCounter(TextView counter, int value, int maxVisibleValue){
         if (counter != null){
             if(value > maxVisibleValue){
@@ -197,6 +210,52 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
     private static void setText(TextView holder, String text) {
         if(holder!=null) {
             holder.setText(text);
+        }
+    }
+
+    private class ConnectionListFilter<T> extends Filter {
+        private ArrayList<T> sourceObjects;
+
+        public ConnectionListFilter(List<T> objects) {
+            sourceObjects = new ArrayList<T>();
+            synchronized (this) {
+                sourceObjects.addAll(objects);
+            }
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            String filterSeq = constraint.toString().toLowerCase();
+            FilterResults result = new FilterResults();
+            if (filterSeq != null && filterSeq.length() > 0) {
+                ArrayList<T> filter = new ArrayList<T>();
+
+                for (T object : sourceObjects) {
+                    if(((Connection)object).contains(filterSeq)) {
+                        filter.add(object);
+                    }
+                }
+                result.count = filter.size();
+                result.values = filter;
+            } else {
+                // add all objects
+                synchronized (this) {
+                    result.values = sourceObjects;
+                    result.count = sourceObjects.size();
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            ArrayList<T> filtered = (ArrayList<T>) results.values;
+            notifyDataSetChanged();
+            clear();
+            for (int i = 0, l = filtered.size(); i < l; i++) {
+                add(filtered.get(i));
+            }
+            notifyDataSetInvalidated();
         }
     }
 }

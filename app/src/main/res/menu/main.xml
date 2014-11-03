@@ -11,7 +11,4 @@
           android:title="@string/action_share"
           android:icon="@drawable/ic_action_share"
           android:showAsAction="always" />
-    <item android:id="@+id/action_example"
-          android:title="@string/action_example"
-          app:showAsAction="withText|ifRoom" />
 </menu>

@@ -41,7 +41,7 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public Fragment getItem(int position) {
         Log.d(LOG_TAG, "postId: " + postId);
-        Fragment fragment = null;
+        Fragment fragment;
         Bundle args = new Bundle();
         args.putString(Post.ID_REF, postId);
 

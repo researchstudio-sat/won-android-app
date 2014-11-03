@@ -13,7 +13,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Header Text"
-            android:textSize="40dp"
+            android:textSize="40sp"
             android:paddingTop="20sp"
             />
     <ImageView

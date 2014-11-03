@@ -13,4 +13,8 @@ public class MessageItemModel {
         this.type = type;
         this.text = text;
     }
+
+    public boolean contains(String filterSeq){
+        return text.toLowerCase().contains(filterSeq);
+    }
 }

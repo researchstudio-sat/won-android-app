@@ -226,4 +226,9 @@ public class Post extends Model {
                 ", repeat=" + repeat +
                 '}';
     }
+
+    public boolean contains(String filterSeq){
+        //TODO: Filter for everything inside this post
+        return this.getTitle().toLowerCase().contains(filterSeq) || this.getDescription().toLowerCase().contains(filterSeq) || getTagsAsString().toLowerCase().contains(filterSeq);
+    }
 }

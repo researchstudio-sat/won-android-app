@@ -76,8 +76,8 @@ public class MenuItemAdapter extends ArrayAdapter{
         ViewHolder holder = null;
         View view = convertView;
 
-        int menuItemFontColor = 0;
-        int menuItemBackgroundColor = 0;
+        int menuItemFontColor;
+        int menuItemBackgroundColor;
 
         if(item != null && item.isSelected()){
             //SET COLORS ACCORDINGLY

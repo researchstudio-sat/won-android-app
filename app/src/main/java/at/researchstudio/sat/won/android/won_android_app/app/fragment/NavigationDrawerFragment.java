@@ -28,7 +28,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsSer
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
 public class NavigationDrawerFragment extends Fragment {
-
+    //TODO: PREVENT NAVIGATION DRAWER FROM BEING OPENED VIA SWIPE WITHIN SUBPAGES (every page with a backbutton)
     /**
      * Remember the position of the selected item.
      */
@@ -231,11 +231,6 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
             return true;
         }
 

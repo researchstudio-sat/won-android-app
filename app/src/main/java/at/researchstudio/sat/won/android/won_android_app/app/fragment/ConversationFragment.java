@@ -16,7 +16,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -31,14 +30,12 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Created by fsuda on 14.10.2014.
@@ -57,27 +54,12 @@ public class ConversationFragment extends Fragment {
 
     private Connection connection;
 
+
+    //******FRAGMENT LIFECYCLE*************************************
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        createListTask = new CreateListTask();
-        createListTask.execute();
-    }
-
-
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
-        super.onDestroy();
-        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createListTask.cancel(true);
-        }
     }
 
     @Override
@@ -86,13 +68,6 @@ public class ConversationFragment extends Fragment {
 
         activity = (MainActivity) getActivity();
         activity.setDrawerToggle(false);
-        /*************************
-        TEST NEW ACTIONBAR IMPL
-
-        ActionBar actionBar = getActivity().getActionBar();
-        actionBar.setSubtitle("THIS IS THE SUBTITLE");
-        actionBar.setIcon(R.drawable.offer);
-        */
 
         if(args!=null){
             conversationId=args.getString(Connection.ID_REF);
@@ -100,8 +75,6 @@ public class ConversationFragment extends Fragment {
         }else{
             conversationId=null;
         }
-
-
 
         View rootView = inflater.inflate(R.layout.fragment_conversation, container, false);
 
@@ -150,27 +123,48 @@ public class ConversationFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
-        getActivity().getMenuInflater().inflate(R.menu.needlist, menu);
-        MenuItem searchViewItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchViewItem.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Log.d(LOG_TAG,"SEARCHQUERY: "+query);
-                //TODO: INVOKE SEARCH
-                return true;
-            }
+    public void onStart() {
+        super.onStart();
+        createListTask = new CreateListTask();
+        createListTask.execute();
+    }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                Log.d(LOG_TAG,"SEARCHTEXT: "+newText);
-                //TODO: CHANGE SEARCH RESULTS MAYBE
-                return true;
-            }
-        });
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
+        super.onDestroy();
+        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createListTask.cancel(true);
+        }
+    }
+    //*************************************************************
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if(activity.isDrawerOpen()){
+            super.onCreateOptionsMenu(menu, inflater);
+        }else {
+            menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
+            getActivity().getMenuInflater().inflate(R.menu.list, menu);
+            MenuItem searchViewItem = menu.findItem(R.id.action_search);
+            SearchView searchView = (SearchView) searchViewItem.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    if(mMessageListItemAdapter!=null) {
+                        mMessageListItemAdapter.getFilter().filter(query);
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if(mMessageListItemAdapter!=null) {
+                        mMessageListItemAdapter.getFilter().filter(newText);
+                    }
+                    return true;
+                }
+            });
+        }
     }
 
     private class CreateListTask extends AsyncTask<String, Integer, ArrayList<MessageItemModel>> {

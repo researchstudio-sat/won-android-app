@@ -20,7 +20,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -131,4 +130,8 @@ public class Connection extends Model {
         return getLastUserMessage().text;
     }
 
+    public boolean contains(String filterSeq){
+        //TODO: Filter for everything inside this connection
+        return this.getTitle().toLowerCase().contains(filterSeq) || this.getReferenceTitle().toLowerCase().contains(filterSeq) || (getLastUserMessage() != null && getLastUserMessage().text.toLowerCase().contains(filterSeq));
+    }
 }

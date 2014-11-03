@@ -57,9 +57,4 @@ public class WelcomeScreenFragment extends Fragment {
         welcomeHeaderText.setText(headerTextId);
         return rootView;
     }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-    }
 }

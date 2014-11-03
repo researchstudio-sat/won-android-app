@@ -35,7 +35,7 @@ public class FileUtils {
         return file;
     }
 
-    public static File createNewImageFile() throws IOException {
+    public static File createNewImageFile() throws IOException{
         int i = 1;
 
         File f;

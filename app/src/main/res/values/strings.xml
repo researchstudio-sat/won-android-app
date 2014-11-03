@@ -21,10 +21,12 @@
     <!-- Generic Items -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
+    <string name="save">Save</string>
     <string name="to">matched to</string>
     <string name="cancel">Cancel</string>
-    <string name="sharechooser">Share through...</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="sharechooser">Share through&#8230;</string>
 
     <!-- MENU ITEMS -->
     <string name="mi_profile">Profile</string>
@@ -77,7 +79,7 @@
     <string name="create_enddate">End Date</string>
     <string name="create_choosedatetime">Choose Date/Time</string>
     <string name="create_tags_2">Using tags improves results by a great deal.</string>
-    <string name="create_tags_hint">e.g. furniture, electronics, for children,...</string>
+    <string name="create_tags_hint">e.g. furniture, electronics, for children,&#8230;</string>
     <string name="create_type">Type</string>
     <string name="create_type_spinner_choose">Select a Type</string>
     <string name="create_type_spinner_offer">Offer</string>
@@ -88,12 +90,20 @@
     <!-- TOAST TEXTS -->
     <string name="error_no_camera">Camera is not available on the device</string>
     <string name="error_saving_picture">Error saving imagefile</string>
+    <string name="toast_back_to_exit">Press back once again to exit the app</string>
+    <string name="toast_create_saved">Post was saved</string>
+    <string name="toast_create_dismiss">Post was dismissed</string>
 
     <!-- DIALOG TEXTS -->
     <string name="dialog_delete_image_text">Do you want to remove the Image from the Post?</string>
     <string name="dialog_delete_image_title">Remove Image</string>
     <string name="dialog_set_title_image_text">Do you want to set this Image as your title image?</string>
     <string name="dialog_set_title_image_title">Title Image</string>
+    <string name="dialog_create_save">Do you want to save the Post as is?</string>
+    <string name="dialog_create_dismiss">Dismiss this Post?</string>
+    <string name="dialog_create_save_title">Save</string>
+    <string name="dialog_create_dismiss_title">Dismiss</string>
+
 
     <!-- MYPOST -->
     <string name="post">Post</string>

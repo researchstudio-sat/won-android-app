@@ -6,8 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by fsuda on 24.09.2014.
@@ -15,14 +19,19 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoader
 public class PostListItemAdapter extends ArrayAdapter {
     private static final String LOG_TAG = PostListItemAdapter.class.getSimpleName();
     private ImageLoaderService mImgLoader;
+    private List<Post> objects;
+
+    private Filter filter;
 
     public PostListItemAdapter(Context context) {
         super(context, 0);
         mImgLoader = new ImageLoaderService(context);
+        this.objects = new ArrayList<Post>();
     }
 
     public void addItem(Post postListItem) {
         add(postListItem);
+        objects.add(postListItem);
     }
 
     public static class ViewHolder {
@@ -160,5 +169,59 @@ public class PostListItemAdapter extends ArrayAdapter {
 
     private static void setCountersInvisible(ViewHolder holder){
         holder.notificationTable.setVisibility(View.GONE);
+    }
+
+    @Override
+    public Filter getFilter() {
+        if(filter == null){
+            filter = new PostListFilter<Post>(objects);
+        }
+        return filter;
+    }
+
+    private class PostListFilter<T> extends Filter {
+        private ArrayList<T> sourceObjects;
+
+        public PostListFilter(List<T> objects) {
+            sourceObjects = new ArrayList<T>();
+            synchronized (this) {
+                sourceObjects.addAll(objects);
+            }
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            String filterSeq = constraint.toString().toLowerCase();
+            FilterResults result = new FilterResults();
+            if (filterSeq != null && filterSeq.length() > 0) {
+                ArrayList<T> filter = new ArrayList<T>();
+
+                for (T object : sourceObjects) {
+                    if(((Post)object).contains(filterSeq)) {
+                        filter.add(object);
+                    }
+                }
+                result.count = filter.size();
+                result.values = filter;
+            } else {
+                // add all objects
+                synchronized (this) {
+                    result.values = sourceObjects;
+                    result.count = sourceObjects.size();
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            ArrayList<T> filtered = (ArrayList<T>) results.values;
+            notifyDataSetChanged();
+            clear();
+            for (int i = 0, l = filtered.size(); i < l; i++) {
+                add(filtered.get(i));
+            }
+            notifyDataSetInvalidated();
+        }
     }
 }

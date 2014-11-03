@@ -16,19 +16,18 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -244,6 +243,39 @@ public class CreateFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(LOG_TAG,"ON CREATE OPTIONS MENU");
+        if(activity.isDrawerOpen()){
+            Log.d(LOG_TAG,"Drawer Open");
+            super.onCreateOptionsMenu(menu, inflater);
+        }else {
+            Log.d(LOG_TAG,"Drawer closed");
+            menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
+            inflater.inflate(R.menu.create, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case (R.id.action_save):
+                displaySaveDialog();
+                return true;
+            case (R.id.action_dismiss):
+                displayDismissDialog();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onResume() {
         Log.d(LOG_TAG,"ON RESUME");
         super.onResume();
@@ -269,5 +301,51 @@ public class CreateFragment extends Fragment {
         ab.setTitle(getString(R.string.mi_createpost));
         ab.setSubtitle(null);
         ab.setIcon(R.drawable.ic_launcher);
+    }
+
+    private void displaySaveDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(getString(R.string.dialog_create_save));
+        builder.setTitle(getString(R.string.dialog_create_save_title));
+
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: IMPLEMENT SAVE STUFF
+                Toast.makeText(activity, getString(R.string.toast_create_saved), Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: IMPLEMENT STUFF TO DO HERE
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void displayDismissDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(getString(R.string.dialog_create_dismiss));
+        builder.setTitle(getString(R.string.dialog_create_dismiss_title));
+
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: IMPLEMENT DISMISS STUFF
+                Toast.makeText(activity, getString(R.string.toast_create_dismiss), Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: IMPLEMENT STUFF TO DO HERE
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
