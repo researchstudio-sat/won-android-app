@@ -15,6 +15,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 public class WelcomeScreenFragment extends Fragment {
     public static final String ARG_WELCOME_PAGE_NUMBER = "welcome_page_number";
 
+    //*******FRAGMENT LIFECYCLE************************************************************************
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
@@ -57,4 +58,5 @@ public class WelcomeScreenFragment extends Fragment {
         welcomeHeaderText.setText(headerTextId);
         return rootView;
     }
+    //*************************************************************************************************
 }

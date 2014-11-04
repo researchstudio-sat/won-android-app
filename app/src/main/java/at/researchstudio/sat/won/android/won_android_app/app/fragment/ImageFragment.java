@@ -21,9 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -34,7 +32,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 import at.researchstudio.sat.won.android.won_android_app.app.util.FileUtils;
 import com.viewpagerindicator.IconPageIndicator;
@@ -67,6 +64,7 @@ public class ImageFragment extends Fragment{
         super();
     }
 
+    //*****************FRAGMENT LIFECYCLE************************************************************
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
@@ -118,6 +116,7 @@ public class ImageFragment extends Fragment{
 
         return rootView;
     }
+    //***********************************************************************************************
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

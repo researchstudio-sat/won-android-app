@@ -27,13 +27,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.*;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
-import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
@@ -42,10 +40,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 /**
  * Created by fsuda on 21.08.2014.
@@ -75,54 +71,11 @@ public class PostFragment extends Fragment {
 
     private Post post;
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        createTask = new CreateTask();
-        createTask.execute();
-    }
-
-
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
-        super.onDestroy();
-        mMapView.onDestroy();
-        if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createTask.cancel(true);
-        }
-    }
-
+    //*******FRAGMENT LIFECYCLE************************************************************************************
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(activity.isDrawerOpen()){
-            super.onCreateOptionsMenu(menu, inflater);
-        }else {
-            menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
-            //TODO: IMPLEMENT MENU FOR MYPOST AND FOR MATCHED POST
-            /*getActivity().getMenuInflater().inflate(R.menu.list, menu);
-            MenuItem searchViewItem = menu.findItem(R.id.action_search);
-            SearchView searchView = (SearchView) searchViewItem.getActionView();
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    mPostListItemAdapter.getFilter().filter(query);
-                    return true;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    mPostListItemAdapter.getFilter().filter(newText);
-                    return true;
-                }
-            });*/
-        }
     }
 
     @Nullable
@@ -204,6 +157,58 @@ public class PostFragment extends Fragment {
         Log.d(LOG_TAG,"DONE WITH INITIALIZING THE POST FRAGMENT VIEW");
         return rootView;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        createTask = new CreateTask();
+        createTask.execute();
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(LOG_TAG,"ON RESUME");
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
+        super.onDestroy();
+        mMapView.onDestroy();
+        if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createTask.cancel(true);
+        }
+    }
+    //*************************************************************************************************************
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if(activity.isDrawerOpen()){
+            super.onCreateOptionsMenu(menu, inflater);
+        }else {
+            menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
+            //TODO: IMPLEMENT MENU FOR MYPOST AND FOR MATCHED POST
+            /*getActivity().getMenuInflater().inflate(R.menu.list, menu);
+            MenuItem searchViewItem = menu.findItem(R.id.action_search);
+            SearchView searchView = (SearchView) searchViewItem.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    mPostListItemAdapter.getFilter().filter(query);
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    mPostListItemAdapter.getFilter().filter(newText);
+                    return true;
+                }
+            });*/
+        }
+    }
+
 
     private class CreateTask extends AsyncTask<String, Integer, Post> {
         @Override
@@ -309,13 +314,6 @@ public class PostFragment extends Fragment {
                 Log.e(LOG_TAG,ioe.getMessage());
             }
         }
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(LOG_TAG,"ON RESUME");
-        super.onResume();
-        mMapView.onResume();
     }
 
     @Override

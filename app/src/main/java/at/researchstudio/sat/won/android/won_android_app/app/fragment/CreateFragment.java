@@ -37,7 +37,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerA
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinnerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
-import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
@@ -46,7 +45,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -76,10 +74,16 @@ public class CreateFragment extends Fragment {
     private GoogleMap map;
     private Geocoder mGeocoder;
 
+    //***********FRAGMENT LIFECYCLE****************************************************************
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(LOG_TAG,"ON CREATE VIEW");
         View rootView = inflater.inflate(R.layout.fragment_create, container, false);
 
         activity = (MainActivity) getActivity();
@@ -243,6 +247,20 @@ public class CreateFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+    }
+    //*********************************************************************************************
+
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         Log.d(LOG_TAG,"ON CREATE OPTIONS MENU");
         if(activity.isDrawerOpen()){
@@ -269,24 +287,6 @@ public class CreateFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(LOG_TAG,"ON RESUME");
-        super.onResume();
-        mMapView.onResume();
-    }
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG,"ON DESTROY");
-        super.onDestroy();
-        mMapView.onDestroy();
-    }
     @Override
     public void onLowMemory() {
         Log.d(LOG_TAG,"ON LOW MEMORY");

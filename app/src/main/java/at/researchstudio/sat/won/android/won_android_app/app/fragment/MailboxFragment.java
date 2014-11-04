@@ -18,13 +18,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by fsuda on 21.08.2014.
  */
+@Deprecated //TODO CAN BE REMOVED
 public class MailboxFragment extends Fragment {
     private static final String LOG_TAG = MailboxFragment.class.getSimpleName();
     private Button cameraButton;
@@ -33,6 +35,7 @@ public class MailboxFragment extends Fragment {
     public String currentPhotoPath = null;
     public Uri capturedImageURI = null;
 
+    //*****************FRAGMENT LIFECYCLE************************************************************
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -71,30 +74,8 @@ public class MailboxFragment extends Fragment {
         return mailboxView;
     }
 
-    @Override
-    public void onPause() {
-        Log.d(LOG_TAG, "onPause");
-        super.onPause();
-    }
 
-    @Override
-    public void onResume() {
-        Log.d(LOG_TAG, "onResume");
-        super.onResume();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy");
-        super.onDestroy();
-    }
-
-    @Override
-    public void onDestroyView() {
-        Log.d(LOG_TAG, "onDestroyView");
-        super.onDestroyView();
-    }
-
+    //***********************************************************************************************
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.d(LOG_TAG, "onSaveInstance");

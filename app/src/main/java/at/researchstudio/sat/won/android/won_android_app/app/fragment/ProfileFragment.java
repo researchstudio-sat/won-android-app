@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +19,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.LocationSer
 /**
  * Created by fsuda on 21.08.2014.
  */
+@Deprecated //TODO CAN BE REMOVED
 public class ProfileFragment extends Fragment {
     private static final String LOG_TAG = ProfileFragment.class.getSimpleName();
     private Button dialogButton;

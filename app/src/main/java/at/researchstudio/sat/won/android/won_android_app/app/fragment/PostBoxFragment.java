@@ -44,6 +44,7 @@ public class PostBoxFragment extends ListFragment {
 
     private String postId;
 
+    //***************FRAGMENT LIFECYLCLE******************************************************************
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +72,24 @@ public class PostBoxFragment extends ListFragment {
     }
 
     @Override
+    public void onStart() {
+        Log.d(LOG_TAG,"FRAGMENT ONSTART IS CALLED");
+        super.onStart();
+        createListTask = new CreateListTask();
+        createListTask.execute();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
+        super.onDestroy();
+        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createListTask.cancel(true);
+        }
+    }
+    //****************************************************************************************************
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if(activity.isDrawerOpen()){
             super.onCreateOptionsMenu(menu, inflater);
@@ -96,26 +115,6 @@ public class PostBoxFragment extends ListFragment {
                     return true;
                 }
             });
-        }
-    }
-
-
-
-    @Override
-    public void onStart() {
-        Log.d(LOG_TAG,"FRAGMENT ONSTART IS CALLED");
-        super.onStart();
-        createListTask = new CreateListTask();
-        createListTask.execute();
-    }
-
-
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
-        super.onDestroy();
-        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createListTask.cancel(true);
         }
     }
 

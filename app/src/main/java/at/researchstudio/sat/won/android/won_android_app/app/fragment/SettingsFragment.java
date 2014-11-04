@@ -1,9 +1,7 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
@@ -16,6 +14,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsSer
 public class SettingsFragment extends PreferenceFragment {
     MainActivity activity;
 
+    //*********FRAGMENT LIFECYCLE**********************************************************
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +35,10 @@ public class SettingsFragment extends PreferenceFragment {
         //in that case unnecessary read
         SettingsService.readPreferences(this.getPreferenceManager().getSharedPreferences());
     }
+    //*************************************************************************************
+
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
