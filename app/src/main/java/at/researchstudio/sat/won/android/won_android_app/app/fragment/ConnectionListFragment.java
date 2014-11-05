@@ -49,15 +49,8 @@ public class ConnectionListFragment extends ListFragment {
 
     //*********FRAGMENT LIFECYCLE********************************
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
-        activity = (MainActivity) getActivity();
 
         if(args!=null){
             postId=args.getString(Post.ID_REF);
@@ -67,13 +60,21 @@ public class ConnectionListFragment extends ListFragment {
             receivedRequestsOnly = false;
         }
 
-        styleActionBar();
         Log.d(LOG_TAG, "Fragment started with postId: " + postId+ " recReqOnly: "+receivedRequestsOnly);
 
 
         mConnectionListView = (ListView) inflater.inflate(R.layout.fragment_connections, container, false);
 
         return mConnectionListView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+
+        activity = (MainActivity) getActivity();
+        styleActionBar();
     }
 
     @Override
@@ -164,11 +165,10 @@ public class ConnectionListFragment extends ListFragment {
         @Override
         protected void onCancelled(ArrayList<Connection> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
             if(linkArray != null) {
                 mConnectionListItemAdapter = new ConnectionListItemAdapter(getActivity(), isMailbox(), receivedRequestsOnly);
                 for (Connection connection : linkArray) {
-                    mConnectionListItemAdapter.addItem(connection); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                    mConnectionListItemAdapter.addItem(connection);
                 }
                 setListAdapter(mConnectionListItemAdapter);
             }
@@ -177,7 +177,7 @@ public class ConnectionListFragment extends ListFragment {
         protected void onPostExecute(ArrayList<Connection> linkArray) {
             mConnectionListItemAdapter = new ConnectionListItemAdapter(getActivity(), isMailbox(), receivedRequestsOnly);
             for(Connection connection : linkArray) {
-                mConnectionListItemAdapter.addItem(connection); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                mConnectionListItemAdapter.addItem(connection);
             }
             setListAdapter(mConnectionListItemAdapter);
         }

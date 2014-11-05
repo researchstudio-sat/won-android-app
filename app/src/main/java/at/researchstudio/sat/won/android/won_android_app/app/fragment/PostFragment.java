@@ -28,6 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.*;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
@@ -55,14 +56,13 @@ public class PostFragment extends Fragment {
     private String postId;
     private String refPostTitle; //title of the reference post
 
-    private TextView postTitle;
-    private TextView postObject; //TODO: REMOVE THIS STUB
     private TextView postDescription;
     private ImageView postType;
     private ImagePagerAdapter mImagePagerAdapter;
     private ViewPager mImagePager;
     private IconPageIndicator mIconPageIndicator;
     private MapView mMapView;
+    private ScrollView mScrollView;
 
     private MainActivity activity;
 
@@ -71,25 +71,16 @@ public class PostFragment extends Fragment {
 
     private Post post;
 
-    //*******FRAGMENT LIFECYCLE************************************************************************************
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
 
+    //*******FRAGMENT LIFECYCLE************************************************************************************
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(LOG_TAG,"ON CREATE VIEW");
         Bundle args = getArguments();
-
-        activity = (MainActivity) getActivity();
 
         if(args!=null){
             postId=args.getString(Post.ID_REF);
             refPostTitle=args.getString(Post.TITLE_REF);
-            Log.d(LOG_TAG,"Fragment started with postId: "+postId+" : "+refPostTitle);
         }else{
             postId=null;
             refPostTitle=null;
@@ -98,42 +89,57 @@ public class PostFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
 
         postDescription = (TextView) rootView.findViewById(R.id.post_description);
-        postObject = (TextView) rootView.findViewById(R.id.post_object);
+        postType = (ImageView) rootView.findViewById(R.id.post_type);
+        mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
+        mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
+        mMapView = (MapView) rootView.findViewById(R.id.post_map);
 
+        mScrollView = (ScrollView) rootView.findViewById(R.id.post_scrollview);
+        ImageView transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
 
-        /*postType = (ImageView) rootView.findViewById(R.id.post_type);
+        transparentImageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        mScrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
 
-        switch(post.getType()){
-            case OFFER:
-                postType.setImageResource(R.drawable.offer);
-                break;
-            case WANT:
-                postType.setImageResource(R.drawable.want);
-                break;
-            case ACTIVITY:
-                postType.setImageResource(R.drawable.activity);
-                break;
-            case CHANGE:
-                postType.setImageResource(R.drawable.change);
-                break;
-        }*/
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        mScrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        mScrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+        });
+
+        return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+        activity = (MainActivity) getActivity();
 
         //******INIT IMAGE PAGER **********
         //Initialize ImagePager
-        mImagePagerAdapter = new ImagePagerAdapter(activity.getFragmentManager(),false);
-
-        mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
+        mImagePagerAdapter = new ImagePagerAdapter(activity,false);
         mImagePager.setSaveFromParentEnabled(false);  //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
-
-
-        mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
-
-
         //Initialize GMaps
         MapsInitializer.initialize(activity);
         mGeocoder = new Geocoder(activity, Locale.getDefault());
 
-        mMapView = (MapView) rootView.findViewById(R.id.post_map);
         //*********** 'HACK' TO FIX PARCEABLE BUG see darnmason post in http://stackoverflow.com/questions/13900322/badparcelableexception-in-google-maps-code
         Bundle mapState = null;
         if(savedInstanceState != null) {
@@ -142,9 +148,7 @@ public class PostFragment extends Fragment {
         }
 
         mMapView.onCreate(mapState);
-        //mMapView.onCreate(savedInstanceState);
         //****************************
-
 
         // Gets to GoogleMap from the MapView and does initialization stuff
         if(mMapView!=null)
@@ -153,9 +157,6 @@ public class PostFragment extends Fragment {
             map.getUiSettings().setMyLocationButtonEnabled(false);
             map.setMyLocationEnabled(true);
         }
-
-        Log.d(LOG_TAG,"DONE WITH INITIALIZING THE POST FRAGMENT VIEW");
-        return rootView;
     }
 
     @Override
@@ -228,8 +229,22 @@ public class PostFragment extends Fragment {
             if(tempPost != null) {
                 post = tempPost;
 
+                switch(post.getType()){
+                    case OFFER:
+                        postType.setImageResource(R.drawable.offer);
+                        break;
+                    case WANT:
+                        postType.setImageResource(R.drawable.want);
+                        break;
+                    case ACTIVITY:
+                        postType.setImageResource(R.drawable.activity);
+                        break;
+                    case CHANGE:
+                        postType.setImageResource(R.drawable.change);
+                        break;
+                }
+
                 //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
-                postObject.setText(post.toString());
                 postDescription.setText(post.getDescription());
 
                 if(post.getTitleImageUrl()!=null) {
@@ -260,8 +275,8 @@ public class PostFragment extends Fragment {
                     Marker marker = map.addMarker(new MarkerOptions()
                             .position(post.getLocation())
                             .title(post.getTitle())
-                            .snippet(address)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
-
+                            .snippet(address)
+                            .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
                     map.animateCamera(cameraUpdate);
                 }catch (IOException ioe){
@@ -275,8 +290,22 @@ public class PostFragment extends Fragment {
             post = tempPost;
             styleActionBar();
 
+            switch(post.getType()){
+                case OFFER:
+                    postType.setImageResource(R.drawable.offer);
+                    break;
+                case WANT:
+                    postType.setImageResource(R.drawable.want);
+                    break;
+                case ACTIVITY:
+                    postType.setImageResource(R.drawable.activity);
+                    break;
+                case CHANGE:
+                    postType.setImageResource(R.drawable.change);
+                    break;
+            }
+
             //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
-            postObject.setText(post.toString());
             postDescription.setText(post.getDescription());
 
             if(post.getTitleImageUrl()!=null) {
@@ -305,8 +334,8 @@ public class PostFragment extends Fragment {
                 Marker marker = map.addMarker(new MarkerOptions()
                         .position(post.getLocation())
                         .title(post.getTitle())
-                        .snippet(address)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
-
+                        .snippet(address)
+                        .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
                 map.animateCamera(cameraUpdate);
             }catch (IOException ioe){

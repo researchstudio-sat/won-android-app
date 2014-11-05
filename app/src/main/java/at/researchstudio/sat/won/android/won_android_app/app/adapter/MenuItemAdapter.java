@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import at.researchstudio.sat.won.android.won_android_app.app.model.MenuItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.model.MenuItemModel;
 
 /**
  * Created by RSA SAT on 22.08.2014.
@@ -135,8 +135,7 @@ public class MenuItemAdapter extends ArrayAdapter{
             text1.setTextColor(menuItemFontColor);
             view.setBackgroundColor(menuItemBackgroundColor);
 
-            image1.setColorFilter(menuItemFontColor); //TODO: Maybe change the filter to something else idk
-            //SET DIFFERENT ICON
+            image1.setColorFilter(menuItemFontColor);
         }
 
         return view;

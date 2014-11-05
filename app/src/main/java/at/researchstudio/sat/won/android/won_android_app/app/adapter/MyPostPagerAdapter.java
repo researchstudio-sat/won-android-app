@@ -15,12 +15,15 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
+import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.util.Log;
-import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
+import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.fragment.ConnectionListFragment;
+import at.researchstudio.sat.won.android.won_android_app.app.fragment.PostBoxFragment;
+import at.researchstudio.sat.won.android.won_android_app.app.fragment.PostFragment;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
@@ -30,12 +33,12 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
     private static final String LOG_TAG = MyPostPagerAdapter.class.getSimpleName();
     private String postId;
-    private FragmentManager fm;
+    private Activity activity;
 
-    public MyPostPagerAdapter(FragmentManager fm, String postId) {
-        super(fm);
+    public MyPostPagerAdapter(Activity activity, String postId) {
+        super(activity.getFragmentManager());
         this.postId = postId;
-        this.fm = fm;
+        this.activity = activity;
     }
 
     @Override
@@ -79,21 +82,20 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        //TODO: GET THE STRINGS FROM RESOURCES
         switch(position){
             case 0:
             default:
                 //POST VIEW PAGE
-                return "Post";
+                return activity.getString(R.string.post);
             case 1:
                 //MATCHES VIEW PAGE
-                return "Matches";
+                return activity.getString(R.string.matches);
             case 2:
                 //REQUESTS PAGE
-                return "Requests";
+                return activity.getString(R.string.requests);
             case 3:
                 //CONVERSATION PAGE
-                return "Conversations";
+                return activity.getString(R.string.conversations);
         }
     }
 

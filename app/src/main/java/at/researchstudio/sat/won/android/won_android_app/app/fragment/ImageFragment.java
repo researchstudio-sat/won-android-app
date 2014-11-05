@@ -17,13 +17,13 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,10 +31,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 import at.researchstudio.sat.won.android.won_android_app.app.util.FileUtils;
-import com.viewpagerindicator.IconPageIndicator;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,15 +49,15 @@ public class ImageFragment extends Fragment{
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    private ViewPager mImageViewPager;
-    private ImagePagerAdapter mImagePagerAdapter;
-    private IconPageIndicator mIconPageIndicator;
     private ImageLoaderService mImgLoader;
     private ImageView createPostImage;
 
     private boolean addFlag;
     private boolean editable=true;
     private String mImageUrl;
+    private Bundle args;
+
+    private MainActivity activity;
 
     public ImageFragment(){
         super();
@@ -67,28 +66,14 @@ public class ImageFragment extends Fragment{
     //*****************FRAGMENT LIFECYCLE************************************************************
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_image, container, false);
-        mImageViewPager = (ViewPager) getActivity().findViewById(R.id.image_pager);
-        mImagePagerAdapter = (ImagePagerAdapter) ((ViewPager) getActivity().findViewById(R.id.image_pager)).getAdapter();
-        mIconPageIndicator = (IconPageIndicator) getActivity().findViewById(R.id.image_pager_indicator);
-        mImgLoader = new ImageLoaderService(getActivity());
+        Log.d(LOG_TAG,"onCreateView: "+this.hashCode());
 
-        Bundle args = getArguments();
+        Bundle args2 = getArguments();
+        Log.d(LOG_TAG,"args2: "+this.hashCode()+" - "+args2);
+
+        View rootView = inflater.inflate(R.layout.fragment_image, container, false);
 
         createPostImage = (ImageView) rootView.findViewById(R.id.image);
-        //TODO: MOVE THIS LOADING THINGY TO AN ASYNCTASK OR SOMETHING
-
-        if((mImageUrl==null) && (args == null)) {
-            createPostImage.setImageResource(R.drawable.add_image);
-            addFlag = true;
-        }else{
-            if((mImageUrl==null) || (mImageUrl.trim().equals(""))) {
-                mImageUrl = args.getString(ARG_IMAGE_URL);
-            }
-            editable = args.getBoolean(ARG_IMAGE_EDITABLE);
-
-            mImgLoader.displayImage(mImageUrl, R.drawable.image_placeholder_donotcommit ,createPostImage);
-        }
 
         if(editable) { //ONLY ALLOW THE 'FONDLING' OF IMAGES WHEN IT IS IN EDIT MODE
             createPostImage.setOnLongClickListener(new View.OnLongClickListener() {
@@ -106,7 +91,7 @@ public class ImageFragment extends Fragment{
                 public void onClick(View v) {
                     if (addFlag) {
                         dispatchTakePictureIntent();
-                        addFlag = false;
+                        //addFlag = false; //TODO: TRY THIS SHOULDNT MATTER
                     } else {
                         displaySetTitleImageDialog();
                     }
@@ -116,6 +101,37 @@ public class ImageFragment extends Fragment{
 
         return rootView;
     }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(LOG_TAG,"onActivityCreated: "+this.hashCode());
+
+        super.onActivityCreated(savedInstanceState);
+        activity = (MainActivity) getActivity();
+
+        mImgLoader = new ImageLoaderService(activity);
+
+
+        args = getArguments();
+        Log.d(LOG_TAG,"args: "+this.hashCode()+" - "+args);
+
+        if(mImageUrl == null && args == null){
+            addFlag = true;
+        }else{
+            if(mImageUrl== null || mImageUrl.trim().length()==0){
+                mImageUrl = args.getString(ARG_IMAGE_URL);
+            }
+            editable = args.getBoolean(ARG_IMAGE_EDITABLE);
+        }
+        Log.d(LOG_TAG,"mImageUrl: "+this.hashCode() +" - "+mImageUrl);
+
+        if(addFlag) {
+            createPostImage.setImageResource(R.drawable.add_image);
+        }else{
+            mImgLoader.displayImage(mImageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
+        }
+    }
+
     //***********************************************************************************************
 
     @Override
@@ -127,8 +143,14 @@ public class ImageFragment extends Fragment{
                 FileOutputStream out = new FileOutputStream(FileUtils.createNewImageFile().getAbsolutePath());
                 photo.compress(Bitmap.CompressFormat.JPEG, 100, out);
             } catch (Exception e) {
+                activity.getTempPost().removeLastAddedImage();
                 Log.e(LOG_TAG, "ERROR WHILE PROCESSING CAMERA PICTURE: " + e.getMessage());
             }
+
+            reloadFragment();
+        }else if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_CANCELED){
+            activity.getTempPost().removeLastAddedImage(); //REMOVE IMAGE AGAIN IF THE REQUEST IS CANCELED
+            reloadFragment();
         }else{
             super.onActivityResult(requestCode,resultCode,data);
         }
@@ -153,10 +175,9 @@ public class ImageFragment extends Fragment{
 
                 if (photoFile != null) {
                     mImageUrl = photoFile.getAbsolutePath();
-                    mImagePagerAdapter.addItem(mImageUrl);
-                    mImgLoader.displayImage(mImageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
-                    mImagePagerAdapter.notifyDataSetChanged();
-                    mIconPageIndicator.notifyDataSetChanged();
+
+                    Log.d(LOG_TAG, "Adding image with url: "+mImageUrl);
+                    activity.getTempPost().addImage(mImageUrl);
 
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 }else{
@@ -174,14 +195,10 @@ public class ImageFragment extends Fragment{
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d(LOG_TAG, "DIALOG YES");
-                    /*
-                    //TODO: UPDATE IMAGEVIEW DELETE DOES NOT WORK CORRECTLY YET
-                    int currentItem = mImageViewPager.getCurrentItem();
-                    mImageViewPager.setCurrentItem(currentItem+1);
-                    mImagePagerAdapter.removeItem(currentItem);
-                    mImagePagerAdapter.notifyDataSetChanged();
-                    mIconPageIndicator.notifyDataSetChanged();*/
+                Log.d(LOG_TAG, "Delete image with url: "+mImageUrl);
+                activity.getTempPost().removeImage(mImageUrl);
+
+                reloadFragment();
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -217,5 +234,15 @@ public class ImageFragment extends Fragment{
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void reloadFragment(){
+        Log.d(LOG_TAG,"reloading the whole createFragment");
+        // update the main content by replacing fragments
+        Fragment fragment = activity.getFragmentManager().findFragmentById(R.id.container);
+        final FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.detach(fragment);
+        ft.attach(fragment);
+        ft.commit();
     }
 }

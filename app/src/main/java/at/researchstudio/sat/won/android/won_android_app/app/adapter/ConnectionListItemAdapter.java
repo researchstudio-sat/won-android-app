@@ -16,11 +16,13 @@
 package at.researchstudio.sat.won.android.won_android_app.app.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
@@ -37,11 +39,15 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
     private boolean includeReference;
     private boolean receivedRequestsOnly;
     private List<Connection> objects;
+    private Context context;
+    private LetterTileProvider tileProvider;
 
     private Filter filter;
 
     public ConnectionListItemAdapter(Context context, boolean includeReference, boolean receivedRequestsOnly){
         super(context, 0);
+        this.context = context;
+        tileProvider = new LetterTileProvider(context);
         mImgLoader = new ImageLoaderService(context);
         this.includeReference = includeReference;
         this.receivedRequestsOnly = receivedRequestsOnly;
@@ -138,8 +144,10 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
 
             if (holder.imageHolder != null){
                 if (item.getTitleImageUrl() == null){
-                    //TODO: Implement this for GMAIL APP STYLE DEFAULT ICONS: http://stackoverflow.com/questions/23122088/colored-boxed-with-letters-a-la-gmail
-                    holder.imageHolder.setImageResource(R.drawable.image_placeholder_donotcommit);
+                    final int tileSize = context.getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+                    final Bitmap letterTile = tileProvider.getLetterTile(item.getTitle(), item.getTitle(), tileSize, tileSize);
+
+                    holder.imageHolder.setImageBitmap(letterTile);
                 }else {
                     mImgLoader.displayImage(item.getTitleImageUrl(), R.drawable.image_placeholder_donotcommit, holder.imageHolder);
                 }

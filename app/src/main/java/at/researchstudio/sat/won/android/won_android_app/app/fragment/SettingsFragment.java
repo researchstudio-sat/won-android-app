@@ -12,15 +12,13 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsSer
  * Created by fsuda on 22.09.2014.
  */
 public class SettingsFragment extends PreferenceFragment {
-    MainActivity activity;
-
     //*********FRAGMENT LIFECYCLE**********************************************************
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.getPreferenceManager().setSharedPreferencesName(SettingsService.PREFS_NAME);
 
-        activity = (MainActivity) getActivity();
+        MainActivity activity = (MainActivity) getActivity();
         activity.setDrawerToggle(false);
 
         // Load the preferences from an XML resource

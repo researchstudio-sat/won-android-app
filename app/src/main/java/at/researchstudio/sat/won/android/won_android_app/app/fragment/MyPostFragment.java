@@ -57,7 +57,7 @@ public class MyPostFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
 
         //Initialize ViewPager
-        mMyPostPagerAdapter = new MyPostPagerAdapter(activity.getFragmentManager(), postId);
+        mMyPostPagerAdapter = new MyPostPagerAdapter(activity, postId);
 
         Parcelable state = mMyPostPagerAdapter.saveState();
         mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);

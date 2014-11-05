@@ -23,9 +23,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
@@ -36,6 +39,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivi
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinnerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
@@ -57,6 +61,8 @@ public class CreateFragment extends Fragment {
     private static final String MAP_STATE_KEY = "CREATE_MAP_STATE";
     private static final String IMAGE_URLS = "IMAGE_URLS";
 
+    private CreateTask createTask;
+
     private MainActivity activity;
     private MapView mMapView;
     private Spinner mTypeSpinner;
@@ -70,52 +76,61 @@ public class CreateFragment extends Fragment {
     private Button mEndDateTimeButton;
 
     private EditText mLocationText;
+    private EditText mTitle;
+    private EditText mDescription;
+    private EditText mTags;
 
     private GoogleMap map;
     private Geocoder mGeocoder;
 
-    //***********FRAGMENT LIFECYCLE****************************************************************
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
+    private ScrollView mScrollView;
 
+    //***********FRAGMENT LIFECYCLE****************************************************************
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_create, container, false);
 
-        activity = (MainActivity) getActivity();
-
-        styleActionBar();
-
-        //Initialize TypeSpinner
         mTypeSpinner = (Spinner)rootView.findViewById(R.id.typespinner);
-        mTypeSpinnerAdapter = new TypeSpinnerAdapter(activity);
-
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_want, R.drawable.want, PostType.WANT));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_offer, R.drawable.offer, PostType.OFFER));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_activity, R.drawable.activity, PostType.ACTIVITY));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_change, R.drawable.change, PostType.CHANGE));
-
-        mTypeSpinner.setAdapter(mTypeSpinnerAdapter);
-
-        //TODO: SPINNER HANDLING  --> EDIT HELPTEXTS
-
-        //Initialize ImagePager
-        mImagePagerAdapter = new ImagePagerAdapter(activity.getFragmentManager());
-
         mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
-        mImagePager.setAdapter(mImagePagerAdapter);
-
         mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
-
-        mIconPageIndicator.setViewPager(mImagePager);
-
-        //Initialize DateTime Picker
+        mLocationText = (EditText) rootView.findViewById(R.id.create_location);
+        mMapView = (MapView) rootView.findViewById(R.id.post_map);
         mStartDateTimeButton = (Button) rootView.findViewById(R.id.create_startdatetime_button);
         mEndDateTimeButton = (Button) rootView.findViewById(R.id.create_enddatetime_button);
+        mTitle = (EditText) rootView.findViewById(R.id.create_title);
+        mDescription = (EditText) rootView.findViewById(R.id.create_description);
+        mTags = (EditText) rootView.findViewById(R.id.create_tags);
+
+        mScrollView = (ScrollView) rootView.findViewById(R.id.create_scrollview);
+        ImageView transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
+
+        transparentImageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        mScrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        mScrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        mScrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+        });
+
 
         mStartDateTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,22 +170,100 @@ public class CreateFragment extends Fragment {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                mEndDateTimeButton.setText(dayOfMonth+"."+monthOfYear+"."+year);
+                                mEndDateTimeButton.setText(dayOfMonth + "." + monthOfYear + "." + year);
                             }
                         }, mYear, mMonth, mDay);
                 dialog.show();
             }
         });
 
-        //Initialize GMaps
+        mTitle.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                activity.getTempPost().setTitle(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        mDescription.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                activity.getTempPost().setDescription(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        mTags.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                activity.getTempPost().setTags(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        mTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
+                PostType newType = PostType.values()[position];
+                activity.getTempPost().setType(newType);
+
+                setPostTypeHints(newType);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                Log.d(LOG_TAG,"nothing selected");
+            }
+        });
+
+        return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+        activity = (MainActivity) getActivity();
+        styleActionBar();
+
+        mTypeSpinnerAdapter = new TypeSpinnerAdapter(activity);
+
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_want, R.drawable.want, PostType.WANT));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_offer, R.drawable.offer, PostType.OFFER));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_activity, R.drawable.activity, PostType.ACTIVITY));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_change, R.drawable.change, PostType.CHANGE));
+
+        mTypeSpinner.setAdapter(mTypeSpinnerAdapter);
+
+        //Initialize ImagePager
+        mImagePagerAdapter = new ImagePagerAdapter(activity);
+
+        mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
+        mImagePager.setAdapter(mImagePagerAdapter);
+
+
+        mIconPageIndicator.setViewPager(mImagePager);
+
         MapsInitializer.initialize(activity);
         mGeocoder = new Geocoder(activity, Locale.getDefault());
-
-        mLocationText = (EditText) rootView.findViewById(R.id.create_location);
-
-
-
-        mMapView = (MapView) rootView.findViewById(R.id.post_map);
 
         //*********** 'HACK' TO FIX PARCEABLE BUG see darnmason post in http://stackoverflow.com/questions/13900322/badparcelableexception-in-google-maps-code
         Bundle mapState = null;
@@ -189,8 +282,6 @@ public class CreateFragment extends Fragment {
             map = mMapView.getMap();
             map.getUiSettings().setMyLocationButtonEnabled(true);
             map.setMyLocationEnabled(true);
-
-
         }
 
         mLocationText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -212,6 +303,7 @@ public class CreateFragment extends Fragment {
                                     .snippet(StringUtils.getFormattedAddress(a)) //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
                                     .draggable(false)); //TODO: DRAG MARKER IMPLEMENTATION
                             Log.d(LOG_TAG,a.toString());
+                            activity.getTempPost().setLocation(new LatLng(a.getLatitude(), a.getLongitude())); //SET LOCATION OF TEMPPOST
                         }
 
                         if(addressList.size() > 0) {
@@ -242,8 +334,13 @@ public class CreateFragment extends Fragment {
                 return false;
             }
         });
+    }
 
-        return rootView;
+    @Override
+    public void onStart() {
+        super.onStart();
+        createTask = new CreateTask();
+        createTask.execute();
     }
 
     @Override
@@ -256,18 +353,16 @@ public class CreateFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+        if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createTask.cancel(true);
+        }
     }
     //*********************************************************************************************
-
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(LOG_TAG,"ON CREATE OPTIONS MENU");
         if(activity.isDrawerOpen()){
-            Log.d(LOG_TAG,"Drawer Open");
             super.onCreateOptionsMenu(menu, inflater);
         }else {
-            Log.d(LOG_TAG,"Drawer closed");
             menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
             inflater.inflate(R.menu.create, menu);
         }
@@ -334,7 +429,9 @@ public class CreateFragment extends Fragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: IMPLEMENT DISMISS STUFF
+                activity.setTempPost(new Post());
+                createTask = new CreateTask();
+                createTask.execute();
                 Toast.makeText(activity, getString(R.string.toast_create_dismiss), Toast.LENGTH_SHORT).show();
             }
         });
@@ -347,5 +444,102 @@ public class CreateFragment extends Fragment {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void setPostTypeHints(PostType newType){
+        switch(newType){
+            case ACTIVITY:
+                mTags.setHint(R.string.create_tags_together_hint);
+                mTitle.setHint(R.string.create_title_together_hint);
+                mDescription.setHint(R.string.create_description_together_hint);
+                mLocationText.setHint(R.string.create_location_together_hint);
+                break;
+            case OFFER:
+                mTags.setHint(R.string.create_tags_supply_hint);
+                mTitle.setHint(R.string.create_title_supply_hint);
+                mDescription.setHint(R.string.create_description_supply_hint);
+                mLocationText.setHint(R.string.create_location_supply_hint);
+                break;
+            case WANT:
+                mTags.setHint(R.string.create_tags_demand_hint);
+                mTitle.setHint(R.string.create_title_demand_hint);
+                mDescription.setHint(R.string.create_description_demand_hint);
+                mLocationText.setHint(R.string.create_location_demand_hint);
+                break;
+            case CHANGE:
+                mTags.setHint(R.string.create_tags_change_hint);
+                mTitle.setHint(R.string.create_title_change_hint);
+                mDescription.setHint(R.string.create_description_change_hint);
+                mLocationText.setHint(R.string.create_location_change_hint);
+                break;
+        }
+    }
+
+    private class CreateTask extends AsyncTask<String, Integer, Post> {
+        @Override
+        protected Post doInBackground(String... params) {
+            return activity.getTempPost();
+        }
+
+        @Override
+        protected void onCancelled(Post tempPost) {
+            putPostInView(tempPost);
+            //TODO: SHOW PROCESS WAS CANCELLED
+        }
+
+        @Override
+        protected void onPostExecute(Post tempPost) {
+            putPostInView(tempPost);
+        }
+
+        private void putPostInView(Post tempPost){
+            mTitle.setText(tempPost.getTitle());
+            mDescription.setText(tempPost.getDescription());
+            mTags.setText(tempPost.getTagsAsString());
+            mTypeSpinner.setSelection(tempPost.getType().ordinal());
+
+            if(tempPost.getLocation().latitude != 0.0 && tempPost.getLocation().longitude != 0.0) {
+                try {
+                    List<Address> adresses = mGeocoder.getFromLocation(tempPost.getLocation().latitude, tempPost.getLocation().longitude, 1);
+
+                    String address;
+
+                    if (adresses != null && adresses.size() > 0) {
+                        address = StringUtils.getFormattedAddress(adresses.get(0));
+                        mLocationText.setText(address);
+                    } else {
+                        Log.d(LOG_TAG, "No Address found");
+                        address = tempPost.getTitle();
+                    }
+
+                    Marker marker = map.addMarker(new MarkerOptions()
+                            .position(tempPost.getLocation())
+                            .title(tempPost.getTitle())
+                            .snippet(address)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(tempPost.getLocation(), 10);
+                    map.animateCamera(cameraUpdate);
+                } catch (IOException ioe) {
+                    //TODO: ERROR TOAST
+                    Log.e(LOG_TAG, ioe.getMessage());
+                }
+            }
+
+            if(tempPost.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
+                mImagePagerAdapter.addItem(tempPost.getTitleImageUrl());
+            }
+
+            if(tempPost.getImageUrls() != null) {
+                for (String imgUrl : tempPost.getImageUrls()) {
+                    imgUrl = imgUrl.trim();
+                    if (imgUrl.length() > 0) {
+                        mImagePagerAdapter.addItem(imgUrl);
+                    }
+                }
+            }
+
+            mImagePagerAdapter.notifyDataSetChanged();
+            mIconPageIndicator.notifyDataSetChanged();
+        }
     }
 }

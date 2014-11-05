@@ -16,7 +16,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.*;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +25,6 @@ import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.components.LoadingDialog;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 import java.util.ArrayList;
@@ -46,15 +44,7 @@ public class PostBoxFragment extends ListFragment {
 
     //***************FRAGMENT LIFECYLCLE******************************************************************
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(LOG_TAG,"ON CREATE VIEW");
-        activity = (MainActivity) getActivity();
         Bundle args = getArguments();
 
         if(args!=null){
@@ -63,12 +53,19 @@ public class PostBoxFragment extends ListFragment {
             postId=null;
         }
 
-        styleActionBar();
         Log.d(LOG_TAG,"Fragment started with postId: "+postId);
 
         mNeedListView = (ListView) inflater.inflate(R.layout.fragment_postbox, container, false);
 
         return mNeedListView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+        activity = (MainActivity) getActivity();
+        styleActionBar();
     }
 
     @Override
@@ -121,7 +118,6 @@ public class PostBoxFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(LOG_TAG,"LIST ITEM CLICKED!!");
-        //TODO: Implement "Real" list item clicking
         Post post = (Post) mPostListItemAdapter.getItem(position);
         Fragment fragment;
 
@@ -130,15 +126,12 @@ public class PostBoxFragment extends ListFragment {
         if(isPostBox()) { //IF IT IS ONE OF YOUR OWN POSTS
             fragment = new MyPostFragment();
         }else{ //IF ITS A POST FROM SOMEBODY ELSE
-            //post.setMatches(0);
-            //mPostListItemAdapter.notifyDataSetChanged();
             args.putString(Post.TITLE_REF, getActivity().getActionBar().getTitle().toString());
             fragment = new PostFragment();
         }
 
         postId = post.getUuidString();
         args.putString(Post.ID_REF, postId);
-
 
         fragment.setArguments(args);
         FragmentManager fragmentManager = getFragmentManager();
@@ -157,28 +150,6 @@ public class PostBoxFragment extends ListFragment {
     }
 
     private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Post>> {
-        private LoadingDialog progress;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            if(isPostBox()) { //SHOW LOADING DIALOG ONLY IN POSTBOX VIEW
-                progress = new LoadingDialog(getActivity(), this);
-                progress.show();
-
-                progress.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        Log.d(LOG_TAG, "called onCancel");
-                        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-                            createListTask.cancel(true);
-                        }
-                    }
-                });
-            }
-        }
-
         @Override
         protected ArrayList<Post> doInBackground(String... params) {
             if(isPostBox()) {
@@ -191,11 +162,10 @@ public class PostBoxFragment extends ListFragment {
         @Override
         protected void onCancelled(ArrayList<Post> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
             if(linkArray != null) {
                 mPostListItemAdapter = new PostListItemAdapter(getActivity());
                 for (Post post : linkArray) {
-                    mPostListItemAdapter.addItem(post); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                    mPostListItemAdapter.addItem(post);
                 }
                 setListAdapter(mPostListItemAdapter);
             }
@@ -204,12 +174,9 @@ public class PostBoxFragment extends ListFragment {
         protected void onPostExecute(ArrayList<Post> linkArray) {
             mPostListItemAdapter = new PostListItemAdapter(getActivity());
             for(Post post : linkArray) {
-                mPostListItemAdapter.addItem(post); //TODO: MOVE THIS TO THE BACKEND (OR ASYNC TASK ETC WHATEVER)
+                mPostListItemAdapter.addItem(post);
             }
             setListAdapter(mPostListItemAdapter);
-            if(isPostBox()) { //DISMISS PROGRESS DIALOG ONLY IN POSTBOX VIEW
-                progress.dismiss();
-            }
         }
     }
 

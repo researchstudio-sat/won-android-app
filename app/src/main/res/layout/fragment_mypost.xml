@@ -7,10 +7,10 @@
     <com.viewpagerindicator.TabPageIndicator
             android:id="@+id/mypost_viewpager_indicator"
             android:layout_height="wrap_content"
-            android:layout_width="fill_parent"/>
+            android:layout_width="match_parent"/>
     <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-                                       android:id="@+id/mypost_viewpager"
-                                       android:layout_width="match_parent"
-                                       android:layout_height="match_parent"
-                                       android:layout_centerVertical="true"/>
+           android:id="@+id/mypost_viewpager"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_centerVertical="true"/>
 </LinearLayout>

@@ -30,9 +30,9 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
-import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 import java.util.ArrayList;
@@ -57,17 +57,8 @@ public class ConversationFragment extends Fragment {
 
     //******FRAGMENT LIFECYCLE*************************************
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
-
-        activity = (MainActivity) getActivity();
-        activity.setDrawerToggle(false);
 
         if(args!=null){
             conversationId=args.getString(Connection.ID_REF);
@@ -123,6 +114,14 @@ public class ConversationFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+
+        activity = (MainActivity) getActivity();
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         createListTask = new CreateListTask();
@@ -144,7 +143,7 @@ public class ConversationFragment extends Fragment {
             super.onCreateOptionsMenu(menu, inflater);
         }else {
             menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
-            getActivity().getMenuInflater().inflate(R.menu.list, menu);
+            inflater.inflate(R.menu.list, menu);
             MenuItem searchViewItem = menu.findItem(R.id.action_search);
             SearchView searchView = (SearchView) searchViewItem.getActionView();
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -177,7 +176,6 @@ public class ConversationFragment extends Fragment {
         @Override
         protected void onCancelled(ArrayList<MessageItemModel> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
             if(linkArray != null) {
                 mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
                 for (MessageItemModel message : linkArray) {

@@ -17,13 +17,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="false">
+            android:fillViewport="false"
+            android:id="@+id/post_scrollview">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
             >
-        <!--<RelativeLayout
+        <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             <ImageView
@@ -31,7 +32,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/offer"/>
-        </RelativeLayout>-->
+        </RelativeLayout>
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -41,19 +42,22 @@
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
         <include layout="@layout/include_image_pager"/>
-        <com.google.android.gms.maps.MapView
+        <RelativeLayout
+                android:id="@+id/map_layout"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:id="@+id/post_map"
-                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
-                android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:id="@+id/post_object"
-                android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+                android:layout_height="300dp">
+            <com.google.android.gms.maps.MapView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/post_map"
+                    android:layout_marginBottom="@dimen/create_edit_margin_bottom"
+                    android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                    android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+            <ImageView
+                    android:id="@+id/transparent_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@android:color/transparent" />
+        </RelativeLayout>
     </LinearLayout>
 </ScrollView>

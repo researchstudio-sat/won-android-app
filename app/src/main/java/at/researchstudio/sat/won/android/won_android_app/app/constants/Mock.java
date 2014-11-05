@@ -15,12 +15,14 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.constants;
 
-import android.os.Message;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
-import at.researchstudio.sat.won.android.won_android_app.app.model.*;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
+import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListItemModel;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DecimalFormat;
@@ -263,11 +265,11 @@ public class Mock {
 
     //MOCK MODEL GENERATOR
     public static Post getRandomPost() {
-       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes));
+       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
     }
 
     public static Post getRandomMatch(){
-        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes));
+        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
     }
 
     public static RequestListItemModel getRandomRequest(){
@@ -276,6 +278,10 @@ public class Mock {
 
     public static String generateRandomImageUrl() {
         return "http://placesheen.com/"+getRandom(100,1600)+"/"+getRandom(100,1600);
+    }
+
+    public static boolean getRandomBoolean(){
+        return ((int)(Math.random()*100))%3 == 0;
     }
 
     public static MessageItemModel getRandomMessage(){

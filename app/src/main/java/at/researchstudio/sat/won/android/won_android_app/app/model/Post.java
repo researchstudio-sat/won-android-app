@@ -15,7 +15,9 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import com.google.android.gms.maps.model.LatLng;
@@ -27,10 +29,25 @@ import java.util.UUID;
 /**
  * Created by fsuda on 10.10.2014.
  */
-public class Post extends Model {
+public class Post extends Model implements Parcelable {
     public static final String ID_REF = "post_id_ref";
+    public static final String TYPE_REF = "post_type_ref";
     public static final String TITLE_REF = "post_title_ref";
-    public static final String TAG_SEPARATOR = ", ";
+    public static final String DESC_REF = "post_description_ref";
+    public static final String TAGS_REF = "post_tags_ref";
+    public static final String MATCHES_REF = "post_matches_ref";
+    public static final String CONVERSATIONS_REF = "post_conversations_ref";
+    public static final String REQUESTS_REF = "post_requests_ref";
+    public static final String IMAGEURLS_REF = "post_imageurl_ref";
+    public static final String TITLEIMAGEURL_REF = "post_titleimageurl_ref";
+    public static final String LOCATION_LAT_REF = "post_lat_ref";
+    public static final String LOCATION_LNG_REF = "post_lng_ref";
+    public static final String STARTTIME_REF = "post_starttime_ref";
+    public static final String STOPTIME_REF = "post_stoptime_ref";
+    public static final String CLOSED_REF = "post_closed_ref";
+    public static final String REPEAT_REF = "post_repeat_ref";
+
+    public static final String TAG_SEPARATOR = ",";
 
     private PostType type;
     private String title;
@@ -42,6 +59,7 @@ public class Post extends Model {
     private int requests;
 
     private List<String> imageUrls;
+    //TODO: REFACTOR TITLEIMAGEURL to titleimageindex, and store the url within the imageurl list
     private String titleImageUrl;
 
     private LatLng location;
@@ -49,17 +67,45 @@ public class Post extends Model {
     private long startTime;
     private long stopTime;
 
+    private boolean closed;
+
     private RepeatType repeat;
 
     public Post() {
         super(null);
+        this.type = PostType.WANT;
+        this.repeat = RepeatType.NONE;
+        this.location = new LatLng(0,0);
+        this.imageUrls = new ArrayList<String>();
+        this.tags = new ArrayList<String>();
     }
 
-    public Post(PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, String titleImageUrl, LatLng location, long startTime, long stopTime, RepeatType repeat) {
-        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageUrl, location, startTime, stopTime, repeat);
+    public Post(PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, String titleImageUrl, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
+        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageUrl, location, startTime, stopTime, repeat, closed);
     }
 
-    public Post(UUID uuid, PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, String titleImageUrl, LatLng location, long startTime, long stopTime, RepeatType repeat) {
+    public Post(Parcel in) {
+        super(null);
+        Bundle bundle = in.readBundle();
+        setUuid(bundle.getString(UUID_REF));
+
+        this.type           = PostType.values()[bundle.getInt(TYPE_REF)];
+        this.title          = bundle.getString(TITLE_REF);
+        this.description    = bundle.getString(DESC_REF);
+        this.tags           = bundle.getStringArrayList(TAGS_REF);
+        this.matches        = bundle.getInt(MATCHES_REF);
+        this.conversations  = bundle.getInt(CONVERSATIONS_REF);
+        this.requests       = bundle.getInt(REQUESTS_REF);
+        this.imageUrls      = bundle.getStringArrayList(IMAGEURLS_REF);
+        this.titleImageUrl  = bundle.getString(TITLEIMAGEURL_REF);
+        this.location       = new LatLng(bundle.getDouble(LOCATION_LAT_REF),bundle.getDouble(LOCATION_LNG_REF));
+        this.startTime      = bundle.getLong(STARTTIME_REF);
+        this.stopTime       = bundle.getLong(STOPTIME_REF);
+        this.repeat         = RepeatType.values()[bundle.getInt(REPEAT_REF)];
+        this.closed         = bundle.getBoolean(CLOSED_REF);
+    }
+
+    public Post(UUID uuid, PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, String titleImageUrl, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
         super(uuid);
         this.type = type;
         this.title = title;
@@ -74,6 +120,7 @@ public class Post extends Model {
         this.startTime = startTime;
         this.stopTime = stopTime;
         this.repeat = repeat;
+        this.closed = closed;
     }
 
     public PostType getType() {
@@ -183,22 +230,33 @@ public class Post extends Model {
     public void setTags(String tagString){
         List<String> tags = new ArrayList<String>();
 
-        for(String tag : tagString.split(",")){
-            tags.add(tag.trim());
+        for(String tag : tagString.split(TAG_SEPARATOR)){
+            tag = tag.trim();
+            if(tag.length()>0) {
+                tags.add(tag);
+            }
         }
 
         this.tags = tags;
     }
 
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
+    }
+
     public String getTagsAsString() {
         StringBuilder sb = new StringBuilder();
 
-        if(tags!=null) {
+        if(tags!=null && tags.size() > 0) {
             for (String tag : tags) {
-                sb.append(tag).append(", ");
+                sb.append(tag).append(TAG_SEPARATOR).append(" ");
             }
 
-            return sb.substring(0, sb.length()-TAG_SEPARATOR.length()); //return without last Separator
+            return sb.substring(0, sb.length()-TAG_SEPARATOR.length()+1); //return without last Separator
         }else{
             return "";
         }
@@ -208,13 +266,47 @@ public class Post extends Model {
         return matches != 0 || conversations != 0 || requests != 0;
     }
 
+    public void removeImage(String url){
+        url = url.trim();
+
+        if(titleImageUrl!= null && titleImageUrl.equals(url)){
+            titleImageUrl = "";
+        }
+        ArrayList<String> newImages = new ArrayList<String>();
+
+        for(String imgUrl : imageUrls){
+            if(!imgUrl.equals(url)){
+                newImages.add(imgUrl);
+            }
+        }
+    }
+
+    public void addImage(String imgUrl){
+        if(this.getTitleImageUrl() == null || "".equals(this.getTitleImageUrl().trim())){
+            this.setTitleImageUrl(imgUrl);
+        }else{
+            this.getImageUrls().add(imgUrl);
+        }
+    }
+
+    public void removeLastAddedImage() {
+        //TODO; Implement this better
+        if(imageUrls == null && imageUrls.size()==0){
+            if(titleImageUrl != null && !"".equals(titleImageUrl.trim())){
+                titleImageUrl = "";
+            }
+        }else{
+            imageUrls.remove(imageUrls.size()-1);
+        }
+    }
+
     @Override
     public String toString() {
         return "Post{" +
                 "type=" + type +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", tags=" + tags +
+                ", tags=" + getTagsAsString() +
                 ", matches=" + matches +
                 ", conversations=" + conversations +
                 ", requests=" + requests +
@@ -223,6 +315,7 @@ public class Post extends Model {
                 ", location=" + location +
                 ", startTime=" + startTime +
                 ", stopTime=" + stopTime +
+                ", closed=" + closed +
                 ", repeat=" + repeat +
                 '}';
     }
@@ -231,4 +324,41 @@ public class Post extends Model {
         //TODO: Filter for everything inside this post
         return this.getTitle().toLowerCase().contains(filterSeq) || this.getDescription().toLowerCase().contains(filterSeq) || getTagsAsString().toLowerCase().contains(filterSeq);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        Bundle bundle = new Bundle();
+        bundle.putString(UUID_REF, getUuid().toString());
+        bundle.putInt(TYPE_REF, type.ordinal());
+        bundle.putInt(REPEAT_REF, repeat.ordinal());
+        bundle.putString(TITLE_REF, title);
+        bundle.putStringArrayList(TAGS_REF, new ArrayList<String>(tags));
+        bundle.putString(DESC_REF, description);
+        bundle.putInt(MATCHES_REF, matches);
+        bundle.putInt(CONVERSATIONS_REF, conversations);
+        bundle.putInt(REQUESTS_REF, requests);
+        bundle.putStringArrayList(IMAGEURLS_REF, new ArrayList<String>(imageUrls));
+        bundle.putString(TITLEIMAGEURL_REF, titleImageUrl);
+        bundle.putDouble(LOCATION_LAT_REF,location.latitude);
+        bundle.putDouble(LOCATION_LNG_REF, location.longitude);
+        bundle.putLong(STARTTIME_REF,startTime);
+        bundle.putLong(STOPTIME_REF, stopTime);
+
+        dest.writeBundle(bundle);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Post createFromParcel(Parcel in) {
+            return new Post(in);
+        }
+
+        public Post[] newArray(int size) {
+            return new Post[size];
+        }
+    };
 }

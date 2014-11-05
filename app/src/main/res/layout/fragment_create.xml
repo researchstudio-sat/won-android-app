@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="false">
+            android:fillViewport="false"
+            android:id="@+id/create_scrollview">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
@@ -39,7 +40,7 @@
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
         <EditText
                 android:id="@+id/create_title"
-                android:hint="@string/create_title_hint"
+                android:hint="@string/create_title_demand_hint"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
@@ -57,7 +58,7 @@
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
         <EditText
                 android:id="@+id/create_description"
-                android:hint="@string/create_description_hint"
+                android:hint="@string/create_description_demand_hint"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
@@ -86,7 +87,7 @@
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
         <EditText
                 android:id="@+id/create_tags"
-                android:hint="@string/create_tags_hint"
+                android:hint="@string/create_tags_demand_hint"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
@@ -113,7 +114,7 @@
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
         <EditText
                 android:id="@+id/create_location"
-                android:hint="@string/create_location_hint"
+                android:hint="@string/create_location_demand_hint"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
@@ -121,13 +122,23 @@
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"
                 android:imeOptions="actionSearch"/>
-        <com.google.android.gms.maps.MapView
+        <RelativeLayout
+                android:id="@+id/map_layout"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:id="@+id/post_map"
-                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
-                android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+                android:layout_height="300dp">
+            <com.google.android.gms.maps.MapView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/post_map"
+                    android:layout_marginBottom="@dimen/create_edit_margin_bottom"
+                    android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                    android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+            <ImageView
+                    android:id="@+id/transparent_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@android:color/transparent" />
+        </RelativeLayout>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

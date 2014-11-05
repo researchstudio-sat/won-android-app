@@ -68,25 +68,43 @@
 
     <!-- Create Post View -->
     <string name="create_title">Title</string>
-    <string name="create_title_hint">Roughly, what\'s it about?</string>
     <string name="create_description">Description</string>
-    <string name="create_description_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like pickup address or time of availability)</string>
     <string name="create_tags">Tags</string>
     <string name="create_images">Images</string>
     <string name="create_location">Location</string>
-    <string name="create_location_hint">Where?</string>
     <string name="create_startdate">Start Date</string>
     <string name="create_enddate">End Date</string>
     <string name="create_choosedatetime">Choose Date/Time</string>
     <string name="create_tags_2">Using tags improves results by a great deal.</string>
-    <string name="create_tags_hint">e.g. furniture, electronics, for children,&#8230;</string>
     <string name="create_type">Type</string>
     <string name="create_type_spinner_choose">Select a Type</string>
     <string name="create_type_spinner_offer">Offer</string>
     <string name="create_type_spinner_want">Want</string>
     <string name="create_type_spinner_activity">Activity</string>
     <string name="create_type_spinner_change">Change</string>
+    <!-- Create Post Hints-->
 
+    <!-- Demand -->
+    <string name="create_title_demand_hint">Roughly, what are you looking for?</string>
+    <string name="create_description_demand_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like pickup address or time of availability)</string>
+    <string name="create_location_demand_hint">Where should the thing be available? i.e. where you pick it up or where should it be deliverd to?</string>
+    <string name="create_tags_demand_hint">e.g. Shoes, Entertainment, Suited For Small Children,&#8230;</string>
+    <!-- Supply -->
+    <string name="create_title_supply_hint">Roughly, what are you offering?</string>
+    <string name="create_description_supply_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for things like delivery address or time of availability)</string>
+    <string name="create_location_supply_hint">Where\'s your offer available? i.e. where can people pick it up or where would you deliver it too?</string>
+    <string name="create_tags_supply_hint">e.g. Shoes, Entertainment, Suited For Small Children,&#8230;</string>
+    <!-- Together -->
+    <string name="create_title_together_hint">Roughly, what are you planning for which you need people?</string>
+    <string name="create_description_together_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for specifying an event location and time)</string>
+    <string name="create_location_together_hint">Where\'s the action happening?</string>
+    <string name="create_tags_together_hint">e.g. Soccer, Party, Discussion, Group, Food Coop,&#8230;</string>
+    <!-- Change -->
+    <string name="create_title_change_hint">Roughly, what are you pointing out and want to change?</string>
+    <string name="create_description_change_hint">And now with details!\n\n(By the way, there\'s specialised textboxes for when and where the thing you want to change occurred.)</string>
+    <string name="create_location_change_hint">Where did the problem occur / where have things to be changed?</string>
+    <string name="create_tags_change_hint">e.g. FML, Clean Park Initiative, Recycling, Occupy Wallstreet, Privacy,&#8230;</string>
+    
     <!-- TOAST TEXTS -->
     <string name="error_no_camera">Camera is not available on the device</string>
     <string name="error_saving_picture">Error saving imagefile</string>

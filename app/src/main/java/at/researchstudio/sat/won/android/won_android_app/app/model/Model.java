@@ -6,7 +6,9 @@ import java.util.UUID;
  * Created by fsuda on 14.10.2014.
  */
 public abstract class Model {
+    protected static final String UUID_REF="UUID";
     private UUID uuid;
+
 
     protected Model(UUID uuid) {
         if(uuid==null){

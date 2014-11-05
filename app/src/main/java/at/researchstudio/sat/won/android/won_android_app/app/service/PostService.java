@@ -27,8 +27,9 @@ public class PostService {
     private static final String LOG_TAG = PostService.class.getSimpleName();
 
     public PostService() {
-        //MOCK DATA RETRIEVAL TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
+        //TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
         //TODO: REFACTOR THIS MOCK METHOD
+        //MOCK DATA RETRIEVAL
         Mock.fillMyMockMatches();
         Mock.fillMyMockPosts();
         Mock.fillMyMockConnections();

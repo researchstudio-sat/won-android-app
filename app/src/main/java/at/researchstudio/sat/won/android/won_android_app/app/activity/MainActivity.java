@@ -15,11 +15,11 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.activity;
 
-import android.app.*;
-
+import android.app.ActionBar;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
@@ -29,13 +29,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.Toast;
-import at.researchstudio.sat.won.android.won_android_app.app.*;
+import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.WelcomeScreenPagerAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.PostService;
@@ -48,6 +46,8 @@ import com.google.android.gms.location.LocationClient;
 public class MainActivity extends FragmentActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
                                                               GooglePlayServicesClient.ConnectionCallbacks,
                                                               GooglePlayServicesClient.OnConnectionFailedListener {
+    private static final String APP_STARTED_REF = "app_started_ref";
+    private static final String TEMPPOST_REF = "temppost_ref";
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private ImageLoaderService mImgLoader;
 
@@ -59,11 +59,23 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     private boolean doubleBackToExitPressedOnce;
 
+    private Post tempPost;
+
     //*******ACTIVITY LIFECYCLE**************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        boolean appAlreadyStarted;
+        //LOAD TEMPPOST
+        if(savedInstanceState != null){
+            tempPost = savedInstanceState.getParcelable(TEMPPOST_REF);
+            appAlreadyStarted = savedInstanceState.getBoolean(APP_STARTED_REF, false);
+        }else{
+            tempPost = new Post();
+            appAlreadyStarted = false;
+        }
+        Log.d(LOG_TAG,"tempPost: "+tempPost);
         //Initialize Connection to the backend
         postService = new PostService();
 
@@ -71,26 +83,29 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         LocationService.init(new LocationClient(this, this, this));
         //Initialize PreferencesService
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
-
         mImgLoader = new ImageLoaderService(this);
 
-        //TODO: THIS OPEN VIA URI DOES NOT NECESSARILY WORK
-        if(getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            Log.d(LOG_TAG,"Opened via url");
-            Log.d(LOG_TAG,""+getIntent().getData());
-
-            //OPEN NEEDS FRAGMENT RIGHT AWAY
+        if(appAlreadyStarted){
+            Log.d(LOG_TAG,"App was already running");
             showMainMenu();
-            //getFragmentManager().beginTransaction().replace(R.id.container, new ProfileFragment(getIntent().getData())).commit();
-            getFragmentManager().beginTransaction().replace(R.id.container, new PostBoxFragment()).commit();
-        }else{
-            Log.d(LOG_TAG,"Opened from launcher");
-            Log.d(LOG_TAG,""+getIntent().getData());
+        }else {
+            //TODO: THIS OPEN VIA URI DOES NOT NECESSARILY WORK
+            if (getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+                Log.d(LOG_TAG, "Opened via url");
+                Log.d(LOG_TAG, "" + getIntent().getData());
 
-            if((SettingsService.appStarts > 0) && !SettingsService.showStartupScreen) {
+                //OPEN NEEDS FRAGMENT RIGHT AWAY
                 showMainMenu();
-            }else {
-                showWelcomeScreen();
+                getFragmentManager().beginTransaction().replace(R.id.container, new PostBoxFragment()).commit();
+            } else {
+                Log.d(LOG_TAG, "Opened from launcher");
+                Log.d(LOG_TAG, "" + getIntent().getData());
+
+                if ((SettingsService.appStarts > 0) && !SettingsService.showStartupScreen) {
+                    showMainMenu();
+                } else {
+                    showWelcomeScreen();
+                }
             }
         }
     }
@@ -101,14 +116,19 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         super.onStart();
     }
 
-
-
     @Override
     protected void onStop() {
         LocationService.disconnect();
         super.onStop();
     }
     //**********************************
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(APP_STARTED_REF,true);
+        outState.putParcelable(TEMPPOST_REF,tempPost);
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -256,7 +276,9 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
      * @param enabled
      */
     public void setDrawerToggle(boolean enabled) {
-        mNavigationDrawerFragment.setDrawerToggle(enabled);
+        if(mNavigationDrawerFragment!=null) {
+            mNavigationDrawerFragment.setDrawerToggle(enabled);
+        }
     }
 
     public ImageLoaderService getImageLoaderService(){
@@ -271,4 +293,11 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         return (mNavigationDrawerFragment != null) && (mNavigationDrawerFragment.isDrawerOpen());
     }
 
+    public Post getTempPost() {
+        return tempPost;
+    }
+
+    public void setTempPost(Post tempPost) {
+        this.tempPost = tempPost;
+    }
 }
