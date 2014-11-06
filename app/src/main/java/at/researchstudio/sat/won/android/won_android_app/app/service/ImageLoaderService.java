@@ -29,7 +29,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -166,6 +168,48 @@ public class ImageLoaderService {
             else
                 photoToLoad.imageView.setImageResource(stub_id);
         }
+    }
+
+
+    /**
+     * Crop the outer parts of an Image to a square shape (based on the existing middle point)
+     * @param srcBmp image that needs to be cropped
+     * @return the cropped bitmap
+     */
+    public Bitmap cropBitmap(Bitmap srcBmp){
+        Bitmap dstBmp;
+
+        if (srcBmp.getWidth() >= srcBmp.getHeight()){
+
+            dstBmp = Bitmap.createBitmap(
+                    srcBmp,
+                    srcBmp.getWidth()/2 - srcBmp.getHeight()/2,
+                    0,
+                    srcBmp.getHeight(),
+                    srcBmp.getHeight()
+            );
+
+        }else{
+
+            dstBmp = Bitmap.createBitmap(
+                    srcBmp,
+                    0,
+                    srcBmp.getHeight()/2 - srcBmp.getWidth()/2,
+                    srcBmp.getWidth(),
+                    srcBmp.getWidth()
+            );
+        }
+
+        return dstBmp;
+    }
+
+    /**
+     * Retrieves an image from an url and crops the outer parts of an Image to a square shape (based on the existing middle point)
+     * @param url of the image that needs to be cropped
+     * @return the cropped bitmap
+     */
+    public Bitmap getCroppedBitmap(String url){
+        return this.cropBitmap(this.getBitmap(url));
     }
 
     public void clearCache() {

@@ -30,6 +30,7 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
@@ -53,6 +54,7 @@ public class ConversationFragment extends Fragment {
     private String conversationId;
 
     private Connection connection;
+    private LetterTileProvider tileProvider;
 
 
     //******FRAGMENT LIFECYCLE*************************************
@@ -119,6 +121,7 @@ public class ConversationFragment extends Fragment {
         setHasOptionsMenu(true);
 
         activity = (MainActivity) getActivity();
+        tileProvider = new LetterTileProvider(activity);
     }
 
     @Override
@@ -225,47 +228,12 @@ public class ConversationFragment extends Fragment {
         ab.setSubtitle(post2.getTitle() != null ? getString(R.string.to)+" "+post2.getTitle(): null);
 
         if(titleImageUrl!=null) {
-            Bitmap srcBmp = activity.getImageLoaderService().getBitmap(titleImageUrl);
-            Bitmap dstBmp;
-            //***********CROP BITMAP
-            if (srcBmp.getWidth() >= srcBmp.getHeight()){
-
-                dstBmp = Bitmap.createBitmap(
-                        srcBmp,
-                        srcBmp.getWidth()/2 - srcBmp.getHeight()/2,
-                        0,
-                        srcBmp.getHeight(),
-                        srcBmp.getHeight()
-                );
-
-            }else{
-
-                dstBmp = Bitmap.createBitmap(
-                        srcBmp,
-                        0,
-                        srcBmp.getHeight()/2 - srcBmp.getWidth()/2,
-                        srcBmp.getWidth(),
-                        srcBmp.getWidth()
-                );
-            }
-            //**********************
-
-            ab.setIcon(new BitmapDrawable(getResources(), dstBmp));
+            ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
         }else{
-            switch(post.getType()){
-                case OFFER:
-                    ab.setIcon(R.drawable.offer);
-                    break;
-                case WANT:
-                    ab.setIcon(R.drawable.want);
-                    break;
-                case ACTIVITY:
-                    ab.setIcon(R.drawable.activity);
-                    break;
-                case CHANGE:
-                    ab.setIcon(R.drawable.change);
-                    break;
-            }
+            final int tileSize = getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+            final Bitmap letterTile = tileProvider.getLetterTile(post.getTitle(), post.getTitle(), tileSize, tileSize);
+
+            ab.setIcon(new BitmapDrawable(getResources(), letterTile));
         }
     }
 }

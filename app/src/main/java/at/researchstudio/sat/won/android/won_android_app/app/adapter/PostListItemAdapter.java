@@ -22,7 +22,6 @@ public class PostListItemAdapter extends ArrayAdapter {
     private ImageLoaderService mImgLoader;
     private List<Post> objects;
     private Context context;
-    private LetterTileProvider tileProvider;
 
     private Filter filter;
 
@@ -31,7 +30,7 @@ public class PostListItemAdapter extends ArrayAdapter {
         this.context = context;
         mImgLoader = new ImageLoaderService(context);
         this.objects = new ArrayList<Post>();
-        tileProvider = new LetterTileProvider(context);
+
     }
 
     public void addItem(Post postListItem) {
@@ -124,6 +123,7 @@ public class PostListItemAdapter extends ArrayAdapter {
             if (holder.imageHolder != null){
                 if (item.getTitleImageUrl() == null){
                     final int tileSize = context.getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+                    final LetterTileProvider tileProvider = new LetterTileProvider(context);
                     final Bitmap letterTile = tileProvider.getLetterTile(item.getTitle(), item.getTitle(), tileSize, tileSize);
 
                     holder.imageHolder.setImageBitmap(letterTile);

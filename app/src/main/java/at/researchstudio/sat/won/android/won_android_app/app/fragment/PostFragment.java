@@ -33,6 +33,7 @@ import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
@@ -63,6 +64,7 @@ public class PostFragment extends Fragment {
     private IconPageIndicator mIconPageIndicator;
     private MapView mMapView;
     private ScrollView mScrollView;
+    private LetterTileProvider tileProvider;
 
     private MainActivity activity;
 
@@ -70,7 +72,6 @@ public class PostFragment extends Fragment {
     private GoogleMap map;
 
     private Post post;
-
 
     //*******FRAGMENT LIFECYCLE************************************************************************************
     @Nullable
@@ -131,6 +132,7 @@ public class PostFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
+        tileProvider = new LetterTileProvider(activity);
 
         //******INIT IMAGE PAGER **********
         //Initialize ImagePager
@@ -308,14 +310,21 @@ public class PostFragment extends Fragment {
             //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
             postDescription.setText(post.getDescription());
 
-            if(post.getTitleImageUrl()!=null) {
+            boolean imgsPresent = false;
+
+            if(post.getTitleImageUrl()!=null && "".equals(post.getTitleImageUrl().trim())) {
                 mImagePagerAdapter.addItem(post.getTitleImageUrl());
+                imgsPresent=true;
             }
             if(post.getImageUrls()!=null) {
                 for (String imgUrl : post.getImageUrls()) {
                     mImagePagerAdapter.addItem(imgUrl);
+                    imgsPresent=true;
                 }
             }
+            mImagePager.setVisibility(imgsPresent? View.VISIBLE : View.INVISIBLE);
+            mIconPageIndicator.setVisibility(imgsPresent? View.VISIBLE : View.INVISIBLE);
+
             mImagePager.setAdapter(mImagePagerAdapter);
             mIconPageIndicator.setViewPager(mImagePager);
 
@@ -361,47 +370,12 @@ public class PostFragment extends Fragment {
         ab.setSubtitle(refPostTitle != null? getString(R.string.to)+" "+refPostTitle: null);
 
         if(titleImageUrl!=null) {
-            Bitmap srcBmp = activity.getImageLoaderService().getBitmap(titleImageUrl);
-            Bitmap dstBmp;
-            //***********CROP BITMAP
-            if (srcBmp.getWidth() >= srcBmp.getHeight()){
-
-                dstBmp = Bitmap.createBitmap(
-                        srcBmp,
-                        srcBmp.getWidth()/2 - srcBmp.getHeight()/2,
-                        0,
-                        srcBmp.getHeight(),
-                        srcBmp.getHeight()
-                );
-
-            }else{
-
-                dstBmp = Bitmap.createBitmap(
-                        srcBmp,
-                        0,
-                        srcBmp.getHeight()/2 - srcBmp.getWidth()/2,
-                        srcBmp.getWidth(),
-                        srcBmp.getWidth()
-                );
-            }
-            //**********************
-
-            ab.setIcon(new BitmapDrawable(getResources(), dstBmp));
+            ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
         }else{
-            switch(post.getType()){
-                case OFFER:
-                    ab.setIcon(R.drawable.offer);
-                    break;
-                case WANT:
-                    ab.setIcon(R.drawable.want);
-                    break;
-                case ACTIVITY:
-                    ab.setIcon(R.drawable.activity);
-                    break;
-                case CHANGE:
-                    ab.setIcon(R.drawable.change);
-                    break;
-            }
+            final int tileSize = getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+            final Bitmap letterTile = tileProvider.getLetterTile(post.getTitle(), post.getTitle(), tileSize, tileSize);
+
+            ab.setIcon(new BitmapDrawable(getResources(), letterTile));
         }
     }
 }

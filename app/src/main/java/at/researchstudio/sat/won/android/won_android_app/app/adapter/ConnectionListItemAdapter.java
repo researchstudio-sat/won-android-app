@@ -40,14 +40,12 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
     private boolean receivedRequestsOnly;
     private List<Connection> objects;
     private Context context;
-    private LetterTileProvider tileProvider;
 
     private Filter filter;
 
     public ConnectionListItemAdapter(Context context, boolean includeReference, boolean receivedRequestsOnly){
         super(context, 0);
         this.context = context;
-        tileProvider = new LetterTileProvider(context);
         mImgLoader = new ImageLoaderService(context);
         this.includeReference = includeReference;
         this.receivedRequestsOnly = receivedRequestsOnly;
@@ -145,6 +143,7 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
             if (holder.imageHolder != null){
                 if (item.getTitleImageUrl() == null){
                     final int tileSize = context.getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+                    final LetterTileProvider tileProvider = new LetterTileProvider(context);
                     final Bitmap letterTile = tileProvider.getLetterTile(item.getTitle(), item.getTitle(), tileSize, tileSize);
 
                     holder.imageHolder.setImageBitmap(letterTile);
