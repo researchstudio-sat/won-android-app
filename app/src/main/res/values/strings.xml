@@ -27,6 +27,8 @@
     <string name="cancel">Cancel</string>
     <string name="dismiss">Dismiss</string>
     <string name="sharechooser">Share through&#8230;</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
 
     <!-- MENU ITEMS -->
     <string name="mi_profile">Profile</string>
@@ -121,7 +123,7 @@
     <string name="dialog_create_dismiss">Dismiss this Post?</string>
     <string name="dialog_create_save_title">Save</string>
     <string name="dialog_create_dismiss_title">Dismiss</string>
-
+    <string name="dialog_select_from">Select from&#8230;</string>
 
     <!-- MYPOST -->
     <string name="post">Post</string>
@@ -131,4 +133,9 @@
 
     <!-- Conversation -->
     <string name="conversation_message_hint">Send message</string>
+
+    <string-array name="image_picker">;
+        <item>@string/camera</item>
+        <item>@string/gallery</item>
+    </string-array>
 </resources>

@@ -17,11 +17,13 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -48,6 +50,7 @@ public class ImageFragment extends Fragment{
     public static final String ARG_IMAGE_EDITABLE = "image_editable";
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_PICK = 2;
 
     private ImageLoaderService mImgLoader;
     private ImageView createPostImage;
@@ -55,9 +58,10 @@ public class ImageFragment extends Fragment{
     private boolean addFlag;
     private boolean editable=true;
     private String mImageUrl;
-    private Bundle args;
 
     private MainActivity activity;
+
+    private CreateTask createTask;
 
     public ImageFragment(){
         super();
@@ -66,54 +70,21 @@ public class ImageFragment extends Fragment{
     //*****************FRAGMENT LIFECYCLE************************************************************
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(LOG_TAG,"onCreateView: "+this.hashCode());
-
-        Bundle args2 = getArguments();
-        Log.d(LOG_TAG,"args2: "+this.hashCode()+" - "+args2);
-
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
 
         createPostImage = (ImageView) rootView.findViewById(R.id.image);
-
-        if(editable) { //ONLY ALLOW THE 'FONDLING' OF IMAGES WHEN IT IS IN EDIT MODE
-            createPostImage.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (!addFlag) {
-                        displayDeleteDialog();
-                        return true; //prohibit further processing
-                    }
-                    return false;
-                }
-            });
-
-            createPostImage.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    if (addFlag) {
-                        dispatchTakePictureIntent();
-                        //addFlag = false; //TODO: TRY THIS SHOULDNT MATTER
-                    } else {
-                        displaySetTitleImageDialog();
-                    }
-                }
-            });
-        }
 
         return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(LOG_TAG,"onActivityCreated: "+this.hashCode());
-
         super.onActivityCreated(savedInstanceState);
         activity = (MainActivity) getActivity();
 
         mImgLoader = new ImageLoaderService(activity);
 
-
-        args = getArguments();
-        Log.d(LOG_TAG,"args: "+this.hashCode()+" - "+args);
+        Bundle args = getArguments();
 
         if(mImageUrl == null && args == null){
             addFlag = true;
@@ -123,12 +94,25 @@ public class ImageFragment extends Fragment{
             }
             editable = args.getBoolean(ARG_IMAGE_EDITABLE);
         }
-        Log.d(LOG_TAG,"mImageUrl: "+this.hashCode() +" - "+mImageUrl);
+    }
 
-        if(addFlag) {
-            createPostImage.setImageResource(R.drawable.add_image);
-        }else{
-            mImgLoader.displayImage(mImageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
+    @Override
+    public void onStart() {
+        super.onStart();
+        createTask = new CreateTask();
+        createTask.execute();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createTask.cancel(true);
         }
     }
 
@@ -146,14 +130,33 @@ public class ImageFragment extends Fragment{
                 activity.getTempPost().removeLastAddedImage();
                 Log.e(LOG_TAG, "ERROR WHILE PROCESSING CAMERA PICTURE: " + e.getMessage());
             }
-
-            reloadFragment();
         }else if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_CANCELED){
             activity.getTempPost().removeLastAddedImage(); //REMOVE IMAGE AGAIN IF THE REQUEST IS CANCELED
-            reloadFragment();
-        }else{
-            super.onActivityResult(requestCode,resultCode,data);
+        }else if(requestCode == REQUEST_IMAGE_PICK && resultCode == getActivity().RESULT_OK){
+            if(data.getData() != null) {
+                Uri _uri = data.getData();
+
+                //User had pick an image.
+                Cursor cursor = getActivity().getContentResolver().query(_uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
+                cursor.moveToFirst();
+
+                //Link to the image
+                final String imageFilePath = cursor.getString(0);
+
+                activity.getTempPost().addImage(imageFilePath);
+                cursor.close();
+            }
+
         }
+        super.onActivityResult(requestCode,resultCode,data);
+    }
+
+    protected void dispatchGalleryPictureIntent(){
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_IMAGE_PICK);
     }
 
     protected void dispatchTakePictureIntent() {
@@ -176,7 +179,6 @@ public class ImageFragment extends Fragment{
                 if (photoFile != null) {
                     mImageUrl = photoFile.getAbsolutePath();
 
-                    Log.d(LOG_TAG, "Adding image with url: "+mImageUrl);
                     activity.getTempPost().addImage(mImageUrl);
 
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -197,8 +199,6 @@ public class ImageFragment extends Fragment{
             public void onClick(DialogInterface dialog, int which) {
                 Log.d(LOG_TAG, "Delete image with url: "+mImageUrl);
                 activity.getTempPost().removeImage(mImageUrl);
-
-                reloadFragment();
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -220,14 +220,12 @@ public class ImageFragment extends Fragment{
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d(LOG_TAG, "DIALOG YES");
                 //TODO: DIALOG YES ACTION
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d(LOG_TAG, "DIALOG NO");
                 //TODO: DIALOG NO ACTION
             }
         });
@@ -236,13 +234,59 @@ public class ImageFragment extends Fragment{
         dialog.show();
     }
 
-    private void reloadFragment(){
-        Log.d(LOG_TAG,"reloading the whole createFragment");
-        // update the main content by replacing fragments
-        Fragment fragment = activity.getFragmentManager().findFragmentById(R.id.container);
-        final FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.detach(fragment);
-        ft.attach(fragment);
-        ft.commit();
+    private class CreateTask  extends AsyncTask<String, Integer, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            return null; //TODO: I DONT KNOW IF THERE NEEDS TO BE DIFFERENT THINGS HAPPENING HERE
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(editable) { //ONLY ALLOW THE 'FONDLING' OF IMAGES WHEN IT IS IN EDIT MODE
+                createPostImage.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if (!addFlag) {
+                            displayDeleteDialog();
+                            return true; //prohibit further processing
+                        }
+                        return false;
+                    }
+                });
+
+                createPostImage.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        if (addFlag) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle(R.string.dialog_select_from)
+                                    .setItems(R.array.image_picker, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch(which){
+                                                case 0:
+                                                    dispatchTakePictureIntent();
+                                                    break;
+                                                case 1:
+                                                    dispatchGalleryPictureIntent();
+                                                    break;
+                                            }
+                                        }
+                                    });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        } else {
+                            displaySetTitleImageDialog();
+                        }
+                    }
+                });
+            }
+
+            if(addFlag) {
+                createPostImage.setImageResource(R.drawable.add_image);
+            }else{
+                mImgLoader.displayImage(mImageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
+            }
+
+            super.onPostExecute(s);
+        }
     }
 }

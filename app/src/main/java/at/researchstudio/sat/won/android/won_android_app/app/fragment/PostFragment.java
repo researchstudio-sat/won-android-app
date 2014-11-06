@@ -28,6 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.*;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
@@ -134,10 +135,6 @@ public class PostFragment extends Fragment {
         activity = (MainActivity) getActivity();
         tileProvider = new LetterTileProvider(activity);
 
-        //******INIT IMAGE PAGER **********
-        //Initialize ImagePager
-        mImagePagerAdapter = new ImagePagerAdapter(activity,false);
-        mImagePager.setSaveFromParentEnabled(false);  //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
         //Initialize GMaps
         MapsInitializer.initialize(activity);
         mGeocoder = new Geocoder(activity, Locale.getDefault());
@@ -225,70 +222,15 @@ public class PostFragment extends Fragment {
 
         @Override
         protected void onCancelled(Post tempPost) {
-            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
             //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
-
-            if(tempPost != null) {
-                post = tempPost;
-
-                switch(post.getType()){
-                    case OFFER:
-                        postType.setImageResource(R.drawable.offer);
-                        break;
-                    case WANT:
-                        postType.setImageResource(R.drawable.want);
-                        break;
-                    case ACTIVITY:
-                        postType.setImageResource(R.drawable.activity);
-                        break;
-                    case CHANGE:
-                        postType.setImageResource(R.drawable.change);
-                        break;
-                }
-
-                //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
-                postDescription.setText(post.getDescription());
-
-                if(post.getTitleImageUrl()!=null) {
-                    mImagePagerAdapter.addItem(post.getTitleImageUrl());
-                }
-                if(post.getImageUrls()!=null) {
-                    for (String imgUrl : post.getImageUrls()) {
-                        mImagePagerAdapter.addItem(imgUrl);
-                    }
-                }
-                mImagePager.setAdapter(mImagePagerAdapter);
-                mIconPageIndicator.setViewPager(mImagePager);
-
-                styleActionBar();
-
-                try {
-                    List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
-
-                    String address;
-
-                    if(adresses!=null && adresses.size()>0){
-                        address = StringUtils.getFormattedAddress(adresses.get(0));
-                    }else{
-                        Log.d(LOG_TAG, "No Address found");
-                        address=post.getTitle();
-                    }
-
-                    Marker marker = map.addMarker(new MarkerOptions()
-                            .position(post.getLocation())
-                            .title(post.getTitle())
-                            .snippet(address)
-                            .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
-                    map.animateCamera(cameraUpdate);
-                }catch (IOException ioe){
-                    //TODO: ERROR TOAST
-                    Log.e(LOG_TAG,ioe.getMessage());
-                }
-            }
+            putPostInView(tempPost);
         }
 
         protected void onPostExecute(Post tempPost) {
+            putPostInView(tempPost);
+        }
+
+        private void putPostInView(Post tempPost) {
             post = tempPost;
             styleActionBar();
 
@@ -310,9 +252,12 @@ public class PostFragment extends Fragment {
             //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
             postDescription.setText(post.getDescription());
 
+            mImagePagerAdapter = new ImagePagerAdapter(activity, false);
+            mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
+
             boolean imgsPresent = false;
 
-            if(post.getTitleImageUrl()!=null && "".equals(post.getTitleImageUrl().trim())) {
+            if(post.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
                 mImagePagerAdapter.addItem(post.getTitleImageUrl());
                 imgsPresent=true;
             }
@@ -322,11 +267,17 @@ public class PostFragment extends Fragment {
                     imgsPresent=true;
                 }
             }
-            mImagePager.setVisibility(imgsPresent? View.VISIBLE : View.INVISIBLE);
-            mIconPageIndicator.setVisibility(imgsPresent? View.VISIBLE : View.INVISIBLE);
 
-            mImagePager.setAdapter(mImagePagerAdapter);
-            mIconPageIndicator.setViewPager(mImagePager);
+            LinearLayout imageContainer = ((LinearLayout) activity.findViewById(R.id.image_container));
+
+            if(imgsPresent) {
+                mImagePager.setAdapter(mImagePagerAdapter);
+                mIconPageIndicator.setViewPager(mImagePager);
+                mIconPageIndicator.notifyDataSetChanged();
+                imageContainer.setVisibility(View.VISIBLE);
+            }else {
+                imageContainer.setVisibility(View.GONE);
+            }
 
             try {
                 List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);

@@ -108,4 +108,10 @@ public class PostService {
         //TODO: REFACTOR THIS MOCK METHOD
         return Mock.myMockMatches.get(id);
     }
+
+    public Post savePost(Post newPost){
+        Mock.myMockPosts.put(newPost.getUuid(),newPost);
+        //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
+        return newPost; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+    }
 }

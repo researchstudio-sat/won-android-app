@@ -15,10 +15,7 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.Fragment;
+import android.app.*;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Address;
@@ -84,6 +81,7 @@ public class CreateFragment extends Fragment {
     private Geocoder mGeocoder;
 
     private ScrollView mScrollView;
+    private ImageView transparentImageView;
 
     //***********FRAGMENT LIFECYCLE****************************************************************
     @Nullable
@@ -102,143 +100,16 @@ public class CreateFragment extends Fragment {
         mDescription = (EditText) rootView.findViewById(R.id.create_description);
         mTags = (EditText) rootView.findViewById(R.id.create_tags);
 
+        transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
         mScrollView = (ScrollView) rootView.findViewById(R.id.create_scrollview);
-        ImageView transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
 
-        transparentImageView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        // Disallow ScrollView to intercept touch events.
-                        mScrollView.requestDisallowInterceptTouchEvent(true);
-                        // Disable touch on transparent view
-                        return false;
-
-                    case MotionEvent.ACTION_UP:
-                        // Allow ScrollView to intercept touch events.
-                        mScrollView.requestDisallowInterceptTouchEvent(false);
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        mScrollView.requestDisallowInterceptTouchEvent(true);
-                        return false;
-
-                    default:
-                        return true;
-                }
-            }
-        });
-
-
-        mStartDateTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                int mYear = c.get(Calendar.YEAR);
-                int mMonth = c.get(Calendar.MONTH);
-                int mDay = c.get(Calendar.DAY_OF_MONTH);
-                System.out.println("the selected " + mDay);
-
-                //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
-                //TODO: How to reset Date/Time + Time Picker
-                //TODO: Initialize with set values from view
-                DatePickerDialog dialog = new DatePickerDialog(activity,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                mStartDateTimeButton.setText(dayOfMonth + "." + monthOfYear + "." + year);
-                            }
-                        }, mYear, mMonth, mDay);
-                dialog.show();
-            }
-        });
-
-        mEndDateTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                int mYear = c.get(Calendar.YEAR);
-                int mMonth = c.get(Calendar.MONTH);
-                int mDay = c.get(Calendar.DAY_OF_MONTH);
-                System.out.println("the selected " + mDay);
-                //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
-                //TODO: How to reset Date/Time + Time Picker
-                //TODO: Initialize with set values from view
-                DatePickerDialog dialog = new DatePickerDialog(activity,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                mEndDateTimeButton.setText(dayOfMonth + "." + monthOfYear + "." + year);
-                            }
-                        }, mYear, mMonth, mDay);
-                dialog.show();
-            }
-        });
-
-        mTitle.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                activity.getTempPost().setTitle(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        mDescription.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                activity.getTempPost().setDescription(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        mTags.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                activity.getTempPost().setTags(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        mTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-
-                PostType newType = PostType.values()[position];
-                activity.getTempPost().setType(newType);
-
-                setPostTypeHints(newType);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                Log.d(LOG_TAG,"nothing selected");
-            }
-        });
 
         return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(LOG_TAG,"onActivityCreated");
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
@@ -252,15 +123,6 @@ public class CreateFragment extends Fragment {
         mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_change, R.drawable.change, PostType.CHANGE));
 
         mTypeSpinner.setAdapter(mTypeSpinnerAdapter);
-
-        //Initialize ImagePager
-        mImagePagerAdapter = new ImagePagerAdapter(activity);
-
-        mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
-        mImagePager.setAdapter(mImagePagerAdapter);
-
-
-        mIconPageIndicator.setViewPager(mImagePager);
 
         MapsInitializer.initialize(activity);
         mGeocoder = new Geocoder(activity, Locale.getDefault());
@@ -283,57 +145,6 @@ public class CreateFragment extends Fragment {
             map.getUiSettings().setMyLocationButtonEnabled(true);
             map.setMyLocationEnabled(true);
         }
-
-        mLocationText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if(actionId == EditorInfo.IME_ACTION_SEARCH){
-                    //TODO: MAKE ASYNCTASK like here http://developer.android.com/training/location/display-address.html
-                    try {
-                        map.clear();
-                        Log.d(LOG_TAG,"ENTERED TEXT:"+ v.getText());
-
-                        List<Address> addressList = mGeocoder.getFromLocationName(v.getText().toString(), 1);
-
-                        for(Address a : addressList){
-                            Marker marker = map.addMarker(new MarkerOptions()
-                                    .position(new LatLng(a.getLatitude(), a.getLongitude()))
-                                    .title(getString(R.string.create_location))
-                                    .snippet(StringUtils.getFormattedAddress(a)) //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
-                                    .draggable(false)); //TODO: DRAG MARKER IMPLEMENTATION
-                            Log.d(LOG_TAG,a.toString());
-                            activity.getTempPost().setLocation(new LatLng(a.getLatitude(), a.getLongitude())); //SET LOCATION OF TEMPPOST
-                        }
-
-                        if(addressList.size() > 0) {
-                            Address usedAddress = addressList.get(0);
-                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(usedAddress.getLatitude(), usedAddress.getLongitude()), 10);
-                            map.animateCamera(cameraUpdate);
-                        }
-                        //Hides the keyboard after search
-                        InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                        inputManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
-
-                        handled = true;
-                    }catch (IOException ioe){
-                        //TODO ERROR TOAST
-                        Log.e(LOG_TAG,ioe.getMessage());
-                    }
-
-                }
-                return handled;
-            }
-        });
-
-        map.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-            @Override
-            public boolean onMyLocationButtonClick() {
-                //TODO: SET MARKER OR PRESENT TOAST ON CLICK IF LOCATIONSERVICE IS SET, if false then show toast
-
-                return false;
-            }
-        });
     }
 
     @Override
@@ -406,14 +217,32 @@ public class CreateFragment extends Fragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: IMPLEMENT SAVE STUFF
+
                 Toast.makeText(activity, getString(R.string.toast_create_saved), Toast.LENGTH_SHORT).show();
+
+                Post post = activity.getPostService().savePost(activity.getTempPost());
+                activity.setTempPost(new Post());
+
+                Fragment fragment;
+
+                Bundle args = new Bundle();
+
+                fragment = new MyPostFragment();
+
+                args.putString(Post.ID_REF, post.getUuidString());
+
+                fragment.setArguments(args);
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.container, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: IMPLEMENT STUFF TO DO HERE
+                //DO NOTHING
             }
         });
 
@@ -438,7 +267,7 @@ public class CreateFragment extends Fragment {
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: IMPLEMENT STUFF TO DO HERE
+                //DO NOTHING
             }
         });
 
@@ -476,6 +305,7 @@ public class CreateFragment extends Fragment {
     }
 
     private class CreateTask extends AsyncTask<String, Integer, Post> {
+
         @Override
         protected Post doInBackground(String... params) {
             return activity.getTempPost();
@@ -483,16 +313,201 @@ public class CreateFragment extends Fragment {
 
         @Override
         protected void onCancelled(Post tempPost) {
+            addListeners();
             putPostInView(tempPost);
             //TODO: SHOW PROCESS WAS CANCELLED
         }
 
         @Override
         protected void onPostExecute(Post tempPost) {
+            addListeners();
             putPostInView(tempPost);
         }
 
+        private void addListeners(){
+            transparentImageView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    int action = event.getAction();
+                    switch (action) {
+                        case MotionEvent.ACTION_DOWN:
+                            // Disallow ScrollView to intercept touch events.
+                            mScrollView.requestDisallowInterceptTouchEvent(true);
+                            // Disable touch on transparent view
+                            return false;
+
+                        case MotionEvent.ACTION_UP:
+                            // Allow ScrollView to intercept touch events.
+                            mScrollView.requestDisallowInterceptTouchEvent(false);
+                            return true;
+
+                        case MotionEvent.ACTION_MOVE:
+                            mScrollView.requestDisallowInterceptTouchEvent(true);
+                            return false;
+
+                        default:
+                            return true;
+                    }
+                }
+            });
+
+
+            mStartDateTimeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Calendar c = Calendar.getInstance();
+                    int mYear = c.get(Calendar.YEAR);
+                    int mMonth = c.get(Calendar.MONTH);
+                    int mDay = c.get(Calendar.DAY_OF_MONTH);
+                    System.out.println("the selected " + mDay);
+
+                    //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
+                    //TODO: How to reset Date/Time + Time Picker
+                    //TODO: Initialize with set values from view
+                    DatePickerDialog dialog = new DatePickerDialog(activity,
+                            new DatePickerDialog.OnDateSetListener() {
+                                @Override
+                                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                    mStartDateTimeButton.setText(dayOfMonth + "." + monthOfYear + "." + year);
+                                }
+                            }, mYear, mMonth, mDay);
+                    dialog.show();
+                }
+            });
+
+            mEndDateTimeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Calendar c = Calendar.getInstance();
+                    int mYear = c.get(Calendar.YEAR);
+                    int mMonth = c.get(Calendar.MONTH);
+                    int mDay = c.get(Calendar.DAY_OF_MONTH);
+                    System.out.println("the selected " + mDay);
+                    //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
+                    //TODO: How to reset Date/Time + Time Picker
+                    //TODO: Initialize with set values from view
+                    DatePickerDialog dialog = new DatePickerDialog(activity,
+                            new DatePickerDialog.OnDateSetListener() {
+                                @Override
+                                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                    mEndDateTimeButton.setText(dayOfMonth + "." + monthOfYear + "." + year);
+                                }
+                            }, mYear, mMonth, mDay);
+                    dialog.show();
+                }
+            });
+
+            mTitle.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    activity.getTempPost().setTitle(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+
+            mDescription.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    activity.getTempPost().setDescription(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+
+            mTags.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    activity.getTempPost().setTags(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
+
+            mTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
+                    PostType newType = PostType.values()[position];
+                    activity.getTempPost().setType(newType);
+
+                    setPostTypeHints(newType);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                    Log.d(LOG_TAG,"nothing selected");
+                }
+            });
+
+            mLocationText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    boolean handled = false;
+                    if(actionId == EditorInfo.IME_ACTION_SEARCH){
+                        //TODO: MAKE ASYNCTASK like here http://developer.android.com/training/location/display-address.html
+                        try {
+                            map.clear();
+                            Log.d(LOG_TAG,"ENTERED TEXT:"+ v.getText());
+
+                            List<Address> addressList = mGeocoder.getFromLocationName(v.getText().toString(), 1);
+
+                            for(Address a : addressList){
+                                Marker marker = map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(a.getLatitude(), a.getLongitude()))
+                                        .title(getString(R.string.create_location))
+                                        .snippet(StringUtils.getFormattedAddress(a)) //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+                                        .draggable(false)); //TODO: DRAG MARKER IMPLEMENTATION
+                                Log.d(LOG_TAG,a.toString());
+                                activity.getTempPost().setLocation(new LatLng(a.getLatitude(), a.getLongitude())); //SET LOCATION OF TEMPPOST
+                            }
+
+                            if(addressList.size() > 0) {
+                                Address usedAddress = addressList.get(0);
+                                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(usedAddress.getLatitude(), usedAddress.getLongitude()), 10);
+                                map.animateCamera(cameraUpdate);
+                            }
+                            //Hides the keyboard after search
+                            InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            inputManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+
+                            handled = true;
+                        }catch (IOException ioe){
+                            //TODO ERROR TOAST
+                            Log.e(LOG_TAG,ioe.getMessage());
+                        }
+
+                    }
+                    return handled;
+                }
+            });
+
+            map.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    //TODO: SET MARKER OR PRESENT TOAST ON CLICK IF LOCATIONSERVICE IS SET, if false then show toast
+
+                    return false;
+                }
+            });
+        }
+
         private void putPostInView(Post tempPost){
+            Log.d(LOG_TAG,"Putting post into createview");
             mTitle.setText(tempPost.getTitle());
             mDescription.setText(tempPost.getDescription());
             mTags.setText(tempPost.getTagsAsString());
@@ -515,7 +530,8 @@ public class CreateFragment extends Fragment {
                     Marker marker = map.addMarker(new MarkerOptions()
                             .position(tempPost.getLocation())
                             .title(tempPost.getTitle())
-                            .snippet(address)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+                            .snippet(address)
+                            .draggable(true)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
 
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(tempPost.getLocation(), 10);
                     map.animateCamera(cameraUpdate);
@@ -523,9 +539,18 @@ public class CreateFragment extends Fragment {
                     //TODO: ERROR TOAST
                     Log.e(LOG_TAG, ioe.getMessage());
                 }
+            }else{
+                mLocationText.setText("");
+                map.clear();
             }
 
+            //Initialize ImagePager
+            mImagePagerAdapter = new ImagePagerAdapter(activity);
+            mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
+
+
             if(tempPost.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
+                Log.d(LOG_TAG,"Adding Image To Create Post: "+tempPost.getTitleImageUrl());
                 mImagePagerAdapter.addItem(tempPost.getTitleImageUrl());
             }
 
@@ -533,12 +558,14 @@ public class CreateFragment extends Fragment {
                 for (String imgUrl : tempPost.getImageUrls()) {
                     imgUrl = imgUrl.trim();
                     if (imgUrl.length() > 0) {
+                        Log.d(LOG_TAG,"Adding Image To Create Post: "+imgUrl);
                         mImagePagerAdapter.addItem(imgUrl);
                     }
                 }
             }
 
-            mImagePagerAdapter.notifyDataSetChanged();
+            mImagePager.setAdapter(mImagePagerAdapter);
+            mIconPageIndicator.setViewPager(mImagePager);
             mIconPageIndicator.notifyDataSetChanged();
         }
     }
