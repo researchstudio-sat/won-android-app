@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
-import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.ImageFragment;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -48,8 +47,6 @@ public class ImagePagerAdapter extends FragmentStatePagerAdapter implements Icon
     }
 
     public void addItem(String imageUrl){
-        Log.d(LOG_TAG, "ADDING IMAGEITEM WITH: "+imageUrl);
-
         if(imageUrl!=null && !"".equals(imageUrl.trim())) {
             ImageFragment fragment = new ImageFragment();
 

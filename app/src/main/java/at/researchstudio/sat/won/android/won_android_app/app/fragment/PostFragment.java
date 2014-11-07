@@ -271,10 +271,10 @@ public class PostFragment extends Fragment {
             LinearLayout imageContainer = ((LinearLayout) activity.findViewById(R.id.image_container));
 
             if(imgsPresent) {
+                imageContainer.setVisibility(View.VISIBLE);
                 mImagePager.setAdapter(mImagePagerAdapter);
                 mIconPageIndicator.setViewPager(mImagePager);
                 mIconPageIndicator.notifyDataSetChanged();
-                imageContainer.setVisibility(View.VISIBLE);
             }else {
                 imageContainer.setVisibility(View.GONE);
             }

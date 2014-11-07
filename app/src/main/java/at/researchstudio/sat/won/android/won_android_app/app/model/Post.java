@@ -256,7 +256,7 @@ public class Post extends Model implements Parcelable {
                 sb.append(tag).append(TAG_SEPARATOR).append(" ");
             }
 
-            return sb.substring(0, sb.length()-TAG_SEPARATOR.length()+1); //return without last Separator
+            return sb.substring(0, sb.length()-(TAG_SEPARATOR.length()+1)); //return without last Separator and space
         }else{
             return "";
         }

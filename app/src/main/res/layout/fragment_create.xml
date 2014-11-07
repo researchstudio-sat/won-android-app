@@ -17,7 +17,6 @@
                 android:id="@+id/createType"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <!-- TODO: SPINNER INDICATOR IS MISSING FIND OUT HOW TO GET IT BACK WITH COSTUM STYLE -->
         <Spinner
                 android:id="@+id/typespinner"
                 android:drawSelectorOnTop="true"

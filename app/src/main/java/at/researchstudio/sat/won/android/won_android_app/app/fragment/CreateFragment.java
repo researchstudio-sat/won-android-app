@@ -217,7 +217,6 @@ public class CreateFragment extends Fragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 Toast.makeText(activity, getString(R.string.toast_create_saved), Toast.LENGTH_SHORT).show();
 
                 Post post = activity.getPostService().savePost(activity.getTempPost());
