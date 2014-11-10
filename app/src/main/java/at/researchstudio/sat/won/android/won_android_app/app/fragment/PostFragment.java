@@ -27,10 +27,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.*;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
@@ -38,6 +35,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTi
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
@@ -58,14 +56,23 @@ public class PostFragment extends Fragment {
     private String postId;
     private String refPostTitle; //title of the reference post
 
-    private TextView postDescription;
-    private ImageView postType;
+    private TextView postDescription; //the description of the post
+
+    private ImageView postType; //the post type icon
+    private TextView postTypeText; //the written type of the post
+
+    private LinearLayout postTagHolder; //the tag holder //TODO: CHANGE THIS TO A FLOWLAYOUT (COSTUMLAYOUT)
+    private TextView postDate; //a nicely formatted date/time string
+    private ImageView postDateType; //Binds either a Calendar Icon or a recurring circle icon
+
     private ImagePagerAdapter mImagePagerAdapter;
     private ViewPager mImagePager;
     private IconPageIndicator mIconPageIndicator;
     private MapView mMapView;
     private ScrollView mScrollView;
     private LetterTileProvider tileProvider;
+
+    private RelativeLayout mapLayout;
 
     private MainActivity activity;
 
@@ -92,9 +99,15 @@ public class PostFragment extends Fragment {
 
         postDescription = (TextView) rootView.findViewById(R.id.post_description);
         postType = (ImageView) rootView.findViewById(R.id.post_type);
+        postTypeText = (TextView) rootView.findViewById(R.id.post_type_text);
+        postTagHolder = (LinearLayout) rootView.findViewById(R.id.post_tag_holder);
+        postDate = (TextView) rootView.findViewById(R.id.post_calendar_time);
+        postDateType = (ImageView) rootView.findViewById(R.id.post_calendar_icon);
         mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
         mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
+        mapLayout = (RelativeLayout) rootView.findViewById(R.id.map_layout);
         mMapView = (MapView) rootView.findViewById(R.id.post_map);
+
 
         mScrollView = (ScrollView) rootView.findViewById(R.id.post_scrollview);
         ImageView transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
@@ -234,72 +247,122 @@ public class PostFragment extends Fragment {
             post = tempPost;
             styleActionBar();
 
+            //Set PostType
             switch(post.getType()){
                 case OFFER:
-                    postType.setImageResource(R.drawable.offer);
+                    postType.setImageResource(R.drawable.offer_light);
+                    postTypeText.setText(R.string.type_offer);
                     break;
                 case WANT:
-                    postType.setImageResource(R.drawable.want);
+                    postType.setImageResource(R.drawable.want_light);
+                    postTypeText.setText(R.string.type_want);
                     break;
                 case ACTIVITY:
-                    postType.setImageResource(R.drawable.activity);
+                    postType.setImageResource(R.drawable.activity_light);
+                    postTypeText.setText(R.string.type_activity);
                     break;
                 case CHANGE:
-                    postType.setImageResource(R.drawable.change);
+                    postType.setImageResource(R.drawable.change_light);
+                    postTypeText.setText(R.string.type_change);
                     break;
             }
 
-            //TODO: SHOW NOTHING IF THERE ARE NO IMAGES PRESENT
+            //Set RepeatType
+            switch(post.getRepeat()){
+                case NONE:
+                    postDateType.setImageResource(R.drawable.calendar);
+                    break;
+                case WEEKLY:
+                    postDateType.setImageResource(R.drawable.calendar_repeat);
+                    break;
+                case MONTHLY:
+                    postDateType.setImageResource(R.drawable.calendar_repeat);
+                    break;
+            }
+            postDate.setText(post.getFormattedDate());
+
+            //Set Tags
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            params.setMargins(10,10,10,10);
+
+            int margin = (int) getResources().getDimension(R.dimen.create_edit_margin_lr);
+            params.setMargins(margin, margin, margin, margin);
+
+            for(String tag : post.getTags()) {
+                TextView tv = new TextView(activity);
+                tv.setText(tag);
+                tv.setTextColor(getResources().getColor(R.color.post_tag_text));
+                tv.setLayoutParams(params);
+                tv.setBackgroundResource(R.drawable.tag_bg);
+                postTagHolder.addView(tv);
+            }
+
+            //Set Description
             postDescription.setText(post.getDescription());
 
+            //Set Images
             mImagePagerAdapter = new ImagePagerAdapter(activity, false);
             mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
 
             boolean imgsPresent = false;
+            int imageCount = 0;
+
 
             if(post.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
                 mImagePagerAdapter.addItem(post.getTitleImageUrl());
-                imgsPresent=true;
+                imageCount++;
             }
             if(post.getImageUrls()!=null) {
                 for (String imgUrl : post.getImageUrls()) {
                     mImagePagerAdapter.addItem(imgUrl);
-                    imgsPresent=true;
+                    imageCount++;
                 }
             }
 
             LinearLayout imageContainer = ((LinearLayout) activity.findViewById(R.id.image_container));
 
-            if(imgsPresent) {
+            if(imageCount>0) {
                 imageContainer.setVisibility(View.VISIBLE);
+                mIconPageIndicator.setVisibility(imageCount>1? View.VISIBLE : View.GONE);
                 mImagePager.setAdapter(mImagePagerAdapter);
                 mIconPageIndicator.setViewPager(mImagePager);
                 mIconPageIndicator.notifyDataSetChanged();
-            }else {
+                imageContainer.setBackgroundResource(R.color.post_images);
+            }else{
                 imageContainer.setVisibility(View.GONE);
             }
 
+            //Set Location
             try {
-                List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
-
-                String address;
-
-                if(adresses!=null && adresses.size()>0){
-                    address = StringUtils.getFormattedAddress(adresses.get(0));
+                LatLng lng = post.getLocation();
+                if(lng == null || (lng.latitude == 0.0 && lng.longitude == 0.0)){
+                    Log.d(LOG_TAG,"the adress is null do not show the map");
+                    mapLayout.setVisibility(View.GONE);
                 }else{
-                    Log.d(LOG_TAG, "No Address found");
-                    address=post.getTitle();
-                }
+                    mapLayout.setVisibility(View.VISIBLE);
+                    List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
 
-                Marker marker = map.addMarker(new MarkerOptions()
-                        .position(post.getLocation())
-                        .title(post.getTitle())
-                        .snippet(address)
-                        .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
-                map.animateCamera(cameraUpdate);
+                    String address;
+
+                    if(adresses!=null && adresses.size()>0){
+                        address = StringUtils.getFormattedAddress(adresses.get(0));
+                    }else{
+                        Log.d(LOG_TAG, "No Address found");
+                        address=post.getTitle();
+                    }
+
+                    Marker marker = map.addMarker(new MarkerOptions()
+                            .position(post.getLocation())
+                            .title(post.getTitle())
+                            .snippet(address)
+                            .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
+                    map.animateCamera(cameraUpdate);
+                }
             }catch (IOException ioe){
-                //TODO: ERROR TOAST
+                mapLayout.setVisibility(View.GONE); //No ErrorToast just pretend there was never a location anyway
                 Log.e(LOG_TAG,ioe.getMessage());
             }
         }

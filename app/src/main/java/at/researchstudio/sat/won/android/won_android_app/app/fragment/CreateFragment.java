@@ -117,10 +117,10 @@ public class CreateFragment extends Fragment {
 
         mTypeSpinnerAdapter = new TypeSpinnerAdapter(activity);
 
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_want, R.drawable.want, PostType.WANT));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_offer, R.drawable.offer, PostType.OFFER));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_activity, R.drawable.activity, PostType.ACTIVITY));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.create_type_spinner_change, R.drawable.change, PostType.CHANGE));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_want, R.drawable.want, PostType.WANT));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_offer, R.drawable.offer, PostType.OFFER));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_activity, R.drawable.activity, PostType.ACTIVITY));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_change, R.drawable.change, PostType.CHANGE));
 
         mTypeSpinner.setAdapter(mTypeSpinnerAdapter);
 
@@ -351,6 +351,7 @@ public class CreateFragment extends Fragment {
             });
 
 
+            //TODO: RECURRENCES WITH --> https://github.com/Shusshu/Android-RecurrencePicker
             mStartDateTimeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -358,7 +359,6 @@ public class CreateFragment extends Fragment {
                     int mYear = c.get(Calendar.YEAR);
                     int mMonth = c.get(Calendar.MONTH);
                     int mDay = c.get(Calendar.DAY_OF_MONTH);
-                    System.out.println("the selected " + mDay);
 
                     //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
                     //TODO: How to reset Date/Time + Time Picker
@@ -370,6 +370,7 @@ public class CreateFragment extends Fragment {
                                     mStartDateTimeButton.setText(dayOfMonth + "." + monthOfYear + "." + year);
                                 }
                             }, mYear, mMonth, mDay);
+
                     dialog.show();
                 }
             });
@@ -381,10 +382,11 @@ public class CreateFragment extends Fragment {
                     int mYear = c.get(Calendar.YEAR);
                     int mMonth = c.get(Calendar.MONTH);
                     int mDay = c.get(Calendar.DAY_OF_MONTH);
-                    System.out.println("the selected " + mDay);
+
                     //TODO: MAYBE IMPLEMENT THIS https://github.com/flavienlaurent/datetimepicker
                     //TODO: How to reset Date/Time + Time Picker
                     //TODO: Initialize with set values from view
+
                     DatePickerDialog dialog = new DatePickerDialog(activity,
                             new DatePickerDialog.OnDateSetListener() {
                                 @Override

@@ -30,10 +30,12 @@ public class PostService {
         //TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
         //TODO: REFACTOR THIS MOCK METHOD
         //MOCK DATA RETRIEVAL
+        //THIS IS ALSO THE CAUSE WHY THE CHOREOGRAPHER DROPS SOME FRAMES DURING INITIALIZING THE ACTIVITY AND AFTER RESUMING FROM CAMERA INTENT
         Mock.fillMyMockMatches();
         Mock.fillMyMockPosts();
         Mock.fillMyMockConnections();
         Mock.setNotificationCounters();
+
     }
 
     public ArrayList<Connection> getConversations() {

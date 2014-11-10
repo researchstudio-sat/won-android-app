@@ -170,12 +170,6 @@ public class Mock {
             "Zamorano", "Zanetti Grana Padano", "Zanetti Parmigiano Reggiano"
     };
 
-    public static final String[] descriptions = {"Short Description",
-                                                "This is a long description it might be cut \n\n off but it is not necessarily going to be cut off depending on the length of the text",
-                                                "This is a long description it might be cut off but it is not necessarily going to be cut off depending on the length of the text cut off depending on the length of the text cut off depending on the length of the text",
-                                                "This \n a \n short one",
-                                                ""};
-
     public static final String[] imgUrls = {"http://placesheen.com/100/700",
                                             "http://placesheen.com/600/400",
                                             "http://placesheen.com/400/800",
@@ -183,6 +177,36 @@ public class Mock {
                                             "http://lorempixel.com/400/200/sports",
                                             "http://lorempixel.com/400/200/people",
                                             "http://lorempixel.com/400/200/technics",
+                                            "http://lorempixel.com/400/300/city",
+                                            "http://lorempixel.com/400/300/abstract",
+                                            "http://lorempixel.com/400/300/transport",
+                                            "http://lorempixel.com/400/300/food",
+                                            "http://lorempixel.com/400/300/nature",
+                                            "http://lorempixel.com/400/300/business",
+                                            "http://lorempixel.com/400/300/nightlife",
+                                            "http://lorempixel.com/400/300/sports",
+                                            "http://lorempixel.com/400/300/technics",
+                                            "http://lorempixel.com/400/350/transport",
+                                            "http://lorempixel.com/400/350/food",
+                                            "http://lorempixel.com/400/350/nature",
+                                            "http://lorempixel.com/400/350/business",
+                                            "http://lorempixel.com/400/350/nightlife",
+                                            "http://lorempixel.com/400/350/sports",
+                                            "http://lorempixel.com/400/350/technics",
+                                            "http://lorempixel.com/300/300/transport",
+                                            "http://lorempixel.com/300/300/food",
+                                            "http://lorempixel.com/300/300/nature",
+                                            "http://lorempixel.com/300/300/business",
+                                            "http://lorempixel.com/300/300/nightlife",
+                                            "http://lorempixel.com/300/300/sports",
+                                            "http://lorempixel.com/300/300/technics",
+                                            "http://lorempixel.com/300/350/transport",
+                                            "http://lorempixel.com/300/350/food",
+                                            "http://lorempixel.com/300/350/nature",
+                                            "http://lorempixel.com/300/350/business",
+                                            "http://lorempixel.com/300/350/nightlife",
+                                            "http://lorempixel.com/300/350/sports",
+                                            "http://lorempixel.com/300/350/technics",
                                             null,
                                             null,
                                             null};
@@ -265,11 +289,11 @@ public class Mock {
 
     //MOCK MODEL GENERATOR
     public static Post getRandomPost() {
-       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
+       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
     }
 
     public static Post getRandomMatch(){
-        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES),getRandomFromField(descriptions),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
+        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
     }
 
     public static RequestListItemModel getRandomRequest(){
@@ -306,6 +330,17 @@ public class Mock {
 
     public static String getRandomText(){
         List<String> wordList = getRandomList(1,15,CHEESES);
+        StringBuilder message = new StringBuilder();
+
+        for(String word : wordList){
+            message.append(word).append(" ");
+        }
+
+        return message.toString();
+    }
+
+    public static String getLongRandomText(){
+        List<String> wordList = getRandomList(1,40,CHEESES);
         StringBuilder message = new StringBuilder();
 
         for(String word : wordList){

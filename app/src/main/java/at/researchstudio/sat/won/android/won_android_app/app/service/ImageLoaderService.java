@@ -177,11 +177,12 @@ public class ImageLoaderService {
      * @return the cropped bitmap
      */
     public Bitmap cropBitmap(Bitmap srcBmp){
+        Log.d(LOG_TAG,"srcBmp: "+srcBmp.toString());
         Bitmap dstBmp;
 
         if (srcBmp.getWidth() >= srcBmp.getHeight()){
 
-            dstBmp = Bitmap.createBitmap(
+            dstBmp = Bitmap.createBitmap( //TODO: OutOfMemoryError while trying to crop big pictures
                     srcBmp,
                     srcBmp.getWidth()/2 - srcBmp.getHeight()/2,
                     0,

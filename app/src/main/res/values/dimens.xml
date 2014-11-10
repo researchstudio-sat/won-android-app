@@ -10,6 +10,9 @@
     <dimen name="create_edit_margin_top">8dp</dimen>
     <dimen name="create_edit_margin_bottom">16dp</dimen>
 
+    <dimen name="image_pager_margin">1dip</dimen>
+    <dimen name="image_pager_indicator_margin">8dp</dimen>
+
     <!-- Conversation(Message) dimensions -->
     <dimen name="message_item_system_margin">5dp</dimen>
     <dimen name="message_item_system_padding">5dp</dimen>
@@ -37,4 +40,10 @@
     <dimen name="tile_letter_font_size">33sp</dimen>
     <!-- The deafult tile size -->
     <dimen name="letter_tile_size">64dp</dimen>
+
+    <dimen name="tag_item_padding_lr">5dp</dimen>
+    <dimen name="tag_item_padding_tb">2dp</dimen>
+    <dimen name="post_description_margin">12dp</dimen>
+    <dimen name="post_header_icon">30dp</dimen>
+    <dimen name="post_header_margin">5dp</dimen>
 </resources>

@@ -18,30 +18,73 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="false"
-            android:id="@+id/post_scrollview">
+            android:id="@+id/post_scrollview"
+            android:background="@android:color/white">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
             >
-        <RelativeLayout
+        <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            <ImageView
-                    android:id="@+id/post_type"
-                    android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/post_header">
+            <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/offer"/>
-        </RelativeLayout>
+                    android:layout_weight=".5">
+                <ImageView
+                        android:id="@+id/post_type"
+                        android:layout_width="@dimen/post_header_icon"
+                        android:layout_height="@dimen/post_header_icon"
+                        android:src="@drawable/offer"
+                        android:layout_margin="@dimen/post_header_margin"
+                        android:layout_centerVertical="true"/>
+                <TextView
+                        android:id="@+id/post_type_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Activity"
+                        android:textColor="@color/post_header_text"
+                        android:layout_toRightOf="@id/post_type"
+                        android:layout_centerVertical="true"/>
+            </RelativeLayout>
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".5"
+                    android:layout_gravity="center_vertical">
+                <ImageView
+                        android:id="@+id/post_calendar_icon"
+                        android:layout_width="@dimen/post_header_icon"
+                        android:layout_height="@dimen/post_header_icon"
+                        android:layout_margin="@dimen/post_header_margin"
+                        android:src="@drawable/calendar"
+                        android:layout_gravity="center_vertical"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/post_calendar_time"
+                        android:text="22.11.2014 15:00 - 24.11.2014 23:00"
+                        android:textColor="@color/post_header_text"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:layout_gravity="center"/>
+            </LinearLayout>
+        </LinearLayout>
+        <include layout="@layout/include_image_pager"/>
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/post_description"
-                android:layout_toRightOf="@id/post_description"
-                android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <include layout="@layout/include_image_pager"/>
+                android:layout_margin="@dimen/post_description_margin"/>
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                      android:layout_marginRight="@dimen/create_edit_margin_lr"
+                      android:orientation="horizontal"
+                      android:id="@+id/post_tag_holder"/>
         <RelativeLayout
                 android:id="@+id/map_layout"
                 android:layout_width="match_parent"
@@ -49,10 +92,7 @@
             <com.google.android.gms.maps.MapView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/post_map"
-                    android:layout_marginBottom="@dimen/create_edit_margin_bottom"
-                    android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                    android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+                    android:id="@+id/post_map"/>
             <ImageView
                     android:id="@+id/transparent_image"
                     android:layout_width="match_parent"

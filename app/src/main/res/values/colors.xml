@@ -38,6 +38,9 @@
     <color name="conversations">#0000FF</color>
     <color name="matches">#FF0000</color>
 
+
+    <!-- Conversation -->
+    <color name="conversation_bg">#220578ff</color>
     <!-- Create Post -->
     <color name="createpost_edit_outline">#DFDFDF</color>
     <color name="createpost_edit_bg">#FFFFFF</color>
@@ -50,4 +53,11 @@
     <color name="conversation_message_send_text">#000000</color>
     <color name="conversation_message_receive_bg">#08cdb9</color>
     <color name="conversation_message_receive_text">#000000</color>
+
+    <!-- Post -->
+    <color name="post_header">#AFAFAF</color>
+    <color name="post_images">#DFDFDF</color>
+    <color name="post_header_text">#FFF</color>
+    <color name="post_tag_text">#FFF</color>
+    <color name="post_tag_bg">#880000FF</color>
 </resources>

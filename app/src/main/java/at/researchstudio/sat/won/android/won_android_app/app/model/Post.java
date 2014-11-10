@@ -22,7 +22,9 @@ import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -259,6 +261,20 @@ public class Post extends Model implements Parcelable {
             return sb.substring(0, sb.length()-(TAG_SEPARATOR.length()+1)); //return without last Separator and space
         }else{
             return "";
+        }
+    }
+
+    public String getFormattedDate(){
+        //TODO: Implement this accordingly
+        switch(repeat){
+            case NONE:
+            default:
+                DateFormat df = DateFormat.getDateInstance(DateFormat.DEFAULT);
+                return df.format(new Date(startTime)) + " - "+df.format(new Date(stopTime));
+            case WEEKLY:
+                return "every tuesday";
+            case MONTHLY:
+                return "every 3rd Monday";
         }
     }
 

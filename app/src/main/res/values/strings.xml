@@ -80,10 +80,10 @@
     <string name="create_tags_2">Using tags improves results by a great deal.</string>
     <string name="create_type">Type</string>
     <string name="create_type_spinner_choose">Select a Type</string>
-    <string name="create_type_spinner_offer">Offer</string>
-    <string name="create_type_spinner_want">Want</string>
-    <string name="create_type_spinner_activity">Activity</string>
-    <string name="create_type_spinner_change">Change</string>
+    <string name="type_offer">Offer</string>
+    <string name="type_want">Want</string>
+    <string name="type_activity">Activity</string>
+    <string name="type_change">Change</string>
     <!-- Create Post Hints-->
 
     <!-- Demand -->

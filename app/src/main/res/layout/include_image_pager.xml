@@ -5,9 +5,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/edittext_style"
-        android:layout_marginBottom="@dimen/create_edit_margin_bottom"
-        android:layout_marginTop="@dimen/create_edit_margin_top"
+        android:background="@color/post_images"
         android:id="@+id/image_container">
     <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
                                        android:id="@+id/image_pager"
@@ -17,5 +15,6 @@
             android:id="@+id/image_pager_indicator"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent"
-            android:layout_marginBottom="@dimen/create_edit_margin_bottom"/>
+            android:layout_marginBottom="@dimen/image_pager_indicator_margin"
+            android:layout_marginTop="@dimen/image_pager_indicator_margin"/>
 </LinearLayout>

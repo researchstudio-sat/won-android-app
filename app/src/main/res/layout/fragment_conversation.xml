@@ -9,10 +9,12 @@
               android:layout_height="fill_parent"
               android:layout_width="fill_parent"
               android:layout_above="@+id/conversation_footer"
-              android:divider="@color/conversation_message_divider"/>
+              android:divider="@color/conversation_message_divider"
+              />
     <LinearLayout
             android:id="@+id/conversation_footer"
             android:orientation="horizontal"
+            android:background="@drawable/edittext_style"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
@@ -25,8 +27,7 @@
                 android:imeOptions="actionSend"
                 android:singleLine="true"
                 android:hint="@string/conversation_message_hint"
-                style="@style/WoNSendMessageText"
-                />
+                style="@style/WoNSendMessageText"/>
         <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
