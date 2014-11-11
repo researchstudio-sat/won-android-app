@@ -16,26 +16,13 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical">
-    <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/image"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_action_create"/>
-    <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/image_pager_indicator_padding_bottom"
-            android:id="@+id/title_image_indicator">
-        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/loading_screen"
+                android:visibility="gone">
+        <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_star"
-                android:background="@drawable/indicator_bg"
-                />
-    </LinearLayout>
+                android:text="Loading..."
+                android:layout_centerInParent="true"/>
 </RelativeLayout>

@@ -146,6 +146,7 @@ public class PostFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
+        activity.showLoading();
         tileProvider = new LetterTileProvider(activity);
 
         //Initialize GMaps
@@ -180,14 +181,12 @@ public class PostFragment extends Fragment {
 
     @Override
     public void onResume() {
-        Log.d(LOG_TAG,"ON RESUME");
         super.onResume();
         mMapView.onResume();
     }
 
     @Override
     public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
         super.onDestroy();
         mMapView.onDestroy();
         if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
@@ -222,6 +221,30 @@ public class PostFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onLowMemory() {
+        Log.d(LOG_TAG,"ON LOW MEMORY");
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
+
+    private void styleActionBar(){
+        ActionBar ab = activity.getActionBar();
+        String titleImageUrl = post.getTitleImageUrl();
+
+        activity.setDrawerToggle(false); //DISABLE THE NAVDRAWER -> POSTFRAGMENT IS A LOWLEVEL VIEW
+        ab.setTitle(post.getTitle());
+        ab.setSubtitle(refPostTitle != null? getString(R.string.to)+" "+refPostTitle: null);
+
+        if(titleImageUrl!=null) {
+            ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
+        }else{
+            final int tileSize = getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+            final Bitmap letterTile = tileProvider.getLetterTile(post.getTitle(), post.getTitle(), tileSize, tileSize);
+
+            ab.setIcon(new BitmapDrawable(getResources(), letterTile));
+        }
+    }
 
     private class CreateTask extends AsyncTask<String, Integer, Post> {
         @Override
@@ -314,14 +337,14 @@ public class PostFragment extends Fragment {
                 mImagePagerAdapter.addItem(post.getTitleImageUrl());
                 imageCount++;
             }
-            if(post.getImageUrls()!=null) {
-                for (String imgUrl : post.getImageUrls()) {
-                    mImagePagerAdapter.addItem(imgUrl);
-                    imageCount++;
-                }
+
+            for (String imgUrl : post.getOtherImageUrls()) {
+                mImagePagerAdapter.addItem(imgUrl);
+                imageCount++;
             }
 
-            LinearLayout imageContainer = ((LinearLayout) activity.findViewById(R.id.image_container));
+
+            RelativeLayout imageContainer = ((RelativeLayout) activity.findViewById(R.id.image_container));
 
             if(imageCount>0) {
                 imageContainer.setVisibility(View.VISIBLE);
@@ -365,31 +388,7 @@ public class PostFragment extends Fragment {
                 mapLayout.setVisibility(View.GONE); //No ErrorToast just pretend there was never a location anyway
                 Log.e(LOG_TAG,ioe.getMessage());
             }
-        }
-    }
-
-    @Override
-    public void onLowMemory() {
-        Log.d(LOG_TAG,"ON LOW MEMORY");
-        super.onLowMemory();
-        mMapView.onLowMemory();
-    }
-
-    private void styleActionBar(){
-        ActionBar ab = activity.getActionBar();
-        String titleImageUrl = post.getTitleImageUrl();
-
-        activity.setDrawerToggle(false); //DISABLE THE NAVDRAWER -> POSTFRAGMENT IS A LOWLEVEL VIEW
-        ab.setTitle(post.getTitle());
-        ab.setSubtitle(refPostTitle != null? getString(R.string.to)+" "+refPostTitle: null);
-
-        if(titleImageUrl!=null) {
-            ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
-        }else{
-            final int tileSize = getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
-            final Bitmap letterTile = tileProvider.getLetterTile(post.getTitle(), post.getTitle(), tileSize, tileSize);
-
-            ab.setIcon(new BitmapDrawable(getResources(), letterTile));
+            activity.hideLoading();
         }
     }
 }

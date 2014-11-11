@@ -30,17 +30,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/post_header">
-            <RelativeLayout
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".5">
+                    android:layout_weight=".5"
+                    android:layout_gravity="center_vertical">
                 <ImageView
                         android:id="@+id/post_type"
                         android:layout_width="@dimen/post_header_icon"
                         android:layout_height="@dimen/post_header_icon"
                         android:src="@drawable/offer"
                         android:layout_margin="@dimen/post_header_margin"
-                        android:layout_centerVertical="true"/>
+                        android:layout_gravity="center_vertical"/>
                 <TextView
                         android:id="@+id/post_type_text"
                         android:layout_width="wrap_content"
@@ -48,8 +49,8 @@
                         android:text="Activity"
                         android:textColor="@color/post_header_text"
                         android:layout_toRightOf="@id/post_type"
-                        android:layout_centerVertical="true"/>
-            </RelativeLayout>
+                        android:layout_gravity="center_vertical"/>
+            </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

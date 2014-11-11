@@ -29,6 +29,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.WelcomeScreenPagerAdapter;
@@ -59,6 +61,9 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     private boolean doubleBackToExitPressedOnce;
 
+    private RelativeLayout mLoadingScreen;
+    private FrameLayout mContainer;
+
     private Post tempPost;
 
     //*******ACTIVITY LIFECYCLE**************
@@ -75,15 +80,11 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
             tempPost = new Post();
             appAlreadyStarted = false;
         }
-        Log.d(LOG_TAG,"tempPost: "+tempPost);
-        //Initialize Connection to the backend
-        postService = new PostService();
 
         //Initialize LocationService
         LocationService.init(new LocationClient(this, this, this));
         //Initialize PreferencesService
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
-        mImgLoader = new ImageLoaderService(this);
 
         if(appAlreadyStarted){
             Log.d(LOG_TAG,"App was already running");
@@ -164,6 +165,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         if(mNavigationDrawerFragment!=null) {
             mNavigationDrawerFragment.afterSelectMenuItem(position);
         }
+
         getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
     }
 
@@ -233,9 +235,17 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         getActionBar().show();
         setContentView(R.layout.activity_main);
         mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mContainer = (FrameLayout) findViewById(R.id.container);
+        mLoadingScreen = (RelativeLayout) findViewById(R.id.loading_screen);
+        showLoading();
+
+        //Initialize Connection to the backend
+        postService = new PostService();
+        mImgLoader = new ImageLoaderService(this);
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+        hideLoading();
     }
 
     private void showWelcomeScreen() {
@@ -299,5 +309,29 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     public void setTempPost(Post tempPost) {
         this.tempPost = tempPost;
+    }
+
+    public void showLoading() {
+        Log.d(LOG_TAG, "Show Loading Screen");
+        if(mContainer!=null) {
+            Log.d(LOG_TAG, "Hide Container");
+            mContainer.setVisibility(View.GONE);
+        }
+        if(mLoadingScreen!=null) {
+            Log.d(LOG_TAG, "Show Loading");
+            mLoadingScreen.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void hideLoading() {
+        Log.d(LOG_TAG, "Hide Loading Screen");
+        if(mContainer!=null){
+            Log.d(LOG_TAG, "Show Container");
+            mContainer.setVisibility(View.VISIBLE);
+        }
+        if(mLoadingScreen!=null) {
+            Log.d(LOG_TAG, "Hide Loading");
+            mLoadingScreen.setVisibility(View.GONE);
+        }
     }
 }

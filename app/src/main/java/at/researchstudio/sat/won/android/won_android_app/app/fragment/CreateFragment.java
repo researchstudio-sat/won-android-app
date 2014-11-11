@@ -113,6 +113,7 @@ public class CreateFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
+        activity.showLoading();
         styleActionBar();
 
         mTypeSpinnerAdapter = new TypeSpinnerAdapter(activity);
@@ -552,22 +553,23 @@ public class CreateFragment extends Fragment {
 
             if(tempPost.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
                 Log.d(LOG_TAG,"Adding Image To Create Post: "+tempPost.getTitleImageUrl());
-                mImagePagerAdapter.addItem(tempPost.getTitleImageUrl());
+                mImagePagerAdapter.addItem(tempPost.getTitleImageUrl(), true);
             }
 
-            if(tempPost.getImageUrls() != null) {
-                for (String imgUrl : tempPost.getImageUrls()) {
-                    imgUrl = imgUrl.trim();
-                    if (imgUrl.length() > 0) {
-                        Log.d(LOG_TAG,"Adding Image To Create Post: "+imgUrl);
-                        mImagePagerAdapter.addItem(imgUrl);
-                    }
+
+            for (String imgUrl : tempPost.getOtherImageUrls()) {
+                imgUrl = imgUrl.trim();
+                if (imgUrl.length() > 0) {
+                    Log.d(LOG_TAG,"Adding Image To Create Post: "+imgUrl);
+                    mImagePagerAdapter.addItem(imgUrl);
                 }
             }
 
             mImagePager.setAdapter(mImagePagerAdapter);
             mIconPageIndicator.setViewPager(mImagePager);
             mIconPageIndicator.notifyDataSetChanged();
+
+            activity.hideLoading();
         }
     }
 }

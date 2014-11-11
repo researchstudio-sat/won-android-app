@@ -19,7 +19,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,31 +45,34 @@ public class MyPostFragment extends Fragment {
     //*************** FRAGMENT LIFECYCLE***********************************************************************
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        activity = (MainActivity) getActivity();
         Bundle args = getArguments();
 
         if(args!=null){
             postId = args.getString(Post.ID_REF);
         }
-        Log.d(LOG_TAG,"postId: "+postId);
+
+        activity = (MainActivity) getActivity();
 
         View rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
 
+        mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
+        mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
+
         //Initialize ViewPager
-        mMyPostPagerAdapter = new MyPostPagerAdapter(activity, postId);
+        mMyPostPagerAdapter = new MyPostPagerAdapter(activity, activity.getPostService().getMyPostById(postId));
 
         Parcelable state = mMyPostPagerAdapter.saveState();
-        mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
 
         mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
         mMyPostViewPager.setOffscreenPageLimit(1);
         mMyPostViewPager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
         //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
-        mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
 
         mIndicator.setViewPager(mMyPostViewPager);
+
         return rootView;
     }
+
     //*********************************************************************************************************
 
     @Override
@@ -78,6 +80,4 @@ public class MyPostFragment extends Fragment {
         mMyPostViewPager.setOffscreenPageLimit(1);
         super.onLowMemory();
     }
-
-
 }

@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
-import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.ConnectionListFragment;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.PostBoxFragment;
@@ -32,21 +31,20 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
  */
 public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
     private static final String LOG_TAG = MyPostPagerAdapter.class.getSimpleName();
-    private String postId;
+    private Post post;
     private Activity activity;
 
-    public MyPostPagerAdapter(Activity activity, String postId) {
+    public MyPostPagerAdapter(Activity activity, Post post) {
         super(activity.getFragmentManager());
-        this.postId = postId;
+        this.post = post;
         this.activity = activity;
     }
 
     @Override
     public Fragment getItem(int position) {
-        Log.d(LOG_TAG, "postId: " + postId);
         Fragment fragment;
         Bundle args = new Bundle();
-        args.putString(Post.ID_REF, postId);
+        args.putString(Post.ID_REF, post.getUuid().toString());
 
         //This will be used to determine where the post came from
         switch (position) {
@@ -76,9 +74,7 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
-    public int getCount() {
-        return 4;
-    }
+    public int getCount() { return 4; }
 
     @Override
     public CharSequence getPageTitle(int position) {
@@ -89,14 +85,13 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
                 return activity.getString(R.string.post);
             case 1:
                 //MATCHES VIEW PAGE
-                return activity.getString(R.string.matches);
+                return activity.getString(R.string.matches)+" ("+post.getMatches()+")";
             case 2:
                 //REQUESTS PAGE
-                return activity.getString(R.string.requests);
+                return activity.getString(R.string.requests)+" ("+post.getRequests()+")";
             case 3:
                 //CONVERSATION PAGE
-                return activity.getString(R.string.conversations);
+                return activity.getString(R.string.conversations)+" ("+post.getConversations()+")";
         }
     }
-
 }

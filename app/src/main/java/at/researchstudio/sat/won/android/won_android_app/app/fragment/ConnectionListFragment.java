@@ -74,6 +74,7 @@ public class ConnectionListFragment extends ListFragment {
         setHasOptionsMenu(true);
 
         activity = (MainActivity) getActivity();
+        if(isMailbox()){activity.showLoading();}
         styleActionBar();
     }
 
@@ -165,21 +166,20 @@ public class ConnectionListFragment extends ListFragment {
         @Override
         protected void onCancelled(ArrayList<Connection> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            if(linkArray != null) {
-                mConnectionListItemAdapter = new ConnectionListItemAdapter(getActivity(), isMailbox(), receivedRequestsOnly);
-                for (Connection connection : linkArray) {
-                    mConnectionListItemAdapter.addItem(connection);
-                }
-                setListAdapter(mConnectionListItemAdapter);
-            }
+            putListInView(linkArray);
         }
 
         protected void onPostExecute(ArrayList<Connection> linkArray) {
+            putListInView(linkArray);
+        }
+
+        private void putListInView(ArrayList<Connection> linkArray){
             mConnectionListItemAdapter = new ConnectionListItemAdapter(getActivity(), isMailbox(), receivedRequestsOnly);
             for(Connection connection : linkArray) {
                 mConnectionListItemAdapter.addItem(connection);
             }
             setListAdapter(mConnectionListItemAdapter);
+            activity.hideLoading();
         }
     }
 

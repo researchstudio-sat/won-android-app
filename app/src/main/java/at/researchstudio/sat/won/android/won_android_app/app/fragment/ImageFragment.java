@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
@@ -48,14 +49,17 @@ public class ImageFragment extends Fragment{
     private static final String LOG_TAG = ImageFragment.class.getSimpleName();
     public static final String ARG_IMAGE_URL = "image_url";
     public static final String ARG_IMAGE_EDITABLE = "image_editable";
+    public static final String ARG_TITLE_IMAGE = "title_image";
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
 
     private ImageLoaderService mImgLoader;
     private ImageView createPostImage;
+    private LinearLayout titleImageIndicator;
 
     private boolean addFlag;
+    private boolean titleImageFlag;
     private boolean editable=true;
     private String mImageUrl;
 
@@ -73,6 +77,7 @@ public class ImageFragment extends Fragment{
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
 
         createPostImage = (ImageView) rootView.findViewById(R.id.image);
+        titleImageIndicator = (LinearLayout) rootView.findViewById(R.id.title_image_indicator);
 
         return rootView;
     }
@@ -93,6 +98,7 @@ public class ImageFragment extends Fragment{
                 mImageUrl = args.getString(ARG_IMAGE_URL);
             }
             editable = args.getBoolean(ARG_IMAGE_EDITABLE);
+            titleImageFlag = args.getBoolean(ARG_TITLE_IMAGE);
         }
     }
 
@@ -120,6 +126,7 @@ public class ImageFragment extends Fragment{
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //TODO: BUG ADDING AN IMAGE CHANGES THE ACTIONBAR TO A VIEWPOST ACTIONBAR
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
 
@@ -219,14 +226,14 @@ public class ImageFragment extends Fragment{
 
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //TODO: DIALOG YES ACTION
+            public void onClick(DialogInterface dialog, int which){
+                //TODO: UPDATE THE TITLE IMAGE
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: DIALOG NO ACTION
+                //NOTHING NEEDS TO BE DONE
             }
         });
 
@@ -282,8 +289,10 @@ public class ImageFragment extends Fragment{
 
             if(addFlag) {
                 createPostImage.setImageResource(R.drawable.add_image);
+                titleImageIndicator.setVisibility(View.GONE);
             }else{
                 mImgLoader.displayImage(mImageUrl, R.drawable.image_placeholder_donotcommit, createPostImage);
+                titleImageIndicator.setVisibility(titleImageFlag ? View.VISIBLE : View.GONE);
             }
 
             super.onPostExecute(s);

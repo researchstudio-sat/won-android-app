@@ -121,6 +121,7 @@ public class ConversationFragment extends Fragment {
         setHasOptionsMenu(true);
 
         activity = (MainActivity) getActivity();
+        activity.showLoading();
         tileProvider = new LetterTileProvider(activity);
     }
 
@@ -179,18 +180,14 @@ public class ConversationFragment extends Fragment {
         @Override
         protected void onCancelled(ArrayList<MessageItemModel> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            if(linkArray != null) {
-                mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
-                for (MessageItemModel message : linkArray) {
-                    mMessageListItemAdapter.addItem(message);
-                }
-                mMessageListView.setAdapter(mMessageListItemAdapter);
-                mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
-                styleActionBar();
-            }
+            putConversationInView(linkArray);
         }
 
         protected void onPostExecute(ArrayList<MessageItemModel> linkArray) {
+            putConversationInView(linkArray);
+        }
+
+        private void putConversationInView(ArrayList<MessageItemModel> linkArray) {
             mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
             for (MessageItemModel message : linkArray) {
                 mMessageListItemAdapter.addItem(message);
@@ -198,6 +195,7 @@ public class ConversationFragment extends Fragment {
             mMessageListView.setAdapter(mMessageListItemAdapter);
             mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
             styleActionBar();
+            activity.hideLoading();
         }
     }
 

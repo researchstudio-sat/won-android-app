@@ -47,6 +47,10 @@ public class ImagePagerAdapter extends FragmentStatePagerAdapter implements Icon
     }
 
     public void addItem(String imageUrl){
+        addItem(imageUrl, false);
+    }
+
+    public void addItem(String imageUrl, boolean titleImage){
         if(imageUrl!=null && !"".equals(imageUrl.trim())) {
             ImageFragment fragment = new ImageFragment();
 
@@ -54,6 +58,7 @@ public class ImagePagerAdapter extends FragmentStatePagerAdapter implements Icon
 
             args.putString(ImageFragment.ARG_IMAGE_URL, imageUrl);
             args.putBoolean(ImageFragment.ARG_IMAGE_EDITABLE, editable);
+            args.putBoolean(ImageFragment.ARG_TITLE_IMAGE, titleImage);
             fragment.setArguments(args);
 
             imageFragments.add(fragment);

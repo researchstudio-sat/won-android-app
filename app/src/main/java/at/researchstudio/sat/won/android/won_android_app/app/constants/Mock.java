@@ -206,10 +206,7 @@ public class Mock {
                                             "http://lorempixel.com/300/350/business",
                                             "http://lorempixel.com/300/350/nightlife",
                                             "http://lorempixel.com/300/350/sports",
-                                            "http://lorempixel.com/300/350/technics",
-                                            null,
-                                            null,
-                                            null};
+                                            "http://lorempixel.com/300/350/technics"};
 
 
 
@@ -289,11 +286,11 @@ public class Mock {
 
     //MOCK MODEL GENERATOR
     public static Post getRandomPost() {
-       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
+       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),0, getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
     }
 
     public static Post getRandomMatch(){
-        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),getRandomFromField(imgUrls), getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
+        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),0, getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
     }
 
     public static RequestListItemModel getRandomRequest(){
@@ -351,7 +348,7 @@ public class Mock {
     }
 
     public static void fillMyMockPosts(){
-        int amount = 100;
+        int amount = 300;
 
         for(int i = 0; i < amount; i++) {
             Post post = Mock.getRandomPost();

@@ -60,4 +60,7 @@
     <color name="post_header_text">#FFF</color>
     <color name="post_tag_text">#FFF</color>
     <color name="post_tag_bg">#880000FF</color>
+
+    <!-- ImageIndicator -->
+    <color name="indicator_bg">#88FFFFFF</color>
 </resources>

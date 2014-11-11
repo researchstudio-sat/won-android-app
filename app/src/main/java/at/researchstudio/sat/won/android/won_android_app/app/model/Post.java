@@ -41,7 +41,7 @@ public class Post extends Model implements Parcelable {
     public static final String CONVERSATIONS_REF = "post_conversations_ref";
     public static final String REQUESTS_REF = "post_requests_ref";
     public static final String IMAGEURLS_REF = "post_imageurl_ref";
-    public static final String TITLEIMAGEURL_REF = "post_titleimageurl_ref";
+    public static final String TITLEIMAGEINDEX_REF = "post_titleimageindex_ref";
     public static final String LOCATION_LAT_REF = "post_lat_ref";
     public static final String LOCATION_LNG_REF = "post_lng_ref";
     public static final String STARTTIME_REF = "post_starttime_ref";
@@ -61,8 +61,7 @@ public class Post extends Model implements Parcelable {
     private int requests;
 
     private List<String> imageUrls;
-    //TODO: REFACTOR TITLEIMAGEURL to titleimageindex, and store the url within the imageurl list
-    private String titleImageUrl;
+    private int titleImageIndex;
 
     private LatLng location;
 
@@ -82,8 +81,8 @@ public class Post extends Model implements Parcelable {
         this.tags = new ArrayList<String>();
     }
 
-    public Post(PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, String titleImageUrl, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
-        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageUrl, location, startTime, stopTime, repeat, closed);
+    public Post(PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
+        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageIndex, location, startTime, stopTime, repeat, closed);
     }
 
     public Post(Parcel in) {
@@ -91,23 +90,23 @@ public class Post extends Model implements Parcelable {
         Bundle bundle = in.readBundle();
         setUuid(bundle.getString(UUID_REF));
 
-        this.type           = PostType.values()[bundle.getInt(TYPE_REF)];
-        this.title          = bundle.getString(TITLE_REF);
-        this.description    = bundle.getString(DESC_REF);
-        this.tags           = bundle.getStringArrayList(TAGS_REF);
-        this.matches        = bundle.getInt(MATCHES_REF);
-        this.conversations  = bundle.getInt(CONVERSATIONS_REF);
-        this.requests       = bundle.getInt(REQUESTS_REF);
-        this.imageUrls      = bundle.getStringArrayList(IMAGEURLS_REF);
-        this.titleImageUrl  = bundle.getString(TITLEIMAGEURL_REF);
-        this.location       = new LatLng(bundle.getDouble(LOCATION_LAT_REF),bundle.getDouble(LOCATION_LNG_REF));
-        this.startTime      = bundle.getLong(STARTTIME_REF);
-        this.stopTime       = bundle.getLong(STOPTIME_REF);
-        this.repeat         = RepeatType.values()[bundle.getInt(REPEAT_REF)];
-        this.closed         = bundle.getBoolean(CLOSED_REF);
+        this.type               = PostType.values()[bundle.getInt(TYPE_REF)];
+        this.title              = bundle.getString(TITLE_REF);
+        this.description        = bundle.getString(DESC_REF);
+        this.tags               = bundle.getStringArrayList(TAGS_REF);
+        this.matches            = bundle.getInt(MATCHES_REF);
+        this.conversations      = bundle.getInt(CONVERSATIONS_REF);
+        this.requests           = bundle.getInt(REQUESTS_REF);
+        this.imageUrls          = bundle.getStringArrayList(IMAGEURLS_REF);
+        this.titleImageIndex    = bundle.getInt(TITLEIMAGEINDEX_REF);
+        this.location           = new LatLng(bundle.getDouble(LOCATION_LAT_REF),bundle.getDouble(LOCATION_LNG_REF));
+        this.startTime          = bundle.getLong(STARTTIME_REF);
+        this.stopTime           = bundle.getLong(STOPTIME_REF);
+        this.repeat             = RepeatType.values()[bundle.getInt(REPEAT_REF)];
+        this.closed             = bundle.getBoolean(CLOSED_REF);
     }
 
-    public Post(UUID uuid, PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, String titleImageUrl, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
+    public Post(UUID uuid, PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
         super(uuid);
         this.type = type;
         this.title = title;
@@ -117,12 +116,20 @@ public class Post extends Model implements Parcelable {
         this.conversations = conversations;
         this.requests = requests;
         this.imageUrls = imageUrls;
-        this.titleImageUrl = titleImageUrl;
+        this.titleImageIndex = titleImageIndex;
         this.location = location;
         this.startTime = startTime;
         this.stopTime = stopTime;
         this.repeat = repeat;
         this.closed = closed;
+    }
+
+    public int getTitleImageIndex() {
+        return titleImageIndex;
+    }
+
+    public void setTitleImageIndex(int titleImageIndex) {
+        this.titleImageIndex = titleImageIndex;
     }
 
     public PostType getType() {
@@ -185,16 +192,29 @@ public class Post extends Model implements Parcelable {
         return imageUrls;
     }
 
+    /*
+    Returns every Image except the titleImage
+     */
+    public List<String> getOtherImageUrls() {
+        List<String> newImageUrls = new ArrayList<String>();
+        for(int i=0; i < imageUrls.size(); i++){
+            if(i!=titleImageIndex){
+                newImageUrls.add(imageUrls.get(i));
+            }
+        }
+        return newImageUrls;
+    }
+
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls;
     }
 
     public String getTitleImageUrl() {
-        return titleImageUrl;
-    }
-
-    public void setTitleImageUrl(String titleImageUrl) {
-        this.titleImageUrl = titleImageUrl;
+        if(titleImageIndex < imageUrls.size()){
+            return imageUrls.get(titleImageIndex);
+        }else{
+            return null;
+        }
     }
 
     public LatLng getLocation() {
@@ -285,34 +305,44 @@ public class Post extends Model implements Parcelable {
     public void removeImage(String url){
         url = url.trim();
 
-        if(titleImageUrl!= null && titleImageUrl.equals(url)){
-            titleImageUrl = "";
-        }
-        ArrayList<String> newImages = new ArrayList<String>();
+        int deleteIndex = -1;
 
-        for(String imgUrl : imageUrls){
-            if(!imgUrl.equals(url)){
-                newImages.add(imgUrl);
+        for(int i=0; i<imageUrls.size(); i++){
+            String imgUrl = imageUrls.get(i);
+
+            if(url.equals(imgUrl)){
+                deleteIndex = i;
+                break;
+            }
+        }
+
+        if(deleteIndex > 0){
+            imageUrls.remove(deleteIndex);
+
+            if(titleImageIndex == deleteIndex){
+                titleImageIndex = --deleteIndex < 0 ? 0 : deleteIndex;
             }
         }
     }
 
     public void addImage(String imgUrl){
-        if(this.getTitleImageUrl() == null || "".equals(this.getTitleImageUrl().trim())){
-            this.setTitleImageUrl(imgUrl);
-        }else{
-            this.getImageUrls().add(imgUrl);
+        imgUrl = imgUrl.trim();
+        if(!"".equals(imgUrl)) {
+            imageUrls.add(imgUrl);
+
+            if (imageUrls.size() == 1) {
+                titleImageIndex = 0;
+            }
         }
     }
 
     public void removeLastAddedImage() {
-        //TODO; Implement this better
-        if(imageUrls == null && imageUrls.size()==0){
-            if(titleImageUrl != null && !"".equals(titleImageUrl.trim())){
-                titleImageUrl = "";
+        if(imageUrls.size()>0) {
+            int lastIndex = imageUrls.size()-1;
+            if(lastIndex != 0 && lastIndex==titleImageIndex){
+                titleImageIndex--;
             }
-        }else{
-            imageUrls.remove(imageUrls.size()-1);
+            imageUrls.remove(imageUrls.size() - 1);
         }
     }
 
@@ -322,12 +352,12 @@ public class Post extends Model implements Parcelable {
                 "type=" + type +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", tags=" + getTagsAsString() +
+                ", tags=" + tags +
                 ", matches=" + matches +
                 ", conversations=" + conversations +
                 ", requests=" + requests +
                 ", imageUrls=" + imageUrls +
-                ", titleImageUrl='" + titleImageUrl + '\'' +
+                ", titleImageIndex=" + titleImageIndex +
                 ", location=" + location +
                 ", startTime=" + startTime +
                 ", stopTime=" + stopTime +
@@ -359,7 +389,7 @@ public class Post extends Model implements Parcelable {
         bundle.putInt(CONVERSATIONS_REF, conversations);
         bundle.putInt(REQUESTS_REF, requests);
         bundle.putStringArrayList(IMAGEURLS_REF, new ArrayList<String>(imageUrls));
-        bundle.putString(TITLEIMAGEURL_REF, titleImageUrl);
+        bundle.putInt(TITLEIMAGEINDEX_REF, titleImageIndex);
         bundle.putDouble(LOCATION_LAT_REF,location.latitude);
         bundle.putDouble(LOCATION_LNG_REF, location.longitude);
         bundle.putLong(STARTTIME_REF,startTime);

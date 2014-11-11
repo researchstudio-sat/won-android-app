@@ -65,6 +65,7 @@ public class PostBoxFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
+        activity.showLoading();
         styleActionBar();
     }
 
@@ -162,21 +163,21 @@ public class PostBoxFragment extends ListFragment {
         @Override
         protected void onCancelled(ArrayList<Post> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            if(linkArray != null) {
-                mPostListItemAdapter = new PostListItemAdapter(getActivity());
-                for (Post post : linkArray) {
-                    mPostListItemAdapter.addItem(post);
-                }
-                setListAdapter(mPostListItemAdapter);
-            }
+            putListInView(linkArray);
         }
 
         protected void onPostExecute(ArrayList<Post> linkArray) {
+            putListInView(linkArray);
+        }
+
+        private void putListInView(ArrayList<Post> linkArray) {
             mPostListItemAdapter = new PostListItemAdapter(getActivity());
             for(Post post : linkArray) {
                 mPostListItemAdapter.addItem(post);
             }
             setListAdapter(mPostListItemAdapter);
+
+            activity.hideLoading();
         }
     }
 
