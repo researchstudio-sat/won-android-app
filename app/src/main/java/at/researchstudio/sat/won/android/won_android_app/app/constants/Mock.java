@@ -348,7 +348,7 @@ public class Mock {
     }
 
     public static void fillMyMockPosts(){
-        int amount = 300;
+        int amount = 100;
 
         for(int i = 0; i < amount; i++) {
             Post post = Mock.getRandomPost();

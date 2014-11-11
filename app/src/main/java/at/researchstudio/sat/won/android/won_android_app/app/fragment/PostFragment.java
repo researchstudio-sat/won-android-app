@@ -15,8 +15,8 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.app.ActionBar;
-import android.app.Fragment;
+import android.app.*;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
@@ -39,10 +39,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
+import com.wefika.flowlayout.FlowLayout;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Created by fsuda on 21.08.2014.
@@ -61,7 +63,7 @@ public class PostFragment extends Fragment {
     private ImageView postType; //the post type icon
     private TextView postTypeText; //the written type of the post
 
-    private LinearLayout postTagHolder; //the tag holder //TODO: CHANGE THIS TO A FLOWLAYOUT (COSTUMLAYOUT)
+    private FlowLayout postTagHolder; //the tag holder
     private TextView postDate; //a nicely formatted date/time string
     private ImageView postDateType; //Binds either a Calendar Icon or a recurring circle icon
 
@@ -100,7 +102,7 @@ public class PostFragment extends Fragment {
         postDescription = (TextView) rootView.findViewById(R.id.post_description);
         postType = (ImageView) rootView.findViewById(R.id.post_type);
         postTypeText = (TextView) rootView.findViewById(R.id.post_type_text);
-        postTagHolder = (LinearLayout) rootView.findViewById(R.id.post_tag_holder);
+        postTagHolder = (FlowLayout) rootView.findViewById(R.id.post_tag_holder);
         postDate = (TextView) rootView.findViewById(R.id.post_calendar_time);
         postDateType = (ImageView) rootView.findViewById(R.id.post_calendar_icon);
         mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
@@ -201,24 +203,44 @@ public class PostFragment extends Fragment {
             super.onCreateOptionsMenu(menu, inflater);
         }else {
             menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
-            //TODO: IMPLEMENT MENU FOR MYPOST AND FOR MATCHED POST
-            /*getActivity().getMenuInflater().inflate(R.menu.list, menu);
-            MenuItem searchViewItem = menu.findItem(R.id.action_search);
-            SearchView searchView = (SearchView) searchViewItem.getActionView();
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    mPostListItemAdapter.getFilter().filter(query);
-                    return true;
-                }
 
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    mPostListItemAdapter.getFilter().filter(newText);
-                    return true;
-                }
-            });*/
+            if(isMyPost()) {
+                getActivity().getMenuInflater().inflate(R.menu.mypost, menu);
+            }else{
+                getActivity().getMenuInflater().inflate(R.menu.post, menu);
+            }
+
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case (R.id.action_close_post):
+                displayCloseDialog();
+                return true;
+            case (R.id.action_draft_from_post):
+                Toast.makeText(activity, getString(R.string.toast_create_draft), Toast.LENGTH_SHORT).show();
+
+                activity.setTempPost(activity.getPostService().createDraft(UUID.fromString(postId)));
+                Log.d(LOG_TAG,"Creating Draft from: "+activity.getTempPost());
+
+                Fragment fragment = new CreateFragment(); //TODO: THIS REDIRECT THING DOES NOT WORK WELL
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.container, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private boolean isMyPost(){
+        return refPostTitle == null || "".equals(refPostTitle.trim());
     }
 
     @Override
@@ -234,7 +256,7 @@ public class PostFragment extends Fragment {
 
         activity.setDrawerToggle(false); //DISABLE THE NAVDRAWER -> POSTFRAGMENT IS A LOWLEVEL VIEW
         ab.setTitle(post.getTitle());
-        ab.setSubtitle(refPostTitle != null? getString(R.string.to)+" "+refPostTitle: null);
+        ab.setSubtitle(!isMyPost()? getString(R.string.to)+" "+refPostTitle : null);
 
         if(titleImageUrl!=null) {
             ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
@@ -246,10 +268,33 @@ public class PostFragment extends Fragment {
         }
     }
 
+    private void displayCloseDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(getString(R.string.dialog_close_mypost));
+        builder.setTitle(getString(R.string.dialog_close_mypost_title));
+
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                activity.setTempPost(activity.getPostService().closePost(UUID.fromString(postId)));
+                Toast.makeText(activity, getString(R.string.toast_close_mypost), Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //DO NOTHING
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private class CreateTask extends AsyncTask<String, Integer, Post> {
         @Override
         protected Post doInBackground(String... params) {
-            if(refPostTitle!=null){
+            if(!isMyPost()){
                 return activity.getPostService().getMatchById(postId);
             }else{
                 return activity.getPostService().getMyPostById(postId);
@@ -305,13 +350,17 @@ public class PostFragment extends Fragment {
             postDate.setText(post.getFormattedDate());
 
             //Set Tags
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(new ViewGroup.LayoutParams(
+            FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
             params.setMargins(10,10,10,10);
 
             int margin = (int) getResources().getDimension(R.dimen.create_edit_margin_lr);
             params.setMargins(margin, margin, margin, margin);
+
+            if(postTagHolder.getChildCount()>0) {
+                postTagHolder.removeAllViews();
+            }
 
             for(String tag : post.getTags()) {
                 TextView tv = new TextView(activity);

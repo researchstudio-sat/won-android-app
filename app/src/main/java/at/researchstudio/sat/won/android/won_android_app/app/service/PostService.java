@@ -19,6 +19,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -115,5 +116,34 @@ public class PostService {
         Mock.myMockPosts.put(newPost.getUuid(),newPost);
         //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
         return newPost; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+    }
+
+    public Post closePost(UUID postId){
+        Post post = Mock.myMockPosts.get(postId);
+        post.setClosed(true);
+        //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
+        return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+    }
+
+    public Post createDraft(UUID postId) {
+        Post oldPost = Mock.myMockPosts.get(postId);
+
+        if(oldPost==null){
+            oldPost = Mock.myMockMatches.get(postId);
+        }
+        Post newPost = new Post();
+
+        //TODO: IMPL THIS WHOLE THING CORRECTLY
+        newPost.setTitle(oldPost.getTitle());
+        newPost.setTags(new ArrayList<String>(oldPost.getTags()));
+        newPost.setDescription(oldPost.getDescription());
+        newPost.setImageUrls(new ArrayList<String>(oldPost.getImageUrls()));
+        newPost.setType(oldPost.getType());
+        newPost.setRepeat(oldPost.getRepeat());
+        newPost.setStartTime(oldPost.getStartTime());
+        newPost.setStopTime(oldPost.getStopTime());
+        newPost.setLocation(new LatLng(oldPost.getLocation().latitude,oldPost.getLocation().longitude));
+
+        return newPost;
     }
 }

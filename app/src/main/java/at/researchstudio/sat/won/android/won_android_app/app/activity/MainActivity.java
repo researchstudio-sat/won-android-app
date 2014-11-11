@@ -312,25 +312,19 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     }
 
     public void showLoading() {
-        Log.d(LOG_TAG, "Show Loading Screen");
         if(mContainer!=null) {
-            Log.d(LOG_TAG, "Hide Container");
             mContainer.setVisibility(View.GONE);
         }
         if(mLoadingScreen!=null) {
-            Log.d(LOG_TAG, "Show Loading");
             mLoadingScreen.setVisibility(View.VISIBLE);
         }
     }
 
     public void hideLoading() {
-        Log.d(LOG_TAG, "Hide Loading Screen");
         if(mContainer!=null){
-            Log.d(LOG_TAG, "Show Container");
             mContainer.setVisibility(View.VISIBLE);
         }
         if(mLoadingScreen!=null) {
-            Log.d(LOG_TAG, "Hide Loading");
             mLoadingScreen.setVisibility(View.GONE);
         }
     }

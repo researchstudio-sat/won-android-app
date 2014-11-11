@@ -315,7 +315,6 @@ public class CreateFragment extends Fragment {
         protected void onCancelled(Post tempPost) {
             addListeners();
             putPostInView(tempPost);
-            //TODO: SHOW PROCESS WAS CANCELLED
         }
 
         @Override
@@ -538,7 +537,6 @@ public class CreateFragment extends Fragment {
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(tempPost.getLocation(), 10);
                     map.animateCamera(cameraUpdate);
                 } catch (IOException ioe) {
-                    //TODO: ERROR TOAST
                     Log.e(LOG_TAG, ioe.getMessage());
                 }
             }else{
@@ -568,6 +566,12 @@ public class CreateFragment extends Fragment {
             mImagePager.setAdapter(mImagePagerAdapter);
             mIconPageIndicator.setViewPager(mImagePager);
             mIconPageIndicator.notifyDataSetChanged();
+
+            if(tempPost.getImageUrls()==null || tempPost.getImageUrls().size()==0){
+                mIconPageIndicator.setVisibility(View.GONE);
+            }else{
+                mIconPageIndicator.setVisibility(View.VISIBLE);
+            }
 
             activity.hideLoading();
         }

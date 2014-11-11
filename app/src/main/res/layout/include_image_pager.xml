@@ -25,7 +25,7 @@
     <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
                                        android:id="@+id/image_pager"
                                        android:layout_width="match_parent"
-                                       android:layout_height="240dp"/>
+                                       android:layout_height="@dimen/image_pager_height"/>
     <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
