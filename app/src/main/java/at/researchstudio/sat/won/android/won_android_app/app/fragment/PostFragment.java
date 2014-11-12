@@ -15,7 +15,9 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
-import android.app.*;
+import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -220,18 +222,7 @@ public class PostFragment extends Fragment {
                 displayCloseDialog();
                 return true;
             case (R.id.action_draft_from_post):
-                Toast.makeText(activity, getString(R.string.toast_create_draft), Toast.LENGTH_SHORT).show();
-
-                activity.setTempPost(activity.getPostService().createDraft(UUID.fromString(postId)));
-                Log.d(LOG_TAG,"Creating Draft from: "+activity.getTempPost());
-
-                Fragment fragment = new CreateFragment(); //TODO: THIS REDIRECT THING DOES NOT WORK WELL
-
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                activity.createDraft(postId);
 
                 return true;
         }

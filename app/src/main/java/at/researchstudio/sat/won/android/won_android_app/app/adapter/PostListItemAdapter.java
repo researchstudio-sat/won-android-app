@@ -63,8 +63,9 @@ public class PostListItemAdapter extends ArrayAdapter {
         public final ImageView typeHolder;
         public final TextView tagHolder;
         public final TableLayout notificationTable;
+        public final RelativeLayout closedHolder;
 
-        public ViewHolder(TextView text1, TextView descriptionHolder, TextView matchesHolder, TextView requestHolder, TextView conversationsHolder, ImageView imageHolder, TextView tagHolder, ImageView typeHolder, TableLayout notificationTable) {
+        public ViewHolder(TextView text1, TextView descriptionHolder, TextView matchesHolder, TextView requestHolder, TextView conversationsHolder, ImageView imageHolder, TextView tagHolder, ImageView typeHolder, TableLayout notificationTable, RelativeLayout closedHolder) {
             this.titleHolder = text1;
             this.descriptionHolder = descriptionHolder;
             this.imageHolder = imageHolder;
@@ -74,6 +75,7 @@ public class PostListItemAdapter extends ArrayAdapter {
             this.requestHolder = requestHolder;
             this.typeHolder = typeHolder;
             this.notificationTable = notificationTable;
+            this.closedHolder = closedHolder;
         }
     }
 
@@ -96,7 +98,8 @@ public class PostListItemAdapter extends ArrayAdapter {
             ImageView image = (ImageView) view.findViewById(R.id.item_post_list_image);
             ImageView type = (ImageView) view.findViewById(R.id.item_post_list_type);
             TableLayout notificationTable = (TableLayout) view.findViewById(R.id.postlist_item_notifications);
-            view.setTag(new ViewHolder(title,description,matches,requests,conversations,image,tag,type,notificationTable));
+            RelativeLayout closedHolder = (RelativeLayout) view.findViewById(R.id.item_post_list_closed);
+            view.setTag(new ViewHolder(title,description,matches,requests,conversations,image,tag,type,notificationTable,closedHolder));
         }
 
         if (holder == null && view != null) {
@@ -112,6 +115,9 @@ public class PostListItemAdapter extends ArrayAdapter {
                 holder.titleHolder.setText(item.getTitle());
             }
 
+            if(holder.closedHolder != null){
+                holder.closedHolder.setVisibility(item.isClosed()? View.VISIBLE : View.GONE);
+            }
             //TODO: IMPL CLOSED VIEW ON POSTS
 
             if (holder.descriptionHolder != null)

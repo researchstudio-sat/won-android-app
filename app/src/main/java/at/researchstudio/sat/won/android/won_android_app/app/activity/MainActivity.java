@@ -18,6 +18,7 @@ package at.researchstudio.sat.won.android.won_android_app.app.activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -43,6 +44,8 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsSer
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
+
+import java.util.UUID;
 
 
 public class MainActivity extends FragmentActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -327,5 +330,26 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         if(mLoadingScreen!=null) {
             mLoadingScreen.setVisibility(View.GONE);
         }
+    }
+
+    public void createDraft(String postId){
+        createDraft(UUID.fromString(postId));
+    }
+
+    public void createDraft(UUID postId) {
+        Toast.makeText(this, getString(R.string.toast_create_draft), Toast.LENGTH_SHORT).show();
+
+        tempPost = postService.createDraft(postId);
+        Log.d(LOG_TAG,"Creating Draft from: "+tempPost);
+
+        Fragment fragment = new CreateFragment();
+
+        //TODO: SUBVIEWS SHOULD PROBABLY CALL POPBACKSTACK BEFORE TO GET RID OF ANY VISIBLE VIEWS THAT ARE PRESENT (Matches View, MyPostView, PostView)
+
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 }

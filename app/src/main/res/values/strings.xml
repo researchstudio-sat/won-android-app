@@ -145,6 +145,7 @@
     <string name="dialog_select_from">Select from&#8230;</string>
     <string name="dialog_close_mypost">Do you want to close this Post?</string>
     <string name="dialog_close_mypost_title">Close</string>
+    <string name="dialog_select_action_title">Select Action</string>
 
     <!-- MYPOST -->
     <string name="post">Post</string>
@@ -153,6 +154,7 @@
     <string name="requests">Requests</string>
 
     <string name="close_post">Close Post</string>
+    <string name="reopen_post">Reopen Post</string>
     <string name="draft_post">Use Post as Draft</string>
 
     <!-- POST -->
@@ -162,8 +164,24 @@
     <!-- Conversation -->
     <string name="conversation_message_hint">Send message</string>
 
-    <string-array name="image_picker">;
+    <string-array name="image_picker">
         <item>@string/camera</item>
         <item>@string/gallery</item>
+    </string-array>
+
+    <string-array name="postbox_closed_action_picker">
+        <item>@string/draft_post</item>
+        <item>@string/reopen_post</item>
+    </string-array>
+
+    <string-array name="postbox_open_action_picker">
+        <item>@string/draft_post</item>
+        <item>@string/close_post</item>
+    </string-array>
+
+    <string-array name="matches_action_picker">
+        <item>@string/send_request</item>
+        <item>@string/draft_post</item>
+        <item>@string/close_connection</item>
     </string-array>
 </resources>

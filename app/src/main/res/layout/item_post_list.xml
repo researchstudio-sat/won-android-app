@@ -15,7 +15,8 @@
   ~    limitations under the License.
   -->
 
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout
+              xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/postlist_item"
               android:orientation="horizontal"
               android:layout_width="match_parent"
@@ -41,6 +42,21 @@
                 android:layout_height="18dp"
                 android:id="@+id/item_post_list_type"
                 android:src="@drawable/activity"/>
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#CCFFFFFF"
+                android:id="@+id/item_post_list_closed">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="closed"
+                    android:rotation="-45"
+                    android:layout_alignWithParentIfMissing="false"
+                    android:layout_centerInParent="true"
+                    android:textStyle="bold"
+                    android:typeface="monospace"/>
+        </RelativeLayout>
     </RelativeLayout>
 
     <LinearLayout

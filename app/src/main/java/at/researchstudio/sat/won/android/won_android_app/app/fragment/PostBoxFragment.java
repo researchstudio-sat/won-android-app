@@ -16,10 +16,12 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.*;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
@@ -28,6 +30,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListIte
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by fsuda on 21.08.2014.
@@ -67,6 +70,14 @@ public class PostBoxFragment extends ListFragment {
         activity = (MainActivity) getActivity();
         activity.showLoading();
         styleActionBar();
+
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
+                displayListActions((Post) mPostListItemAdapter.getItem(position));
+                return true;
+            }
+        });
     }
 
     @Override
@@ -116,9 +127,10 @@ public class PostBoxFragment extends ListFragment {
         }
     }
 
+
+
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Log.d(LOG_TAG,"LIST ITEM CLICKED!!");
         Post post = (Post) mPostListItemAdapter.getItem(position);
         Fragment fragment;
 
@@ -148,6 +160,71 @@ public class PostBoxFragment extends ListFragment {
      */
     public boolean isPostBox(){
         return postId == null;
+    }
+
+    public void displayListActions(Post post){
+        final UUID postId = post.getUuid();
+
+        if(isPostBox()){
+            //CLOSED MYPOST PICKER
+            if(post.isClosed()){
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.dialog_select_action_title)
+                        .setItems(R.array.postbox_closed_action_picker, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch(which){
+                                    case 0: //DRAFT
+                                        activity.createDraft(postId);
+                                        break;
+                                    case 1: //REOPEN POST
+                                        //TODO: IMPL
+                                        break;
+                                }
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }else{
+                //OPEN MYPOST PICKER
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.dialog_select_action_title)
+                        .setItems(R.array.postbox_open_action_picker, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch(which){
+                                    case 0: //DRAFT
+                                        activity.createDraft(postId);
+                                        break;
+                                    case 1: //CLOSE
+                                        //TODO: IMPL
+                                        break;
+                                }
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        }else{
+            //MATCH PICKER
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(R.string.dialog_select_action_title)
+                    .setItems(R.array.matches_action_picker, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch(which){
+                                case 0:  //SEND REQUEST
+                                    //TODO: IMPL
+                                    break;
+                                case 1: //DRAFT
+                                    activity.createDraft(postId);
+                                    break;
+                                case 2: //CLOSE
+                                    //TODO: IMPL
+                                    break;
+                            }
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
     private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Post>> {

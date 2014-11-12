@@ -125,7 +125,6 @@ public class ConnectionListFragment extends ListFragment {
     }
 
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Log.d(LOG_TAG, "LIST ITEM CLICKED!!");
         Connection connection = (Connection) mConnectionListItemAdapter.getItem(position);
         Fragment fragment;
         Bundle args = new Bundle();
