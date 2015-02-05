@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.ActionBar;
 import android.app.Fragment;
-import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.*;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
@@ -36,11 +37,12 @@ import java.util.ArrayList;
  * This Fragment shows a List of Connections
  * Created by fsuda on 10.10.2014.
  */
-public class ConnectionListFragment extends ListFragment {
+public class ConnectionListFragment extends Fragment {
     private static final String LOG_TAG = ConnectionListFragment.class.getSimpleName();
 
     private MainActivity activity;
     private CreateListTask createListTask;
+    private SwipeRefreshLayout swipeLayout;
     private ListView mConnectionListView;
     private ConnectionListItemAdapter mConnectionListItemAdapter;
 
@@ -62,10 +64,17 @@ public class ConnectionListFragment extends ListFragment {
 
         Log.d(LOG_TAG, "Fragment started with postId: " + postId+ " recReqOnly: "+receivedRequestsOnly);
 
+        View rootView = inflater.inflate(R.layout.fragment_connections, container, false);
 
-        mConnectionListView = (ListView) inflater.inflate(R.layout.fragment_connections, container, false);
+        swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+        mConnectionListView = (ListView) rootView.findViewById(R.id.connection_list);
 
-        return mConnectionListView;
+        swipeLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        return rootView;
     }
 
     @Override
@@ -74,8 +83,40 @@ public class ConnectionListFragment extends ListFragment {
         setHasOptionsMenu(true);
 
         activity = (MainActivity) getActivity();
-        if(isMailbox()){activity.showLoading();}
+        if(isMailbox()){swipeLayout.setRefreshing(true);}
         styleActionBar();
+
+        mConnectionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Connection connection = (Connection) mConnectionListItemAdapter.getItem(position);
+                Fragment fragment;
+                Bundle args = new Bundle();
+
+                if(receivedRequestsOnly){
+                    Log.d(LOG_TAG, "REQUEST SHOW POST WITH ID: "+ connection.getMatchedPost().getUuid());
+                    args.putString(Post.ID_REF, connection.getMatchedPost().getUuid().toString());
+                    args.putString(Post.TITLE_REF, connection.getMyPost().getTitle());
+
+                    fragment = new PostFragment();
+                }else {
+                    Log.d(LOG_TAG, "CONVERSATIONID: " + connection.getUuid());
+                    args.putString(Connection.ID_REF, connection.getUuidString());
+
+                    fragment = new ConversationFragment();
+                }
+                fragment.setArguments(args);
+                getFragmentManager().beginTransaction().replace(R.id.container, fragment).addToBackStack(null).commit();
+            }
+        });
+
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
+            @Override
+            public void onRefresh() {
+                createListTask = new CreateListTask();
+                createListTask.execute();
+            }
+        });
     }
 
     @Override
@@ -124,27 +165,6 @@ public class ConnectionListFragment extends ListFragment {
         }
     }
 
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Connection connection = (Connection) mConnectionListItemAdapter.getItem(position);
-        Fragment fragment;
-        Bundle args = new Bundle();
-
-        if(receivedRequestsOnly){
-            Log.d(LOG_TAG, "REQUEST SHOW POST WITH ID: "+ connection.getMatchedPost().getUuid());
-            args.putString(Post.ID_REF, connection.getMatchedPost().getUuid().toString());
-            args.putString(Post.TITLE_REF, connection.getMyPost().getTitle());
-
-            fragment = new PostFragment();
-        }else {
-            Log.d(LOG_TAG, "CONVERSATIONID: " + connection.getUuid());
-            args.putString(Connection.ID_REF, connection.getUuidString());
-
-            fragment = new ConversationFragment();
-        }
-        fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(R.id.container, fragment).addToBackStack(null).commit();
-    }
-
     public boolean isMailbox(){
         return postId==null;
     }
@@ -177,8 +197,8 @@ public class ConnectionListFragment extends ListFragment {
             for(Connection connection : linkArray) {
                 mConnectionListItemAdapter.addItem(connection);
             }
-            setListAdapter(mConnectionListItemAdapter);
-            activity.hideLoading();
+            mConnectionListView.setAdapter(mConnectionListItemAdapter);
+            swipeLayout.setRefreshing(false);
         }
     }
 

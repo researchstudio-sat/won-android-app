@@ -19,6 +19,8 @@ import android.app.*;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.*;
 import android.widget.AdapterView;
@@ -32,20 +34,18 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import java.util.ArrayList;
 import java.util.UUID;
 
-/**
- * Created by fsuda on 21.08.2014.
- */
-public class PostBoxFragment extends ListFragment {
+public class PostBoxFragment extends Fragment{
     private static final String LOG_TAG = PostBoxFragment.class.getSimpleName();
 
+    private SwipeRefreshLayout swipeLayout;
     private CreateListTask createListTask;
     private ListView mNeedListView;
     private PostListItemAdapter mPostListItemAdapter;
     private MainActivity activity;
 
     private String postId;
-
-    //***************FRAGMENT LIFECYLCLE******************************************************************
+    //*******FRAGMENT LIFECYCLE************************************************************************************
+    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
@@ -58,45 +58,98 @@ public class PostBoxFragment extends ListFragment {
 
         Log.d(LOG_TAG,"Fragment started with postId: "+postId);
 
-        mNeedListView = (ListView) inflater.inflate(R.layout.fragment_postbox, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_postbox, container, false);
 
-        return mNeedListView;
+        swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+        mNeedListView = (ListView) rootView.findViewById(R.id.postbox_list);
+
+        swipeLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+        return rootView;
     }
+
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
-        activity.showLoading();
+        swipeLayout.setRefreshing(true);
         styleActionBar();
 
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mNeedListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
                 displayListActions(position);
                 return true;
             }
         });
+
+        mNeedListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Post post = (Post) mPostListItemAdapter.getItem(position);
+
+                if(!post.isClosed()) {
+                    Fragment fragment;
+
+                    Bundle args = new Bundle();
+
+                    if (isPostBox()) { //IF IT IS ONE OF YOUR OWN POSTS
+                        fragment = new MyPostFragment();
+                    } else { //IF ITS A POST FROM SOMEBODY ELSE
+                        args.putString(Post.TITLE_REF, getActivity().getActionBar().getTitle().toString());
+                        fragment = new PostFragment();
+                    }
+
+                    postId = post.getUuidString();
+                    args.putString(Post.ID_REF, postId);
+
+                    fragment.setArguments(args);
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.container, fragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }else{
+                    //TODO: Figure out what to do when clicking closed elements
+                }
+            }
+        });
+
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
+            @Override
+            public void onRefresh() {
+                createListTask = new CreateListTask();
+                createListTask.execute();
+            }
+        });
     }
 
     @Override
     public void onStart() {
-        Log.d(LOG_TAG,"FRAGMENT ONSTART IS CALLED");
         super.onStart();
         createListTask = new CreateListTask();
         createListTask.execute();
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
         super.onDestroy();
+
         if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
             createListTask.cancel(true);
         }
     }
-    //****************************************************************************************************
+    //*************************************************************************************************************
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -125,46 +178,6 @@ public class PostBoxFragment extends ListFragment {
                 }
             });
         }
-    }
-
-
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Post post = (Post) mPostListItemAdapter.getItem(position);
-
-        if(!post.isClosed()) {
-            Fragment fragment;
-
-            Bundle args = new Bundle();
-
-            if (isPostBox()) { //IF IT IS ONE OF YOUR OWN POSTS
-                fragment = new MyPostFragment();
-            } else { //IF ITS A POST FROM SOMEBODY ELSE
-                args.putString(Post.TITLE_REF, getActivity().getActionBar().getTitle().toString());
-                fragment = new PostFragment();
-            }
-
-            postId = post.getUuidString();
-            args.putString(Post.ID_REF, postId);
-
-            fragment.setArguments(args);
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.container, fragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        }else{
-            //TODO: Figure out what to do when clicking closed elements
-        }
-    }
-
-    /**
-     * Determines whether the Fragment is used for PostBox or for the Matches View
-     * @return
-     */
-    public boolean isPostBox(){
-        return postId == null;
     }
 
     public void displayListActions(final int position){
@@ -260,9 +273,9 @@ public class PostBoxFragment extends ListFragment {
             for(Post post : linkArray) {
                 mPostListItemAdapter.addItem(post);
             }
-            setListAdapter(mPostListItemAdapter);
 
-            activity.hideLoading();
+            mNeedListView.setAdapter(mPostListItemAdapter);
+            swipeLayout.setRefreshing(false);
         }
     }
 
@@ -276,6 +289,7 @@ public class PostBoxFragment extends ListFragment {
         mNeedListView.getAdapter().getView(position, view, mNeedListView);
     }
 
+
     private void styleActionBar(){
         if(isPostBox()) {
             activity.setDrawerToggle(true);
@@ -285,5 +299,13 @@ public class PostBoxFragment extends ListFragment {
             ab.setSubtitle(null);
             ab.setIcon(R.drawable.ic_launcher);
         }
+    }
+
+    /**
+     * Determines whether the Fragment is used for PostBox or for the Matches View
+     * @return
+     */
+    public boolean isPostBox(){
+        return postId == null;
     }
 }

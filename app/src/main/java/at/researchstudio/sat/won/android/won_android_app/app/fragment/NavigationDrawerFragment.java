@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -104,7 +104,6 @@ public class NavigationDrawerFragment extends Fragment {
         mMenuItemAdapter.addItem(R.string.mi_postbox, R.drawable.ic_action_needs, mCurrentSelectedPosition == 0);
         mMenuItemAdapter.addItem(R.string.mi_mailbox, R.drawable.ic_action_mailbox, SettingsService.appStarts, mCurrentSelectedPosition == 1); //TODO: REMOVE FIXED COUNTER
         mMenuItemAdapter.addItem(R.string.mi_createpost, R.drawable.ic_action_create, mCurrentSelectedPosition == 2);
-
 
         mDrawerListView.setAdapter(mMenuItemAdapter);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
