@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import com.wefika.flowlayout.FlowLayout;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 /**
  * Created by fsuda on 21.08.2014.
@@ -77,6 +76,7 @@ public class PostFragment extends Fragment {
     private LetterTileProvider tileProvider;
 
     private RelativeLayout mapLayout;
+    private RelativeLayout imageContainer;
 
     private MainActivity activity;
 
@@ -111,7 +111,7 @@ public class PostFragment extends Fragment {
         mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
         mapLayout = (RelativeLayout) rootView.findViewById(R.id.map_layout);
         mMapView = (MapView) rootView.findViewById(R.id.post_map);
-
+        imageContainer = (RelativeLayout) rootView.findViewById(R.id.image_container);
 
         mScrollView = (ScrollView) rootView.findViewById(R.id.post_scrollview);
         ImageView transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
@@ -267,7 +267,7 @@ public class PostFragment extends Fragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                activity.setTempPost(activity.getPostService().closePost(UUID.fromString(postId)));
+                activity.setTempPost(activity.getPostService().closePost(postId));
                 Toast.makeText(activity, getString(R.string.toast_close_mypost), Toast.LENGTH_SHORT).show();
             }
         });
@@ -285,11 +285,7 @@ public class PostFragment extends Fragment {
     private class CreateTask extends AsyncTask<String, Integer, Post> {
         @Override
         protected Post doInBackground(String... params) {
-            if(!isMyPost()){
-                return activity.getPostService().getMatchById(postId);
-            }else{
-                return activity.getPostService().getMyPostById(postId);
-            }
+            return !isMyPost()? activity.getPostService().getMatchById(postId) : activity.getPostService().getMyPostById(postId);
         }
 
         @Override
@@ -300,11 +296,12 @@ public class PostFragment extends Fragment {
 
         protected void onPostExecute(Post tempPost) {
             putPostInView(tempPost);
+            /*TODO: BUG putPostInView is called even though the view isnt visible --> (probably due to some backStack issue)
+            leads to the styleActionBar() method even though its not supposed to execute anything --> happens on app resume (postfragment view must have been visible once already)*/
         }
 
         private void putPostInView(Post tempPost) {
             post = tempPost;
-            styleActionBar();
 
             //Set PostType
             switch(post.getType()){
@@ -383,9 +380,6 @@ public class PostFragment extends Fragment {
                 imageCount++;
             }
 
-
-            RelativeLayout imageContainer = ((RelativeLayout) activity.findViewById(R.id.image_container));
-
             if(imageCount>0) {
                 imageContainer.setVisibility(View.VISIBLE);
                 mIconPageIndicator.setVisibility(imageCount>1? View.VISIBLE : View.GONE);
@@ -428,6 +422,7 @@ public class PostFragment extends Fragment {
                 mapLayout.setVisibility(View.GONE); //No ErrorToast just pretend there was never a location anyway
                 Log.e(LOG_TAG,ioe.getMessage());
             }
+            styleActionBar();
             activity.hideLoading();
         }
     }

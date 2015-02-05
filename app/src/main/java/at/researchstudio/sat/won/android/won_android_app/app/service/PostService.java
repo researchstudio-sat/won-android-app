@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -118,9 +118,20 @@ public class PostService {
         return newPost; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 
+    public Post closePost(String postIdString){
+        return closePost(UUID.fromString(postIdString));
+    }
+
     public Post closePost(UUID postId){
         Post post = Mock.myMockPosts.get(postId);
         post.setClosed(true);
+        //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
+        return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+    }
+
+    public Post reOpenPost(UUID postId){
+        Post post = Mock.myMockPosts.get(postId);
+        post.setClosed(false);
         //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
         return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }

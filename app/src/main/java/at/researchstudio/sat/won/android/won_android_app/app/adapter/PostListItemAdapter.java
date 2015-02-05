@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -118,7 +118,6 @@ public class PostListItemAdapter extends ArrayAdapter {
             if(holder.closedHolder != null){
                 holder.closedHolder.setVisibility(item.isClosed()? View.VISIBLE : View.GONE);
             }
-            //TODO: IMPL CLOSED VIEW ON POSTS
 
             if (holder.descriptionHolder != null)
                 holder.descriptionHolder.setText(item.getDescription());
@@ -135,7 +134,7 @@ public class PostListItemAdapter extends ArrayAdapter {
                 }
             }
 
-            if(item.hasNotifications()) {
+            if(!item.isClosed() && item.hasNotifications()) {
                 setCountersVisible(holder);
                 setCounter(holder.matchesHolder, item.getMatches(), 9);
                 setCounter(holder.requestHolder, item.getRequests(), 9);

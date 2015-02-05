@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListItemModel;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -276,12 +275,10 @@ public class Mock {
     }
 
     public static LatLng getRandomLocation(){
-        DecimalFormat df = new DecimalFormat("0.000");
-
         double latitude = (Math.random() * (180 - (-180)) + (-180));
         double longitude = (Math.random() * (180 - (-180)) + (-180));
 
-        return new LatLng(Double.valueOf(df.format(latitude)), Double.valueOf(df.format(longitude)));
+        return new LatLng(latitude, longitude);
     }
 
     //MOCK MODEL GENERATOR

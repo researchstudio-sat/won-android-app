@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class PostBoxFragment extends ListFragment {
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
-                displayListActions((Post) mPostListItemAdapter.getItem(position));
+                displayListActions(position);
                 return true;
             }
         });
@@ -132,26 +132,31 @@ public class PostBoxFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Post post = (Post) mPostListItemAdapter.getItem(position);
-        Fragment fragment;
 
-        Bundle args = new Bundle();
+        if(!post.isClosed()) {
+            Fragment fragment;
 
-        if(isPostBox()) { //IF IT IS ONE OF YOUR OWN POSTS
-            fragment = new MyPostFragment();
-        }else{ //IF ITS A POST FROM SOMEBODY ELSE
-            args.putString(Post.TITLE_REF, getActivity().getActionBar().getTitle().toString());
-            fragment = new PostFragment();
+            Bundle args = new Bundle();
+
+            if (isPostBox()) { //IF IT IS ONE OF YOUR OWN POSTS
+                fragment = new MyPostFragment();
+            } else { //IF ITS A POST FROM SOMEBODY ELSE
+                args.putString(Post.TITLE_REF, getActivity().getActionBar().getTitle().toString());
+                fragment = new PostFragment();
+            }
+
+            postId = post.getUuidString();
+            args.putString(Post.ID_REF, postId);
+
+            fragment.setArguments(args);
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }else{
+            //TODO: Figure out what to do when clicking closed elements
         }
-
-        postId = post.getUuidString();
-        args.putString(Post.ID_REF, postId);
-
-        fragment.setArguments(args);
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
     }
 
     /**
@@ -162,7 +167,8 @@ public class PostBoxFragment extends ListFragment {
         return postId == null;
     }
 
-    public void displayListActions(Post post){
+    public void displayListActions(final int position){
+        Post post = (Post) mPostListItemAdapter.getItem(position);
         final UUID postId = post.getUuid();
 
         if(isPostBox()){
@@ -177,7 +183,8 @@ public class PostBoxFragment extends ListFragment {
                                         activity.createDraft(postId);
                                         break;
                                     case 1: //REOPEN POST
-                                        //TODO: IMPL
+                                        activity.getPostService().reOpenPost(postId);
+                                        updateItemAtPosition(position);
                                         break;
                                 }
                             }
@@ -195,7 +202,8 @@ public class PostBoxFragment extends ListFragment {
                                         activity.createDraft(postId);
                                         break;
                                     case 1: //CLOSE
-                                        //TODO: IMPL
+                                        activity.getPostService().closePost(postId);
+                                        updateItemAtPosition(position);
                                         break;
                                 }
                             }
@@ -211,13 +219,13 @@ public class PostBoxFragment extends ListFragment {
                         public void onClick(DialogInterface dialog, int which) {
                             switch(which){
                                 case 0:  //SEND REQUEST
-                                    //TODO: IMPL
+                                    //TODO: IMPL SEND REQUEST --> START CHAT OR SOMETHING
                                     break;
                                 case 1: //DRAFT
                                     activity.createDraft(postId);
                                     break;
-                                case 2: //CLOSE
-                                    //TODO: IMPL
+                                case 2: //CLOSE MATCH
+                                    //TODO: IMPL CLOSE MATCH
                                     break;
                             }
                         }
@@ -256,6 +264,16 @@ public class PostBoxFragment extends ListFragment {
 
             activity.hideLoading();
         }
+    }
+
+    /**
+     * Updates the view of the given position
+     * @param position
+     */
+    private void updateItemAtPosition(int position) {
+        int visiblePosition = mNeedListView.getFirstVisiblePosition();
+        View view = mNeedListView.getChildAt(position - visiblePosition); //needed because mNeedListView encapsulates only items that are visible (not all items)
+        mNeedListView.getAdapter().getView(position, view, mNeedListView);
     }
 
     private void styleActionBar(){

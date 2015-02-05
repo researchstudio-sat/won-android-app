@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -276,6 +276,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         int backStackCount = getFragmentManager().getBackStackEntryCount();
         if(backStackCount>0){
             getFragmentManager().popBackStack();
+            getFragmentManager().popBackStackImmediate();
             return true;
         }else{
             return false;
