@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -197,9 +197,11 @@ public class Post extends Model implements Parcelable {
      */
     public List<String> getOtherImageUrls() {
         List<String> newImageUrls = new ArrayList<String>();
-        for(int i=0; i < imageUrls.size(); i++){
-            if(i!=titleImageIndex){
-                newImageUrls.add(imageUrls.get(i));
+        if(imageUrls!=null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                if (i != titleImageIndex) {
+                    newImageUrls.add(imageUrls.get(i));
+                }
             }
         }
         return newImageUrls;
@@ -210,7 +212,7 @@ public class Post extends Model implements Parcelable {
     }
 
     public String getTitleImageUrl() {
-        if(titleImageIndex < imageUrls.size()){
+        if(imageUrls != null && titleImageIndex < imageUrls.size()){
             return imageUrls.get(titleImageIndex);
         }else{
             return null;

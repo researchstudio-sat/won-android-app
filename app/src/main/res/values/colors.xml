@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+  ~ Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -29,6 +29,10 @@
     <color name="menuitem_counter_text">#FFFFFF</color>
     <color name="menuitem_counter_bg_outline">#19CC4D</color>
     <color name="menuitem_counter_bg">#16A843</color>
+
+    <!-- CreatePost -->
+    <color name="create_text_disabled">#BBB</color>
+    <color name="create_text_enabled">#000</color>
 
     <!-- NeedList-->
     <color name="list_divider">#DFDFDF</color>

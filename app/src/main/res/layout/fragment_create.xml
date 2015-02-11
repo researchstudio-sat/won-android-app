@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+  ~ Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-            >
+                  android:layout_height="match_parent">
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -105,29 +104,39 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:layout_marginBottom="@dimen/create_edit_margin_bottom"
                 android:layout_marginTop="@dimen/create_edit_margin_top"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <TextView
-                android:layout_width="wrap_content"
+        <Switch
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/create_images"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/createImages"
+                android:id="@+id/create_images_switch"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"
-                android:layout_marginBottom="@dimen/create_edit_margin_top"/>
-        <include layout="@layout/include_image_pager"/>
-        <TextView
-                android:layout_width="wrap_content"
+                android:layout_marginTop="@dimen/create_edit_margin_bottom"
+                android:checked="false"
+                android:textColor="@color/create_text_disabled"/>
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/create_image_container"
+                        android:layout_marginTop="@dimen/create_edit_margin_top"
+                        android:visibility="gone">
+            <include layout="@layout/include_image_pager"/>
+        </RelativeLayout>
+        <Switch
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/create_location"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/createLocation"
-                android:layout_marginTop="@dimen/create_edit_margin_bottom"
+                android:id="@+id/create_location_switch"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
+                android:layout_marginRight="@dimen/create_edit_margin_lr"
+                android:layout_marginTop="@dimen/create_edit_margin_bottom"
+                android:textColor="@color/create_text_disabled"
+                android:checked="false"
+                />
         <EditText
                 android:id="@+id/create_location"
                 android:hint="@string/create_location_demand_hint"
@@ -137,16 +146,17 @@
                 android:layout_marginTop="@dimen/create_edit_margin_top"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"
-                android:imeOptions="actionSearch"/>
+                android:imeOptions="actionSearch"
+                android:visibility="gone"/>
         <RelativeLayout
-                android:id="@+id/map_layout"
+                android:id="@+id/create_location_container"
                 android:layout_width="match_parent"
-                android:layout_height="300dp">
+                android:layout_height="300dp"
+                android:visibility="gone">
             <com.google.android.gms.maps.MapView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/post_map"
-                    android:layout_marginBottom="@dimen/create_edit_margin_bottom"
                     android:layout_marginLeft="@dimen/create_edit_margin_lr"
                     android:layout_marginRight="@dimen/create_edit_margin_lr"/>
             <ImageView
@@ -155,45 +165,81 @@
                     android:layout_height="match_parent"
                     android:src="@android:color/transparent" />
         </RelativeLayout>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/create_startdate"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/createStartDate"
-                android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <Button
-                android:id="@+id/create_startdatetime_button"
+        <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/create_choosedatetime"
+                android:text="@string/create_datetime"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/create_datetime_switch"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"
+                android:layout_marginTop="@dimen/create_edit_margin_bottom"
+                android:textColor="@color/create_text_disabled"
+                android:checked="false"/>
+        <CheckBox
+                android:text="@string/create_recurrence"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/create_recurrence_switch"
+                android:layout_alignParentLeft="true"
+                android:layout_marginTop="@dimen/create_edit_margin_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/create_edit_margin_lr"
+                android:layout_marginRight="@dimen/create_edit_margin_lr"
+                android:checked="false"
+                android:visibility="gone"/>
+        <Button
+                android:id="@+id/create_recurrencedate_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/create_chooserecurrencedate"
                 style="?android:attr/spinnerStyle"
                 android:layout_marginBottom="@dimen/create_edit_margin_bottom"
                 android:layout_marginTop="@dimen/create_edit_margin_top"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"
                 android:paddingLeft="@dimen/create_edit_date_padding_lr"
-                android:paddingRight="@dimen/create_edit_date_padding_lr"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/create_enddate"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/createEndDate"
-                android:layout_marginLeft="@dimen/create_edit_margin_lr"
-                android:layout_marginRight="@dimen/create_edit_margin_lr"/>
-        <Button
-                android:id="@+id/create_enddatetime_button"
+                android:paddingRight="@dimen/create_edit_date_padding_lr"
+                android:visibility="gone"/>
+
+        <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/create_choosedatetime"
-                style="?android:attr/spinnerStyle"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:id="@+id/create_datetime_container"
                 android:layout_marginBottom="@dimen/create_edit_margin_bottom"
                 android:layout_marginTop="@dimen/create_edit_margin_top"
                 android:layout_marginLeft="@dimen/create_edit_margin_lr"
                 android:layout_marginRight="@dimen/create_edit_margin_lr"
-                android:paddingLeft="@dimen/create_edit_date_padding_lr"
-                android:paddingRight="@dimen/create_edit_date_padding_lr"/>
+                android:visibility="gone">
+            <Button
+                    android:id="@+id/create_startdatetime_button"
+                    android:layout_gravity="left|top"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:text="@string/create_choosedatetime"
+                    style="?android:attr/spinnerStyle"
+                    android:paddingLeft="@dimen/create_edit_date_padding_lr"
+                    android:paddingRight="@dimen/create_edit_date_padding_lr"
+                    android:layout_weight="5"/>
+            <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/next"
+                    android:paddingLeft="@dimen/create_edit_date_padding_lr"
+                    android:paddingRight="@dimen/create_edit_date_padding_lr"
+                    android:layout_weight="1" android:layout_gravity="center"/>
+            <Button
+                    android:id="@+id/create_enddatetime_button"
+                    android:layout_gravity="right|top"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_choosedatetime"
+                    style="?android:attr/spinnerStyle"
+                    android:paddingLeft="@dimen/create_edit_date_padding_lr"
+                    android:paddingRight="@dimen/create_edit_date_padding_lr"
+                    android:layout_weight="5"/>
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

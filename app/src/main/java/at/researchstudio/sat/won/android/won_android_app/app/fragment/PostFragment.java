@@ -59,6 +59,7 @@ public class PostFragment extends Fragment {
     private String postId;
     private String refPostTitle; //title of the reference post
 
+    private View rootView;
     private TextView postDescription; //the description of the post
 
     private ImageView postType; //the post type icon
@@ -99,7 +100,7 @@ public class PostFragment extends Fragment {
             refPostTitle=null;
         }
 
-        View rootView = inflater.inflate(R.layout.fragment_post, container, false);
+        rootView = inflater.inflate(R.layout.fragment_post, container, false);
 
         postDescription = (TextView) rootView.findViewById(R.id.post_description);
         postType = (ImageView) rootView.findViewById(R.id.post_type);
@@ -109,11 +110,46 @@ public class PostFragment extends Fragment {
         postDateType = (ImageView) rootView.findViewById(R.id.post_calendar_icon);
         mImagePager = (ViewPager) rootView.findViewById(R.id.image_pager);
         mIconPageIndicator = (IconPageIndicator) rootView.findViewById(R.id.image_pager_indicator);
-        mapLayout = (RelativeLayout) rootView.findViewById(R.id.map_layout);
+        mapLayout = (RelativeLayout) rootView.findViewById(R.id.create_location_container);
         mMapView = (MapView) rootView.findViewById(R.id.post_map);
         imageContainer = (RelativeLayout) rootView.findViewById(R.id.image_container);
 
         mScrollView = (ScrollView) rootView.findViewById(R.id.post_scrollview);
+
+        return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+        activity = (MainActivity) getActivity();
+        activity.showLoading();//TODO: BUG SHOWS LOADING IF AN ADJACENT TAB IS CURRENTLY VISIBLE DUE TO THE PAGER HOLDING 3 VIEWS AT A TIME
+
+        tileProvider = new LetterTileProvider(activity);
+
+        //Initialize GMaps
+        MapsInitializer.initialize(activity);
+        mGeocoder = new Geocoder(activity, Locale.getDefault());
+
+        //*********** 'HACK' TO FIX PARCEABLE BUG see darnmason post in http://stackoverflow.com/questions/13900322/badparcelableexception-in-google-maps-code
+        Bundle mapState = null;
+        if(savedInstanceState != null) {
+            mapState = new Bundle();
+            mapState.putBundle(MAP_STATE_KEY, savedInstanceState.getBundle(MAP_STATE_KEY));
+        }
+
+        mMapView.onCreate(mapState);
+        //****************************
+
+        // Gets to GoogleMap from the MapView and does initialization stuff
+        if(mMapView!=null)
+        {
+            map = mMapView.getMap();
+            map.getUiSettings().setMyLocationButtonEnabled(false);
+            map.setMyLocationEnabled(true);
+        }
+
         ImageView transparentImageView = (ImageView) rootView.findViewById(R.id.transparent_image);
 
         transparentImageView.setOnTouchListener(new View.OnTouchListener() {
@@ -141,39 +177,6 @@ public class PostFragment extends Fragment {
                 }
             }
         });
-
-        return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setHasOptionsMenu(true);
-        activity = (MainActivity) getActivity();
-        activity.showLoading();
-        tileProvider = new LetterTileProvider(activity);
-
-        //Initialize GMaps
-        MapsInitializer.initialize(activity);
-        mGeocoder = new Geocoder(activity, Locale.getDefault());
-
-        //*********** 'HACK' TO FIX PARCEABLE BUG see darnmason post in http://stackoverflow.com/questions/13900322/badparcelableexception-in-google-maps-code
-        Bundle mapState = null;
-        if(savedInstanceState != null) {
-            mapState = new Bundle();
-            mapState.putBundle(MAP_STATE_KEY, savedInstanceState.getBundle(MAP_STATE_KEY));
-        }
-
-        mMapView.onCreate(mapState);
-        //****************************
-
-        // Gets to GoogleMap from the MapView and does initialization stuff
-        if(mMapView!=null)
-        {
-            map = mMapView.getMap();
-            map.getUiSettings().setMyLocationButtonEnabled(false);
-            map.setMyLocationEnabled(true);
-        }
     }
 
     @Override
@@ -267,8 +270,9 @@ public class PostFragment extends Fragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                activity.setTempPost(activity.getPostService().closePost(postId));
+                activity.setTempPost(activity.getPostService().closePost(postId)); //TODO: DOES NOT REALLY CLOSE THE POST YET...
                 Toast.makeText(activity, getString(R.string.toast_close_mypost), Toast.LENGTH_SHORT).show();
+                activity.popBackStackIfPossible();
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {

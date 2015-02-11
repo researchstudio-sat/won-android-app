@@ -15,6 +15,8 @@
 
 
 
+
+
 buildscript {
     repositories {
         mavenCentral()
@@ -30,7 +32,7 @@ repositories {
 }
 
 android {
-    compileSdkVersion 14
+    compileSdkVersion 16
     buildToolsVersion "21.1.2"
 
     defaultConfig {
@@ -56,4 +58,6 @@ dependencies {
     compile 'com.google.android.gms:play-services:5.0.89'
     compile 'com.viewpagerindicator:library:2.4.1@aar'
     compile 'com.wefika:flowlayout:0.3.4'
+    compile 'com.github.flavienlaurent.datetimepicker:library:0.0.2'
+    compile 'be.billington.calendar.recurrencepicker:library:1.1.0'
 }

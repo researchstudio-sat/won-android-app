@@ -276,7 +276,6 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         int backStackCount = getFragmentManager().getBackStackEntryCount();
         if(backStackCount>0){
             getFragmentManager().popBackStack();
-            getFragmentManager().popBackStackImmediate();
             return true;
         }else{
             return false;

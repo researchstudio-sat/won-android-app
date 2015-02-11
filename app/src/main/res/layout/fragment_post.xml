@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+  ~ Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@
                 android:orientation="horizontal"
                 android:id="@+id/post_tag_holder"/>
         <RelativeLayout
-                android:id="@+id/map_layout"
+                android:id="@+id/create_location_container"
                 android:layout_width="match_parent"
                 android:layout_height="300dp">
             <com.google.android.gms.maps.MapView
