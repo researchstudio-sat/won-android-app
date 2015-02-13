@@ -18,7 +18,6 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,18 +28,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
-import at.researchstudio.sat.won.android.won_android_app.app.model.User;
+import at.researchstudio.sat.won.android.won_android_app.app.webservice.model.User;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by fsuda on 25.08.2014.
@@ -101,32 +99,37 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... params) {
-            Editable userName = mUsername.getText();
-            Editable pass = mPassword.getText();
-
-            Log.d(LOG_TAG, "Username: "+mUsername.getText());
-            Log.d(LOG_TAG, "Password: "+mPassword.getText());
             //CALL LOGIN THINGY
             final String url = activity.getString(R.string.base_uri)+ "rest/users/signin";
 
-            HttpHeaders requestHeaders = new HttpHeaders();
+            RestTemplate restTemplate = new RestTemplate(true, activity.getHttpRequestFactory());
 
-            requestHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-            requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-            RestTemplate restTemplate = new RestTemplate(false);
-
-            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-            restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
+            restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
 
             try{
                 Log.d(LOG_TAG, url);
 
-                HttpEntity<User> request = new HttpEntity<User>(new User(mUsername.getText().toString(), mPassword.getText().toString()), requestHeaders);
-                return restTemplate.postForObject(url, request, String.class);
+                HttpEntity<User> request = new HttpEntity<User>(new User(mUsername.getText().toString(), mPassword.getText().toString()));
+                HttpEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
 
-            }catch(HttpMessageNotReadableException e) {
-                //TODO: THIS IS DUE TO THE FACT THAT WE DO NOT GET A VALID JSON FROM THE SERVER
-                return "LOGGED IN";
+                /*********************************************************LOG ENTRIES START******/
+                for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
+                    if(es.getValue()==null){
+                        Log.d(LOG_TAG,"Key: "+ es.getKey()+ " EMPTY");
+                    }else {
+                        for (String value : es.getValue()){
+                            Log.d(LOG_TAG,"Key: "+ es.getKey()+ " Value: "+value);
+                        }
+                    }
+                }
+                /*********************LOG ENTRIES END***********************************/
+
+                activity.getHttpRequestFactory().setCookieValue(response.getHeaders().get("Set-Cookie").get(0)); //NOT SURE IF GET 0 is VALID AS THE COOKIE apparently cookie value seems to be set already
+
+                retrieveNeeds(); //JUST A TESTWISE THING
+
+                return response.getBody();
             }catch (HttpClientErrorException e) {
                 Log.e(LOG_TAG, e.getLocalizedMessage(), e);
                 Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
@@ -135,7 +138,6 @@ public class LoginFragment extends Fragment {
                 Log.e(LOG_TAG, e.getLocalizedMessage(), e);
                 return e.getLocalizedMessage();
             }
-
         }
 
         @Override
@@ -145,6 +147,47 @@ public class LoginFragment extends Fragment {
 
         protected void onPostExecute(String str) {
             Toast.makeText(activity, str, Toast.LENGTH_LONG).show();
+        }
+
+        protected String retrieveNeeds(){
+            //CALL LOGIN THINGY
+            final String url = activity.getString(R.string.base_uri)+ "rest/needs/";
+
+            RestTemplate restTemplate = new RestTemplate(true, activity.getHttpRequestFactory());
+
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
+            restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
+
+            try{
+                Log.d(LOG_TAG, url);
+
+                HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
+
+                /*********************************************************LOG ENTRIES START******/
+                for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
+                    if(es.getValue()==null){
+                        Log.d(LOG_TAG,"Key: "+ es.getKey()+ " EMPTY");
+                    }else {
+                        for (String value : es.getValue()){
+                            Log.d(LOG_TAG,"Key: "+ es.getKey()+ " Value: "+value);
+                        }
+                    }
+                }
+
+                for(String needs : response.getBody()){
+                    Log.d(LOG_TAG, needs);
+                }
+                /*********************LOG ENTRIES END***********************************/
+
+                return "SUCCESS";
+            }catch (HttpClientErrorException e) {
+                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+                Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
+                return e.getResponseBodyAsString();
+            } catch (ResourceAccessException e) {
+                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+                return e.getLocalizedMessage();
+            }
         }
     }
 }

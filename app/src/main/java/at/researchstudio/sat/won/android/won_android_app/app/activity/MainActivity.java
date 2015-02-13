@@ -41,6 +41,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoader
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.PostService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsService;
+import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
@@ -60,7 +61,9 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     private WelcomeScreenPagerAdapter mWelcomeScreenPagerAdapter;
     private ViewPager mWelcomeScreenViewPager;
+
     private PostService postService;
+    private WonClientHttpRequestFactory httpRequestFactory;
 
     private boolean doubleBackToExitPressedOnce;
 
@@ -270,6 +273,9 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         getActionBar().show();
         setContentView(R.layout.activity_login);
 
+        mContainer = (FrameLayout) findViewById(R.id.container);
+        mLoadingScreen = (RelativeLayout) findViewById(R.id.loading_screen);
+
         // update the main content by replacing fragments
         Fragment fragment = new LoginFragment();
 
@@ -367,5 +373,14 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         fragmentTransaction.replace(R.id.container, fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
+    }
+
+    public WonClientHttpRequestFactory getHttpRequestFactory(){
+        if(httpRequestFactory==null){
+            Log.d(LOG_TAG, "REQUEST FACTORY WAS NULL");
+            httpRequestFactory = new WonClientHttpRequestFactory();
+        }
+
+        return httpRequestFactory;
     }
 }

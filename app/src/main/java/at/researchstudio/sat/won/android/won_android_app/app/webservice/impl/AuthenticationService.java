@@ -13,7 +13,7 @@
  *    limitations under the License.
  */
 
-package at.researchstudio.sat.won.android.won_android_app.app.model;/*
+package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;/*
  * Copyright 2015  Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,28 +29,6 @@ package at.researchstudio.sat.won.android.won_android_app.app.model;/*
  *    limitations under the License.
  */
 
-public class User {
-    private String username;
-    private String password;
+public class AuthenticationService {
 
-    public User(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
