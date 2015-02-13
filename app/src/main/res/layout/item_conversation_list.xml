@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-  ~ Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+  ~ Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Need Title Long title this is longer than expected oh my"
                 android:id="@+id/item_conversation_list_title"
                 android:gravity="left"
                 android:singleLine="true"/>
@@ -81,7 +80,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Need Title Long title this is longer than expected oh my"
                     android:id="@+id/item_conversation_list_reference_title"
                     android:gravity="left"
                     android:singleLine="true"
@@ -102,7 +100,6 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/item_list_description"
-                    android:text="I would like to have this item please"
                     android:id="@+id/item_conversation_list_message_text"
                     android:singleLine="false"
                     android:gravity="left"
@@ -124,7 +121,6 @@
             android:id="@+id/item_conversation_list_message_counter"
             android:background="@color/conversations"
             android:layout_gravity="center_vertical"
-            android:text="5"
             android:padding="3dp"
             android:textColor="@color/menuitem_counter_text"
             android:textSize="12sp"

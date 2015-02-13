@@ -17,6 +17,8 @@
 
 
 
+
+
 buildscript {
     repositories {
         mavenCentral()
@@ -27,8 +29,15 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 
+configurations.compile {
+    exclude module: 'spring-core'
+    exclude module: 'spring-web'
+    exclude module: 'commons-logging'
+}
+
 repositories {
     mavenCentral()
+    maven { url 'http://repo.spring.io/libs-release' }
 }
 
 android {
@@ -47,6 +56,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/notice.txt'
+    }
 }
 
 dependencies {
@@ -60,4 +76,9 @@ dependencies {
     compile 'com.wefika:flowlayout:0.3.4'
     compile 'com.github.flavienlaurent.datetimepicker:library:0.0.2'
     compile 'be.billington.calendar.recurrencepicker:library:1.1.0'
+    compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
+    compile 'org.springframework.android:spring-android-auth:1.0.1.RELEASE'
+    compile 'org.springframework.android:spring-android-core:1.0.1.RELEASE'
+    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.3.2'
 }

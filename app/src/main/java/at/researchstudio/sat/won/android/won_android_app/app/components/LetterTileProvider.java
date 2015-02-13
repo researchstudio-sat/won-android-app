@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class LetterTileProvider {
             mFirstChar[0] = Character.toUpperCase(firstChar);
             mPaint.setTextSize(mTileLetterFontSize);
             mPaint.getTextBounds(mFirstChar, 0, 1, mBounds);
-            c.drawText(mFirstChar, 0, 1, 0 + width / 2, 0 + height / 2
+            c.drawText(mFirstChar, 0, 1, width / 2, height / 2
                     + (mBounds.bottom - mBounds.top) / 2, mPaint);
         } else {
             c.drawBitmap(mDefaultBitmap, 0, 0, null);

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
   ~ Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
   ~
@@ -15,14 +14,6 @@
   ~    limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/item_request_list_title"/>
-</LinearLayout>
+<resources>
+    <string name="base_uri">http://rsa021.researchstudio.at:8080/owner/</string>
+</resources>

@@ -231,10 +231,15 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     }
 
     public void skipWelcome(View v) {
-        showMainMenu();
+        //TODO: IMPLEMENT IF "AUTHENTICATED CHECK"-METHOD
+        if(false){
+            showMainMenu();
+        }else{
+            showLoginScreen();
+        }
     }
 
-    private void showMainMenu() {
+    public void showMainMenu() {
         getActionBar().show();
         setContentView(R.layout.activity_main);
         mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -242,7 +247,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         mLoadingScreen = (RelativeLayout) findViewById(R.id.loading_screen);
         showLoading();
 
-        //Initialize Connection to the backend
+        //Initialize Connection to the "backend"
         postService = new PostService();
         mImgLoader = new ImageLoaderService(this);
 
@@ -260,6 +265,17 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         mWelcomeScreenViewPager = (ViewPager) findViewById(R.id.welcome_screen_pager);
         mWelcomeScreenViewPager.setAdapter(mWelcomeScreenPagerAdapter);
     }
+
+    private void showLoginScreen() {
+        getActionBar().show();
+        setContentView(R.layout.activity_login);
+
+        // update the main content by replacing fragments
+        Fragment fragment = new LoginFragment();
+
+        getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+    }
+
 
     private void showSettings() {
         if((mNavigationDrawerFragment != null) && (mNavigationDrawerFragment.isDrawerOpen())){

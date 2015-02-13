@@ -370,9 +370,7 @@ public class PostFragment extends Fragment {
             mImagePagerAdapter = new ImagePagerAdapter(activity, false);
             mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
 
-            boolean imgsPresent = false;
             int imageCount = 0;
-
 
             if(post.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
                 mImagePagerAdapter.addItem(post.getTitleImageUrl());

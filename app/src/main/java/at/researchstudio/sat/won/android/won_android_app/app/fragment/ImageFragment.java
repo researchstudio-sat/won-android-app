@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -127,7 +128,7 @@ public class ImageFragment extends Fragment{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //TODO: BUG ADDING AN IMAGE CHANGES THE ACTIONBAR TO A VIEWPOST ACTIONBAR
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
 
             try {
@@ -137,9 +138,9 @@ public class ImageFragment extends Fragment{
                 activity.getTempPost().removeLastAddedImage();
                 Log.e(LOG_TAG, "ERROR WHILE PROCESSING CAMERA PICTURE: " + e.getMessage());
             }
-        }else if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_CANCELED){
+        }else if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_CANCELED){
             activity.getTempPost().removeLastAddedImage(); //REMOVE IMAGE AGAIN IF THE REQUEST IS CANCELED
-        }else if(requestCode == REQUEST_IMAGE_PICK && resultCode == getActivity().RESULT_OK){
+        }else if(requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK){
             if(data.getData() != null) {
                 Uri _uri = data.getData();
 

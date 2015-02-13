@@ -33,6 +33,9 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_compose">Compose</string>
 
+    <!-- Error Messages -->
+    <string name="error_login_failed">Login Failed</string>
+
     <!-- Generic Items -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -45,6 +48,11 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="loading">Loading&#8230;</string>
+    <string name="closed">closed</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
 
     <!-- MENU ITEMS -->
     <string name="mi_profile">Profile</string>
@@ -83,6 +91,7 @@
     <string name="welcome_page_create_header">Create</string>
     <string name="welcome_page_add_header">Add</string>
     <string name="welcome_page_match_header">Match!</string>
+    <string name="welcome_skip">Skip</string>
 
     <!-- Create Post View -->
     <string name="create_title">Title</string>

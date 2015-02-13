@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Research Studios Austria Forschungsges.m.b.H.
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.service;
 
 import android.content.SharedPreferences;
-import android.util.Log;
-
-import java.util.Map;
 
 /**
  * Created by fsuda on 26.08.2014.
@@ -56,6 +53,6 @@ public class SettingsService {
 
         editor.putInt(PREF_APP_STARTS, appStarts);
 
-        editor.commit();
+        editor.apply();
     }
 }
