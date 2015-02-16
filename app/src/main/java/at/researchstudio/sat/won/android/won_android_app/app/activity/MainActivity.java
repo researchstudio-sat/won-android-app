@@ -41,7 +41,8 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoader
 import at.researchstudio.sat.won.android.won_android_app.app.service.LocationService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.PostService;
 import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsService;
-import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
+import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.AuthenticationService;
+import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
@@ -63,7 +64,8 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     private ViewPager mWelcomeScreenViewPager;
 
     private PostService postService;
-    private WonClientHttpRequestFactory httpRequestFactory;
+    private DataService dataService;
+    private AuthenticationService authService;
 
     private boolean doubleBackToExitPressedOnce;
 
@@ -316,14 +318,6 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         }
     }
 
-    public ImageLoaderService getImageLoaderService(){
-        return mImgLoader;
-    }
-
-    public PostService getPostService(){
-        return postService;
-    }
-
     public boolean isDrawerOpen(){
         return (mNavigationDrawerFragment != null) && (mNavigationDrawerFragment.isDrawerOpen());
     }
@@ -375,12 +369,37 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         fragmentTransaction.commit();
     }
 
-    public WonClientHttpRequestFactory getHttpRequestFactory(){
-        if(httpRequestFactory==null){
-            Log.d(LOG_TAG, "REQUEST FACTORY WAS NULL");
-            httpRequestFactory = new WonClientHttpRequestFactory();
+    //SERVICE GETTERS
+
+    public AuthenticationService getAuthService(){
+        if(authService == null){
+            Log.d(LOG_TAG, "AUTH SERVICE IS NULL, INITIZIALIZING AUTH SERVICE");
+            authService = new AuthenticationService(this);
         }
 
-        return httpRequestFactory;
+        return authService;
+    }
+
+    public DataService getDataService(){
+        if(dataService == null){
+            Log.d(LOG_TAG, "DATA SERVICE IS NULL, INITIALIZING DATA SERVICE");
+            dataService = new DataService(getAuthService());
+        }
+
+        return dataService;
+    }
+
+
+    public ImageLoaderService getImageLoaderService(){
+        return mImgLoader;
+    }
+
+    public PostService getPostService(){
+        if(postService == null){
+            Log.d(LOG_TAG, "POST SERVICE IS NULL, INITIZIALIZING POST SERVICE");
+            postService = new PostService();
+        }
+
+        return postService;
     }
 }

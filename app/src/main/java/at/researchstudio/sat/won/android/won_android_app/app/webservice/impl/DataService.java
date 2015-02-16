@@ -32,105 +32,68 @@ package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;/*
 import android.content.Context;
 import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
-import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
-import at.researchstudio.sat.won.android.won_android_app.app.webservice.model.User;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class AuthenticationService{
+public class DataService {
     private static final String LOG_TAG = AuthenticationService.class.getSimpleName();
 
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
     private Context context; //used for string resources
 
-    public AuthenticationService(Context context){
-        this.context = context; //used for stringresource retrieval
-        requestFactory = new WonClientHttpRequestFactory(); //used for cookie handling within connections
+    public DataService(AuthenticationService authService){
+        this.context = authService.getContext(); //used for stringresource retrieval
+        requestFactory = authService.getRequestFactory(); //used for cookie handling within connections
         restTemplate = new RestTemplate(true, requestFactory);
 
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
         restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
     }
 
-    public int login(User user){
-        final String url = context.getString(R.string.base_uri) + context.getString(R.string.login_path);
+    public ArrayList<Post> getMyPosts(){
+        //CALL LOGIN THINGY
+        final String url = context.getString(R.string.base_uri)+ context.getString(R.string.needs_path);
 
         try{
+            ArrayList<Post> myPosts = new ArrayList<Post>();
             Log.d(LOG_TAG, url);
 
-            HttpEntity<User> request = new HttpEntity<User>(user);
-            HttpEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+            HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
 
             verboseLogOutput(response);
 
-            requestFactory.setCookieValue(response.getHeaders().get("Set-Cookie").get(0)); //NOT SURE IF GET 0 is VALID AS THE COOKIE apparently cookie value seems to be set already
 
-            return ResponseCode.LOGIN_SUCCESS;
-        }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
-        } catch (ResourceAccessException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
-        }
-    }
+            for(String s : response.getBody()) {
+                Post p = new Post();
 
-    public int login(String username, String password) {
-        return login(new User(username, password));
-    }
-
-    public int logout() {
-        final String url = context.getString(R.string.base_uri) + context.getString(R.string.logout_path);
-
-        try{
-            Log.d(LOG_TAG, url);
-
-            HttpEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, null, String.class); //TODO: IDK if "null" is a valid postparameter
-
-            verboseLogOutput(response);
-
-            requestFactory.setCookieValue(response.getHeaders().get("Set-Cookie").get(0)); //NOT SURE IF GET 0 is VALID AS THE COOKIE apparently cookie value seems to be set already
-
-            return ResponseCode.LOGIN_SUCCESS;
-        }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
-        } catch (ResourceAccessException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
-        }
-    }
-
-    private void verboseLogOutput(HttpEntity<String> response){
-        for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
-            if(es.getValue()==null){
-                Log.d(LOG_TAG,"Key: "+ es.getKey()+ " EMPTY");
-            }else {
-                for (String value : es.getValue()){
-                    Log.d(LOG_TAG,"Key: "+ es.getKey()+ " Value: "+value);
-                }
+                //TODO: IMPL THIS
+                p.setTitle(s);
+                myPosts.add(p);
             }
+
+            myPosts.addAll(Mock.myMockPosts.values()); //REMOVE THIS LATER
+
+            return myPosts;
+        }catch (HttpClientErrorException e) {
+            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+            Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
+            return new ArrayList<Post>();
+        } catch (ResourceAccessException e) {
+            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+            return new ArrayList<Post>();
         }
-    }
-
-    public WonClientHttpRequestFactory getRequestFactory() {
-        return requestFactory;
-    }
-
-    public void setRequestFactory(WonClientHttpRequestFactory requestFactory) {
-        this.requestFactory = requestFactory;
     }
 
     public Context getContext() {
@@ -139,5 +102,17 @@ public class AuthenticationService{
 
     public void setContext(Context context) {
         this.context = context;
+    }
+
+    private void verboseLogOutput(HttpEntity<String[]> response){
+        for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
+            if(es.getValue()==null){
+                Log.d(LOG_TAG, "Key: " + es.getKey() + " EMPTY");
+            }else {
+                for (String value : es.getValue()){
+                    Log.d(LOG_TAG,"Key: "+ es.getKey()+ " Value: "+value);
+                }
+            }
+        }
     }
 }

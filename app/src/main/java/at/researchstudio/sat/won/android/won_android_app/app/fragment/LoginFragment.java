@@ -16,29 +16,20 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
-import at.researchstudio.sat.won.android.won_android_app.app.webservice.model.User;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
+import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
 
 /**
  * Created by fsuda on 25.08.2014.
@@ -75,118 +66,43 @@ public class LoginFragment extends Fragment {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                login();
+                activity.showLoading();
+                new LoginTask().execute();
             }
         });
     }
 
     //*************************************************************************************************
 
-    private void login(){
-        //******************************************************************************
-        new LoginTask().execute();
-        //******************************************************************************
-        /*if(!StringUtils.isEmpty(userName.toString()) && !StringUtils.isEmpty(pass.toString())) {//TODO: INVOKE REAL AUTHENTICATION in form of a AsyncTask
-            activity.showMainMenu();
-
-        }else{
-            mErrorText.setText(getResources().getString(R.string.error_login_failed));
-            mErrorText.setVisibility(View.VISIBLE);
-        }*/
-    }
-
-    private class LoginTask extends AsyncTask<Void, Void, String> {
+    private class LoginTask extends AsyncTask<Void, Void, Integer> {
 
         @Override
-        protected String doInBackground(Void... params) {
-            //CALL LOGIN THINGY
-            final String url = activity.getString(R.string.base_uri)+ "rest/users/signin";
-
-            RestTemplate restTemplate = new RestTemplate(true, activity.getHttpRequestFactory());
-
-            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
-            restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
-
-            try{
-                Log.d(LOG_TAG, url);
-
-                HttpEntity<User> request = new HttpEntity<User>(new User(mUsername.getText().toString(), mPassword.getText().toString()));
-                HttpEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-
-                /*********************************************************LOG ENTRIES START******/
-                for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
-                    if(es.getValue()==null){
-                        Log.d(LOG_TAG,"Key: "+ es.getKey()+ " EMPTY");
-                    }else {
-                        for (String value : es.getValue()){
-                            Log.d(LOG_TAG,"Key: "+ es.getKey()+ " Value: "+value);
-                        }
-                    }
-                }
-                /*********************LOG ENTRIES END***********************************/
-
-                activity.getHttpRequestFactory().setCookieValue(response.getHeaders().get("Set-Cookie").get(0)); //NOT SURE IF GET 0 is VALID AS THE COOKIE apparently cookie value seems to be set already
-
-                retrieveNeeds(); //JUST A TESTWISE THING
-
-                return response.getBody();
-            }catch (HttpClientErrorException e) {
-                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-                Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
-                return e.getResponseBodyAsString();
-            } catch (ResourceAccessException e) {
-                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-                return e.getLocalizedMessage();
-            }
+        protected Integer doInBackground(Void... params) {
+            InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mUsername.getWindowToken(), 0);
+            return activity.getAuthService().login(mUsername.getText().toString(), mPassword.getText().toString());
         }
 
         @Override
-        protected void onCancelled(String str) {
-
+        protected void onCancelled(Integer responseCode) {
+            activity.hideLoading();
         }
 
-        protected void onPostExecute(String str) {
-            Toast.makeText(activity, str, Toast.LENGTH_LONG).show();
-        }
-
-        protected String retrieveNeeds(){
-            //CALL LOGIN THINGY
-            final String url = activity.getString(R.string.base_uri)+ "rest/needs/";
-
-            RestTemplate restTemplate = new RestTemplate(true, activity.getHttpRequestFactory());
-
-            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
-            restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
-
-            try{
-                Log.d(LOG_TAG, url);
-
-                HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
-
-                /*********************************************************LOG ENTRIES START******/
-                for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
-                    if(es.getValue()==null){
-                        Log.d(LOG_TAG,"Key: "+ es.getKey()+ " EMPTY");
-                    }else {
-                        for (String value : es.getValue()){
-                            Log.d(LOG_TAG,"Key: "+ es.getKey()+ " Value: "+value);
-                        }
-                    }
-                }
-
-                for(String needs : response.getBody()){
-                    Log.d(LOG_TAG, needs);
-                }
-                /*********************LOG ENTRIES END***********************************/
-
-                return "SUCCESS";
-            }catch (HttpClientErrorException e) {
-                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-                Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
-                return e.getResponseBodyAsString();
-            } catch (ResourceAccessException e) {
-                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-                return e.getLocalizedMessage();
+        protected void onPostExecute(Integer responseCode) {
+            switch(responseCode){
+                case ResponseCode.LOGIN_SUCCESS:
+                    activity.showMainMenu();
+                    break;
+                case ResponseCode.LOGIN_NOUSER:
+                    //TODO: SET STUFF FOR FALSE LOGIN
+                    Log.d(LOG_TAG, "USERNAME PASSWORD ERROR");
+                    activity.hideLoading();
+                    break;
+                case ResponseCode.LOGIN_CONNECTION_ERR:
+                    //TODO: SET STUFF FOR CONNECTION ERRORS
+                    Log.d(LOG_TAG, "CONNECTION ERROR");
+                    activity.hideLoading();
+                    break;
             }
         }
     }

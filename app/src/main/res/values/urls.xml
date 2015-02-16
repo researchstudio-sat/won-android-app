@@ -16,4 +16,8 @@
 
 <resources>
     <string name="base_uri">http://rsa021.researchstudio.at:8080/owner/</string>
+    <string name="login_path">rest/users/signin</string>
+    <string name="logout_path">rest/users/signout</string>
+
+    <string name="needs_path">rest/needs/</string>
 </resources>

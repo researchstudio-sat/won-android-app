@@ -36,7 +36,6 @@ public class PostService {
         Mock.fillMyMockPosts();
         Mock.fillMyMockConnections();
         Mock.setNotificationCounters();
-
     }
 
     public ArrayList<Connection> getConversations() {
@@ -78,11 +77,6 @@ public class PostService {
     public ArrayList<Post> getMatchesByPostId(UUID postId) {
         //TODO: REFACTOR THIS MOCK METHOD
         return Mock.getMatchesByPostId(postId);
-    }
-
-    public ArrayList<Post> getMyPosts(){
-        //TODO: REFACTOR THIS MOCK METHOD
-        return new ArrayList<Post>(Mock.myMockPosts.values());
     }
 
     public Connection getConversationById(String id){
