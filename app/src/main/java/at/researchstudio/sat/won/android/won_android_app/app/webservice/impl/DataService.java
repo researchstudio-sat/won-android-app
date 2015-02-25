@@ -20,19 +20,25 @@ import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.util.SimpleLinkedDataSourceImpl;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.StatementCollector;
+import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import won.owner.service.impl.DataReloadService;
+import won.protocol.model.Need;
+import won.protocol.util.NeedModelBuilder;
+import won.protocol.util.RdfUtils;
+import won.protocol.util.linkeddata.LinkedDataSource;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +49,7 @@ public class DataService {
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
     private Context context; //used for string resources
+    private LinkedDataSource linkedDataSource = new SimpleLinkedDataSourceImpl();
 
     public DataService(AuthenticationService authService){
         this.context = authService.getContext(); //used for stringresource retrieval
@@ -63,34 +70,40 @@ public class DataService {
 
             HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
             verboseLogOutput(response);
-
             //**************************************************************************
 
-            try {
-                java.net.URL documentUrl = new URL("http://rsa021.researchstudio.at:8080/won/resource/need/1869023001744244700"); //TODO: SET ACCEPT HEADER TO SET FORMAT
-                InputStream inputStream = documentUrl.openStream();
-
-                RDFParser rdfParser = Rio.createParser(RDFFormat.JSONLD);
-
-                org.openrdf.model.Model myGraph = new org.openrdf.model.impl.LinkedHashModel();
-                rdfParser.setRDFHandler(new StatementCollector(myGraph));
-
-                rdfParser.parse(inputStream, documentUrl.toString());
-            }catch(IOException e){
-                e.printStackTrace();
-            }catch(RDFParseException e){
-                e.printStackTrace();
-            }catch(RDFHandlerException e){
-                e.printStackTrace();
-            }
-
-            //http://rsa021.researchstudio.at:8080/won/resource/need/1869023001744244700
+            //http://rsa021.researchstudio.at:8080/won/resource/need/1869023001744244700,false
             //http://rsa021.researchstudio.at:8080/won/resource/need/1135026076691464200
             for(String s : response.getBody()) {
+                Dataset needDataset = linkedDataSource.getDataForResource(URI.create(s));
+
+                //simple,insecure implementation: iterate over models, try to extract the 'need' data
+                NeedModelBuilder builder = RdfUtils.findFirst(needDataset, new RdfUtils.ModelVisitor<NeedModelBuilder>() {
+                    @Override
+                    public NeedModelBuilder visit(Model model) {
+                        try {
+                            NeedModelBuilder builder = new NeedModelBuilder();
+                            builder.copyValuesFromProduct(model);
+                            return builder;
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    }
+                });
+
+                Log.d(LOG_TAG, builder.build().toString());
+
                 Post p = new Post();
 
-                /*Resource need = model.createResource(s);
-                Log.d(LOG_TAG, need.toString());*/
+                try{
+                    com.hp.hpl.jena.rdf.model.Model needModel = ModelFactory.createDefaultModel();
+
+                    needModel.createResource(s);
+
+                    Log.d(LOG_TAG, needModel.toString());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
                 //TODO: IMPL THIS
                 Log.d(LOG_TAG, s);
                 p.setTitle(s);
@@ -98,6 +111,7 @@ public class DataService {
             }
 
             myPosts.addAll(Mock.myMockPosts.values()); //REMOVE THIS LATER
+            myPosts.addAll(Mock.myMockPosts.values());
 
             return myPosts;
         }catch (HttpClientErrorException e) {
@@ -118,7 +132,7 @@ public class DataService {
         this.context = context;
     }
 
-    private void verboseLogOutput(HttpEntity<String[]> response){
+    private static void verboseLogOutput(HttpEntity<String[]> response){
         for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
             if(es.getValue()==null){
                 Log.d(LOG_TAG, "Key: " + es.getKey() + " EMPTY");
