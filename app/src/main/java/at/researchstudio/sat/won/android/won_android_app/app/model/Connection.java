@@ -17,10 +17,11 @@ package at.researchstudio.sat.won.android.won_android_app.app.model;
 
 import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
-import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
+import won.protocol.model.BasicNeedType;
+import won.protocol.service.impl.WonNodeInformationServiceImpl;
 
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Created by fsuda on 14.10.2014.
@@ -36,16 +37,13 @@ public class Connection extends Model {
 
     private ArrayList<MessageItemModel> messages;
 
-    public Connection(UUID uuid) {
-        super(uuid);
+    public Connection(URI uri) {
+        this.setURI(uri);
     }
 
-    public Connection() {
-        super(null);
-    }
-
-    public Connection(Post myPost, Post matchedPost, ArrayList<MessageItemModel> messages, ConnectionType type){
-        super(null);
+    public Connection(URI uri, Post myPost, Post matchedPost, ArrayList<MessageItemModel> messages, ConnectionType type){
+        //this(new WonNodeInformationServiceImpl().generateConnectionURI()); //TODO: DO NOT IMPLEMENT THIS LIKE THAT
+        setURI(uri);
         this.myPost = myPost;
         this.matchedPost = matchedPost;
         this.messages = messages;
@@ -92,16 +90,16 @@ public class Connection extends Model {
         return (myPost == null) ? "Anonymous Conversation" : myPost.getTitle();
     }
 
-    public PostType getPostType() {
-        return (matchedPost == null) ? PostType.CHANGE : matchedPost.getType(); //TODO: SET DEFAULT VALUE IF NO POST
+    public BasicNeedType getPostType() {
+        return (matchedPost == null) ? BasicNeedType.CRITIQUE : matchedPost.getType(); //TODO: SET DEFAULT VALUE IF NO POST
     }
 
     public String getTitleImageUrl() {
         return (matchedPost == null) ? null : matchedPost.getTitleImageUrl();
     }
 
-    public PostType getReferencePostType() {
-        return (myPost == null) ? PostType.CHANGE : myPost.getType(); //TODO: SET DEFAULT VALUE IF NO POST
+    public BasicNeedType getReferencePostType() {
+        return (myPost == null) ? BasicNeedType.CRITIQUE : myPost.getType(); //TODO: SET DEFAULT VALUE IF NO POST
     }
 
     public int getMessageCount() {

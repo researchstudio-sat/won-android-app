@@ -46,8 +46,9 @@ import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.Dat
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
+import won.protocol.service.impl.WonNodeInformationServiceImpl;
 
-import java.util.UUID;
+import java.net.URI;
 
 
 public class MainActivity extends FragmentActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -57,6 +58,8 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     private static final String TEMPPOST_REF = "temppost_ref";
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private ImageLoaderService mImgLoader;
+
+    private WonNodeInformationServiceImpl mWonNodeInformationService = new WonNodeInformationServiceImpl();
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
@@ -80,12 +83,13 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         super.onCreate(savedInstanceState);
 
         boolean appAlreadyStarted;
+
         //LOAD TEMPPOST
         if(savedInstanceState != null){
             tempPost = savedInstanceState.getParcelable(TEMPPOST_REF);
             appAlreadyStarted = savedInstanceState.getBoolean(APP_STARTED_REF, false);
         }else{
-            tempPost = new Post();
+            tempPost = new Post(URI.create("INVALIDPOSTID")); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
             appAlreadyStarted = false;
         }
 
@@ -252,8 +256,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         mLoadingScreen = (RelativeLayout) findViewById(R.id.loading_screen);
         showLoading();
 
-        //Initialize Connection to the "backend"
-        postService = new PostService();
+        //Initialize ImageLoader
         mImgLoader = new ImageLoaderService(this);
 
         // Set up the drawer.
@@ -349,13 +352,13 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     }
 
     public void createDraft(String postId){
-        createDraft(UUID.fromString(postId));
+        createDraft(URI.create(postId));
     }
 
-    public void createDraft(UUID postId) {
+    public void createDraft(URI postId) {
         Toast.makeText(this, getString(R.string.toast_create_draft), Toast.LENGTH_SHORT).show();
 
-        tempPost = postService.createDraft(postId);
+        tempPost = postService.createDraft(postId, URI.create("INVALIDPOSTID")); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
         Log.d(LOG_TAG,"Creating Draft from: "+tempPost);
 
         Fragment fragment = new CreateFragment();
@@ -397,7 +400,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     public PostService getPostService(){
         if(postService == null){
             Log.d(LOG_TAG, "POST SERVICE IS NULL, INITIZIALIZING POST SERVICE");
-            postService = new PostService();
+            postService = new PostService(getDataService());
         }
 
         return postService;

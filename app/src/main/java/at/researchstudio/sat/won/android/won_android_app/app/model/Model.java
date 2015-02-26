@@ -1,36 +1,27 @@
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
-import java.util.UUID;
+import java.net.URI;
 
 /**
  * Created by fsuda on 14.10.2014.
  */
 public abstract class Model {
-    protected static final String UUID_REF="UUID";
-    private UUID uuid;
+    protected static final String URI_REF ="URI";
+    private URI uri;
 
-
-    protected Model(UUID uuid) {
-        if(uuid==null){
-            this.uuid = UUID.randomUUID();
-        }else{
-            this.uuid = uuid;
-        }
+    public URI getURI(){
+        return uri;
     }
 
-    public UUID getUuid(){
-        return uuid;
+    public String getURIString(){
+        return uri.toString();
     }
 
-    public String getUuidString(){
-        return uuid.toString();
+    public void setURI(URI uri){
+        this.uri = uri;
     }
 
-    public void setUuid(UUID uuid){
-        this.uuid = uuid;
-    }
-
-    public void setUuid(String uuid){
-        this.uuid = UUID.fromString(uuid);
+    public void setURI(String uri){
+        this.uri = URI.create(uri);
     }
 }

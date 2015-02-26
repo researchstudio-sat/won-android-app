@@ -29,17 +29,26 @@ buildscript {
         classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
+
 apply plugin: 'com.android.application'
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 18000, 'seconds'
+}
 
 configurations.compile {
     exclude module: 'spring-core'
     exclude module: 'spring-web'
     exclude module: 'commons-logging'
+    exclude group: 'javax.inject', module: 'javax.inject'
 }
 
 repositories {
     mavenCentral()
     maven { url 'http://repo.spring.io/libs-release' }
+    maven { url 'http://satsrv03.researchstudio.at:8080/artifactory/repo/'}
+    maven { url 'https://repository.jboss.org/nexus/content/groups/public'}
+    maven { url 'http://www.topquadrant.com/repository/spin/'}
 }
 
 android {
@@ -50,7 +59,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 14
         versionCode 1
-        versionName "0.1"
+        versionName "0.2"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -61,16 +70,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+
     packagingOptions {
         exclude 'META-INF/ASL2.0'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/license.txt'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
-        pickFirst 'META-INF/services/org.openrdf.rio.RDFParserFactory'
-        pickFirst 'META-INF/services/org.openrdf.rio.RDFWriterFactory'
+        pickFirst 'META-INF/spring.handlers'
+        pickFirst 'META-INF/spring.schemas'
+        pickFirst 'META-INF/spring.tooling'
+        pickFirst 'META-INF/jersey-module-version'
     }
 }
 
@@ -78,8 +95,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // You must install or update the Support Repository through the SDK manager to use this dependency.
     compile 'com.android.support:support-v4:19.+'
-    compile 'com.android.support:support-v13:20.+'
-    compile 'com.android.support:appcompat-v7:20.+'
+    compile 'com.android.support:support-v13:20.0.0'
+    compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.android.support:multidex:1.0.0'
     compile 'com.google.android.gms:play-services:5.0.89'
     compile 'com.viewpagerindicator:library:2.4.1@aar'
@@ -91,7 +108,52 @@ dependencies {
     compile 'org.springframework.android:spring-android-core:1.0.1.RELEASE'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.3.2'
-    compile 'org.openrdf.sesame:sesame-rio-jsonld:2.8.0'
-    compile 'org.openrdf.sesame:sesame-queryparser-sparql:2.8.0'
-    compile 'org.openrdf.sesame:sesame-http-protocol:2.8.0'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.7'
+    compile 'org.glassfish.jersey.core:jersey-client:2.16'
+    compile(group:'webofneeds', name:'won-owner', version:'0.2-SNAPSHOT', changing: true) {
+        exclude module: 'aopalliance'
+        exclude module: 'signingframework'
+        exclude module: 'activemq-amqp'
+        exclude module: 'activemq-pool'
+        exclude module: 'activemq-camel'
+        exclude module: 'activemq-spring'
+        exclude module: 'activemq-broker'
+        exclude module: 'activemq-client'
+        exclude module: 'activemq-kahadb-store'
+        exclude module: 'activemq-openwire-legacy'
+        exclude module: 'camel-core'
+        exclude module: 'camel-jms'
+        exclude module: 'camel-spring'
+        exclude module: 'camel-amqp'
+        exclude module: 'jms'
+        exclude module: 'xercesImpl'
+        exclude module: 'xml-apis'
+        exclude module: 'aspectjweaver'
+        exclude module: 'aspectjrt'
+        exclude module: 'hibernate-core'
+        exclude module: 'hibernate-c3p0'
+        exclude module: 'hibernate-entitymanager'
+        exclude module: 'hibernate-jpa'
+        exclude module: 'hsqldb'
+        exclude module: 'jena-core'
+        exclude module: 'jena-arq'
+        exclude module: 'jena-iri'
+        exclude module: 'jena-tdb'
+        exclude module: 'jersey-core'
+        exclude module: 'jersey-client'
+        exclude module: 'spring-beans'
+        exclude module: 'spring-security-core'
+        exclude module: 'spring-data-commons'
+        exclude module: 'spring-tx'
+        exclude module: 'servlet-api'
+        exclude module: 'xalan'
+        exclude module: 'postgresql'
+        exclude module: 'jaxws-api'
+        exclude module: 'jaxws-tools'
+        exclude module: 'jaxws-api'
+        exclude module: 'jaxws-rt'
+        exclude module: 'super-csv'
+        exclude module: 'ehcache-core'
+        exclude module: 'javax.inject'
+    }
 }

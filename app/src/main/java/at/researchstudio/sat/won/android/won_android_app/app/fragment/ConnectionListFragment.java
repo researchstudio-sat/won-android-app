@@ -94,14 +94,14 @@ public class ConnectionListFragment extends Fragment {
                 Bundle args = new Bundle();
 
                 if(receivedRequestsOnly){
-                    Log.d(LOG_TAG, "REQUEST SHOW POST WITH ID: "+ connection.getMatchedPost().getUuid());
-                    args.putString(Post.ID_REF, connection.getMatchedPost().getUuid().toString());
+                    Log.d(LOG_TAG, "REQUEST SHOW POST WITH ID: "+ connection.getMatchedPost().getURI());
+                    args.putString(Post.ID_REF, connection.getMatchedPost().getURI().toString());
                     args.putString(Post.TITLE_REF, connection.getMyPost().getTitle());
 
                     fragment = new PostFragment();
                 }else {
-                    Log.d(LOG_TAG, "CONVERSATIONID: " + connection.getUuid());
-                    args.putString(Connection.ID_REF, connection.getUuidString());
+                    Log.d(LOG_TAG, "CONVERSATIONID: " + connection.getURI());
+                    args.putString(Connection.ID_REF, connection.getURIString());
 
                     fragment = new ConversationFragment();
                 }

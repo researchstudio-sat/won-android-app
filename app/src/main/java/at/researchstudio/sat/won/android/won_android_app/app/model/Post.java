@@ -18,15 +18,16 @@ package at.researchstudio.sat.won.android.won_android_app.app.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import com.google.android.gms.maps.model.LatLng;
+import won.protocol.model.BasicNeedType;
+import won.protocol.service.impl.WonNodeInformationServiceImpl;
 
+import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by fsuda on 10.10.2014.
@@ -51,7 +52,7 @@ public class Post extends Model implements Parcelable {
 
     public static final String TAG_SEPARATOR = ",";
 
-    private PostType type;
+    private BasicNeedType type;
     private String title;
     private String description;
 
@@ -72,25 +73,24 @@ public class Post extends Model implements Parcelable {
 
     private RepeatType repeat;
 
-    public Post() {
-        super(null);
-        this.type = PostType.WANT;
+    public Post(BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
+        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageIndex, location, startTime, stopTime, repeat, closed);
+    }
+
+    public Post(URI uri){
+        this.setURI(uri);
+        this.type = BasicNeedType.DEMAND;
         this.repeat = RepeatType.NONE;
         this.location = new LatLng(0,0);
         this.imageUrls = new ArrayList<String>();
         this.tags = new ArrayList<String>();
     }
 
-    public Post(PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
-        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageIndex, location, startTime, stopTime, repeat, closed);
-    }
-
     public Post(Parcel in) {
-        super(null);
         Bundle bundle = in.readBundle();
-        setUuid(bundle.getString(UUID_REF));
+        this.setURI(bundle.getString(URI_REF));
 
-        this.type               = PostType.values()[bundle.getInt(TYPE_REF)];
+        this.type               = BasicNeedType.values()[bundle.getInt(TYPE_REF)];
         this.title              = bundle.getString(TITLE_REF);
         this.description        = bundle.getString(DESC_REF);
         this.tags               = bundle.getStringArrayList(TAGS_REF);
@@ -106,8 +106,12 @@ public class Post extends Model implements Parcelable {
         this.closed             = bundle.getBoolean(CLOSED_REF);
     }
 
-    public Post(UUID uuid, PostType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
-        super(uuid);
+    public Post(URI uri, BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
+        if(uri==null){
+            this.setURI(new WonNodeInformationServiceImpl().generateNeedURI()); //TODO: do not implement this like that
+        }else{
+            this.setURI(uri);
+        }
         this.type = type;
         this.title = title;
         this.description = description;
@@ -132,11 +136,11 @@ public class Post extends Model implements Parcelable {
         this.titleImageIndex = titleImageIndex;
     }
 
-    public PostType getType() {
+    public BasicNeedType getType() {
         return type;
     }
 
-    public void setType(PostType type) {
+    public void setType(BasicNeedType type) {
         this.type = type;
     }
 
@@ -351,7 +355,8 @@ public class Post extends Model implements Parcelable {
     @Override
     public String toString() {
         return "Post{" +
-                "type=" + type +
+                "id=" + getURI() +
+                ", type=" + type +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", tags=" + tags +
@@ -381,7 +386,7 @@ public class Post extends Model implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         Bundle bundle = new Bundle();
-        bundle.putString(UUID_REF, getUuid().toString());
+        bundle.putString(URI_REF, getURI().toString());
         bundle.putInt(TYPE_REF, type.ordinal());
         bundle.putInt(REPEAT_REF, repeat.ordinal());
         bundle.putString(TITLE_REF, title);

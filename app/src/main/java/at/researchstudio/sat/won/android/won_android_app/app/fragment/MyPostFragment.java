@@ -16,17 +16,22 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MyPostPagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import com.viewpagerindicator.TabPageIndicator;
+
+import java.util.ArrayList;
 
 /**
  * Created by fsuda on 10.10.2014.
@@ -35,10 +40,15 @@ public class MyPostFragment extends Fragment {
     private static final String LOG_TAG = MyPostFragment.class.getSimpleName();
 
     private MainActivity activity;
+    private CreatePostTask createPostTask;
 
     private MyPostPagerAdapter mMyPostPagerAdapter;
     private ViewPager mMyPostViewPager;
     private TabPageIndicator mIndicator;
+
+    private View rootView;
+    private ViewGroup container;
+    private LayoutInflater inflater;
 
     private String postId;
 
@@ -50,34 +60,81 @@ public class MyPostFragment extends Fragment {
         if(args!=null){
             postId = args.getString(Post.ID_REF);
         }
-
-        activity = (MainActivity) getActivity();
-
-        View rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
-
-        mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
-        mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
-
-        //Initialize ViewPager
-        mMyPostPagerAdapter = new MyPostPagerAdapter(activity, activity.getPostService().getMyPostById(postId));
-
-        Parcelable state = mMyPostPagerAdapter.saveState();
-
-        mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
-        mMyPostViewPager.setOffscreenPageLimit(1);
-        mMyPostViewPager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
-        //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
-
-        mIndicator.setViewPager(mMyPostViewPager);
+        this.inflater = inflater;
+        this.container = container;
+        rootView = inflater.inflate(R.layout.include_loading, container, false);
 
         return rootView;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        activity = (MainActivity) getActivity();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        createPostTask = new CreatePostTask();
+        createPostTask.execute();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if(createPostTask != null && createPostTask.getStatus() == AsyncTask.Status.RUNNING) {
+            createPostTask.cancel(true);
+        }
+    }
     //*********************************************************************************************************
 
     @Override
     public void onLowMemory() {
         mMyPostViewPager.setOffscreenPageLimit(1);
         super.onLowMemory();
+    }
+
+    private class CreatePostTask extends AsyncTask<String, Integer, Post> {
+        @Override
+        protected Post doInBackground(String... params) {
+            return activity.getPostService().getMyPostById(postId);
+        }
+
+        @Override
+        protected void onCancelled(Post post) {
+            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
+            //TODO: DO TOAST OR SOMETHING
+        }
+
+        protected void onPostExecute(Post post) {
+            putListInView(post);
+        }
+
+        private void putListInView(Post post) {
+            rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
+
+            mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
+            mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
+
+            //Initialize ViewPager
+            mMyPostPagerAdapter = new MyPostPagerAdapter(activity, post);
+
+            Parcelable state = mMyPostPagerAdapter.saveState();
+
+            mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
+            mMyPostViewPager.setOffscreenPageLimit(1);
+            mMyPostViewPager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
+            //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
+
+            mIndicator.setViewPager(mMyPostViewPager);
+            activity.setContentView(rootView);
+        }
     }
 }

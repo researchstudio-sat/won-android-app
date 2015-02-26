@@ -36,7 +36,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinnerAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
@@ -53,8 +52,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sleepbot.datetimepicker.time.RadialPickerLayout;
 import com.sleepbot.datetimepicker.time.TimePickerDialog;
 import com.viewpagerindicator.IconPageIndicator;
+import won.protocol.model.BasicNeedType;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -157,10 +158,10 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
 
         mTypeSpinnerAdapter = new TypeSpinnerAdapter(activity);
 
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_want, R.drawable.want, PostType.WANT));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_offer, R.drawable.offer, PostType.OFFER));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_activity, R.drawable.activity, PostType.ACTIVITY));
-        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_change, R.drawable.change, PostType.CHANGE));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_want, R.drawable.want, BasicNeedType.DEMAND));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_offer, R.drawable.offer, BasicNeedType.SUPPLY));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_activity, R.drawable.activity, BasicNeedType.DO_TOGETHER));
+        mTypeSpinnerAdapter.addItem(new PostTypeSpinnerModel(R.string.type_change, R.drawable.change, BasicNeedType.CRITIQUE));
 
         mTypeSpinner.setAdapter(mTypeSpinnerAdapter);
 
@@ -303,7 +304,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
                 }
 
                 Post post = activity.getPostService().savePost(activity.getTempPost());
-                activity.setTempPost(new Post());
+                activity.setTempPost(new Post(URI.create("INVALIDPOSTID"))); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
 
                 Fragment fragment;
 
@@ -311,7 +312,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
 
                 fragment = new MyPostFragment();
 
-                args.putString(Post.ID_REF, post.getUuidString());
+                args.putString(Post.ID_REF, post.getURIString());
 
                 fragment.setArguments(args);
                 FragmentManager fragmentManager = getFragmentManager();
@@ -340,7 +341,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                activity.setTempPost(new Post());
+                activity.setTempPost(new Post(URI.create("INVALIDPOSTID"))); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
                 createTask = new CreateTask();
                 createTask.execute();
                 Toast.makeText(activity, getString(R.string.toast_create_dismiss), Toast.LENGTH_SHORT).show();
@@ -357,27 +358,27 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
         dialog.show();
     }
 
-    private void setPostTypeHints(PostType newType){
+    private void setPostTypeHints(BasicNeedType newType){
         switch(newType){
-            case ACTIVITY:
+            case DO_TOGETHER:
                 mTags.setHint(R.string.create_tags_together_hint);
                 mTitle.setHint(R.string.create_title_together_hint);
                 mDescription.setHint(R.string.create_description_together_hint);
                 mLocationText.setHint(R.string.create_location_together_hint);
                 break;
-            case OFFER:
+            case SUPPLY:
                 mTags.setHint(R.string.create_tags_supply_hint);
                 mTitle.setHint(R.string.create_title_supply_hint);
                 mDescription.setHint(R.string.create_description_supply_hint);
                 mLocationText.setHint(R.string.create_location_supply_hint);
                 break;
-            case WANT:
+            case DEMAND:
                 mTags.setHint(R.string.create_tags_demand_hint);
                 mTitle.setHint(R.string.create_title_demand_hint);
                 mDescription.setHint(R.string.create_description_demand_hint);
                 mLocationText.setHint(R.string.create_location_demand_hint);
                 break;
-            case CHANGE:
+            case CRITIQUE:
                 mTags.setHint(R.string.create_tags_change_hint);
                 mTitle.setHint(R.string.create_title_change_hint);
                 mDescription.setHint(R.string.create_description_change_hint);
@@ -585,7 +586,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
-                    PostType newType = PostType.values()[position];
+                    BasicNeedType newType = BasicNeedType.values()[position];
                     activity.getTempPost().setType(newType);
 
                     setPostTypeHints(newType);

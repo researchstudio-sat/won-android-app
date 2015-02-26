@@ -31,8 +31,8 @@ import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivi
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class PostBoxFragment extends Fragment{
     private static final String LOG_TAG = PostBoxFragment.class.getSimpleName();
@@ -105,7 +105,7 @@ public class PostBoxFragment extends Fragment{
                         fragment = new PostFragment();
                     }
 
-                    postId = post.getUuidString();
+                    postId = post.getURIString();
                     args.putString(Post.ID_REF, postId);
 
                     fragment.setArguments(args);
@@ -182,7 +182,7 @@ public class PostBoxFragment extends Fragment{
 
     public void displayListActions(final int position){
         Post post = (Post) mPostListItemAdapter.getItem(position);
-        final UUID postId = post.getUuid();
+        final URI postId = post.getURI();
 
         if(isPostBox()){
             //CLOSED MYPOST PICKER
@@ -252,8 +252,8 @@ public class PostBoxFragment extends Fragment{
         @Override
         protected ArrayList<Post> doInBackground(String... params) {
             if(isPostBox()) {
-                return activity.getDataService().getMyPosts();
-                //return activity.getPostService().getMyPosts();
+                //return activity.getDataService().getMyPosts();
+                return activity.getPostService().getMyPosts();
             }else{
                 return activity.getPostService().getMatchesByPostId(postId);
             }

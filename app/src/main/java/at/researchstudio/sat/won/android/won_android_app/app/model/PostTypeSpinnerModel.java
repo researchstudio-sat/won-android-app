@@ -1,6 +1,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
-import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
+import won.protocol.model.BasicNeedType;
 
 /**
  * Created by fsuda on 26.09.2014.
@@ -8,9 +8,9 @@ import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 public class PostTypeSpinnerModel {
     private int titleRes;
     private int iconRes;
-    private PostType type;
+    private BasicNeedType type;
 
-    public PostTypeSpinnerModel(int titleRes, int iconRes, PostType type) {
+    public PostTypeSpinnerModel(int titleRes, int iconRes, BasicNeedType type) {
         this.titleRes = titleRes;
         this.iconRes = iconRes;
         this.type = type;
@@ -32,11 +32,11 @@ public class PostTypeSpinnerModel {
         this.iconRes = iconRes;
     }
 
-    public PostType getType() {
+    public BasicNeedType getType() {
         return type;
     }
 
-    public void setType(PostType type) {
+    public void setType(BasicNeedType type) {
         this.type = type;
     }
 }

@@ -295,7 +295,7 @@ public class PostFragment extends Fragment {
         @Override
         protected void onCancelled(Post tempPost) {
             //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
-            putPostInView(tempPost);
+            //putPostInView(tempPost);
         }
 
         protected void onPostExecute(Post tempPost) {
@@ -309,19 +309,19 @@ public class PostFragment extends Fragment {
 
             //Set PostType
             switch(post.getType()){
-                case OFFER:
+                case SUPPLY:
                     postType.setImageResource(R.drawable.offer_light);
                     postTypeText.setText(R.string.type_offer);
                     break;
-                case WANT:
+                case DEMAND:
                     postType.setImageResource(R.drawable.want_light);
                     postTypeText.setText(R.string.type_want);
                     break;
-                case ACTIVITY:
+                case DO_TOGETHER:
                     postType.setImageResource(R.drawable.activity_light);
                     postTypeText.setText(R.string.type_activity);
                     break;
-                case CHANGE:
+                case CRITIQUE:
                     postType.setImageResource(R.drawable.change_light);
                     postTypeText.setText(R.string.type_change);
                     break;

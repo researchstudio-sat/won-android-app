@@ -18,31 +18,41 @@ package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;
 import android.content.Context;
 import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.model.builder.PostModelBuilder;
+import at.researchstudio.sat.won.android.won_android_app.app.util.SimpleLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.StatementCollector;
+import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.sparql.path.Path;
+import com.hp.hpl.jena.sparql.path.PathParser;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import won.protocol.util.NeedModelBuilder;
+import won.protocol.util.RdfUtils;
+import won.protocol.util.linkeddata.LinkedDataSource;
+import won.protocol.vocabulary.WON;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static junit.framework.Assert.assertEquals;
+
 public class DataService {
-    private static final String LOG_TAG = AuthenticationService.class.getSimpleName();
+    private static final String LOG_TAG = DataService.class.getSimpleName();
 
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
     private Context context; //used for string resources
+    private LinkedDataSource linkedDataSource = new SimpleLinkedDataSource();
 
     public DataService(AuthenticationService authService){
         this.context = authService.getContext(); //used for stringresource retrieval
@@ -63,41 +73,18 @@ public class DataService {
 
             HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
             verboseLogOutput(response);
-
             //**************************************************************************
-
-            try {
-                java.net.URL documentUrl = new URL("http://rsa021.researchstudio.at:8080/won/resource/need/1869023001744244700"); //TODO: SET ACCEPT HEADER TO SET FORMAT
-                InputStream inputStream = documentUrl.openStream();
-
-                RDFParser rdfParser = Rio.createParser(RDFFormat.JSONLD);
-
-                org.openrdf.model.Model myGraph = new org.openrdf.model.impl.LinkedHashModel();
-                rdfParser.setRDFHandler(new StatementCollector(myGraph));
-
-                rdfParser.parse(inputStream, documentUrl.toString());
-            }catch(IOException e){
-                e.printStackTrace();
-            }catch(RDFParseException e){
-                e.printStackTrace();
-            }catch(RDFHandlerException e){
-                e.printStackTrace();
-            }
-
             //http://rsa021.researchstudio.at:8080/won/resource/need/1869023001744244700
             //http://rsa021.researchstudio.at:8080/won/resource/need/1135026076691464200
-            for(String s : response.getBody()) {
-                Post p = new Post();
 
-                /*Resource need = model.createResource(s);
-                Log.d(LOG_TAG, need.toString());*/
-                //TODO: IMPL THIS
-                Log.d(LOG_TAG, s);
-                p.setTitle(s);
-                myPosts.add(p);
+            for(String s : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
+                crawlDataForPost(URI.create(s));
+                Post p = getPostById(URI.create(s));
+
+                if(p!=null){
+                    myPosts.add(p);
+                }
             }
-
-            myPosts.addAll(Mock.myMockPosts.values()); //REMOVE THIS LATER
 
             return myPosts;
         }catch (HttpClientErrorException e) {
@@ -110,6 +97,69 @@ public class DataService {
         }
     }
 
+    public Post getPostById(URI uri) {
+        Dataset needDataset = linkedDataSource.getDataForResource(uri);
+
+        //simple,insecure implementation: iterate over models, try to extract the 'need' data
+        final NeedModelBuilder builder = new NeedModelBuilder();
+        RdfUtils.visit(needDataset, new RdfUtils.ModelVisitor<NeedModelBuilder>() {
+            @Override
+            public NeedModelBuilder visit(Model model) {
+                try {
+                    builder.copyValuesFromProduct(model);
+                } catch (Exception e) {
+                    return null;
+                }
+                return null;
+            }
+        });
+
+        if(builder!=null) {
+            Log.d(LOG_TAG, builder.build().toString());
+            PostModelBuilder postModelBuilder = new PostModelBuilder();
+            builder.copyValuesToBuilder(postModelBuilder);
+            Post p = postModelBuilder.build();
+
+            Log.d(LOG_TAG, "post: "+p);
+
+            return p;
+        }
+        return null;
+    }
+
+    public Dataset crawlDataForPost(URI uri){
+        Dataset needDataset = linkedDataSource.getDataForResourceWithPropertyPath(uri,configurePropertyPaths(),8,300,true);
+        String sparqlPrefix = "PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>"+
+                "PREFIX geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#>"+
+                "PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>"+
+                "PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
+                "PREFIX won:   <http://purl.org/webofneeds/model#>"+
+                "PREFIX gr:    <http://purl.org/goodrelations/v1#>"+
+                "PREFIX sioc:  <http://rdfs.org/sioc/ns#>"+
+                "PREFIX ldp:   <http://www.w3.org/ns/ldp#>";
+        String queryString = sparqlPrefix +
+                "SELECT ?need ?connection ?need2 WHERE {" +
+                "   ?need won:hasConnections ?connections ." +
+                "?connections rdfs:member ?connection ." +
+                "?connection won:hasRemoteConnection ?connection2."+
+                "?connection2 won:belongsToNeed ?need2 ." +
+                "}";
+
+        Query query = QueryFactory.create(queryString);
+        QuerySolutionMap initialBinding = new QuerySolutionMap();
+        initialBinding.add("need",needDataset.getDefaultModel().createResource(uri.toString()));
+        QueryExecution qExec = QueryExecutionFactory.create(query, needDataset);
+        ResultSet results = qExec.execSelect();
+
+        Log.d(LOG_TAG,"need: " + uri);
+        while (results.hasNext()) {
+            QuerySolution soln = results.nextSolution();
+            Log.d(LOG_TAG, "con:" + soln.get("?connection") + ", need2:" + soln.get("?need2"));
+        }
+        qExec.close();
+        return needDataset;
+    }
+
     public Context getContext() {
         return context;
     }
@@ -118,7 +168,7 @@ public class DataService {
         this.context = context;
     }
 
-    private void verboseLogOutput(HttpEntity<String[]> response){
+    private static void verboseLogOutput(HttpEntity<String[]> response){
         for(Map.Entry<String, List<String>> es : response.getHeaders().entrySet()){
             if(es.getValue()==null){
                 Log.d(LOG_TAG, "Key: " + es.getKey() + " EMPTY");
@@ -128,5 +178,27 @@ public class DataService {
                 }
             }
         }
+    }
+
+    /***
+     * Build the property paths needed for crawling need data
+     */
+
+    public static List<Path> configurePropertyPaths(){
+        List<Path> propertyPaths = new ArrayList<Path>();
+        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS +">");
+        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member");
+        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member"+"/<"+WON
+                .HAS_REMOTE_CONNECTION+">");
+        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member"+"/<"+WON
+                .HAS_EVENT_CONTAINER+">/<rdfs:member>");
+        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member"+"/<"+WON
+                .HAS_REMOTE_CONNECTION+">/<"+WON.BELONGS_TO_NEED+">");
+        return propertyPaths;
+    }
+
+    public static void addPropertyPath(final List<Path> propertyPaths, String pathString) {
+        Path path = PathParser.parse(pathString, PrefixMapping.Standard);
+        propertyPaths.add(path);
     }
 }

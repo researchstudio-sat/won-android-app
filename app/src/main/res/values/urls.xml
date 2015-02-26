@@ -16,6 +16,7 @@
 
 <resources>
     <string name="base_uri">http://rsa021.researchstudio.at:8080/owner/</string>
+    <string name="default_wonnode">http://rsa021.researchstudio.at:8080/won/resource</string>
     <string name="login_path">rest/users/signin</string>
     <string name="logout_path">rest/users/signout</string>
 

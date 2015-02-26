@@ -17,14 +17,15 @@ package at.researchstudio.sat.won.android.won_android_app.app.constants;
 
 import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
-import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListItemModel;
 import com.google.android.gms.maps.model.LatLng;
+import won.protocol.model.BasicNeedType;
 
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -32,9 +33,9 @@ import java.util.*;
  * Created by fsuda on 13.10.2014.
  */
 public class Mock {
-    public static Map<UUID, Post> myMockPosts = new HashMap<UUID, Post>();
-    public static Map<UUID, Post> myMockMatches = new HashMap<UUID, Post>();
-    public static Map<UUID, Connection> myMockConversations = new HashMap<UUID, Connection>();
+    public static Map<URI, Post> myMockPosts = new HashMap<URI, Post>();
+    public static Map<URI, Post> myMockMatches = new HashMap<URI, Post>();
+    public static Map<URI, Connection> myMockConversations = new HashMap<URI, Connection>();
 
     public static final String[] CHEESES = {
             "Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi",
@@ -209,7 +210,7 @@ public class Mock {
 
 
 
-    public static final PostType[] postTypes = PostType.values();
+    public static final BasicNeedType[] postTypes = BasicNeedType.values();
 
     public static final MessageType[] messageTypes = MessageType.values();
 
@@ -224,7 +225,7 @@ public class Mock {
         return field[((int)(Math.random()*100))%field.length];
     }
 
-    public static PostType getRandomFromField(PostType[] field){
+    public static BasicNeedType getRandomFromField(BasicNeedType[] field){
         return field[((int)(Math.random()*100))%field.length];
     }
 
@@ -351,7 +352,7 @@ public class Mock {
             Post post = Mock.getRandomPost();
 
             if(((int)(Math.random()*100)) < 10) {
-                myMockPosts.put(post.getUuid(),post);
+                myMockPosts.put(post.getURI(),post);
             }
         }
     }
@@ -363,7 +364,7 @@ public class Mock {
             Post post = Mock.getRandomMatch();
 
             if(((int)(Math.random()*100)) < 10) {
-                myMockMatches.put(post.getUuid(),post);
+                myMockMatches.put(post.getURI(),post);
             }
         }
     }
@@ -372,7 +373,7 @@ public class Mock {
         int amount = 500;
 
         for(int i = 0; i < amount; i++){
-            Connection connection = new Connection(getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages(),getRandomFromField(connectionTypes));
+            Connection connection = new Connection(URI.create("cid"+i), getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages(),getRandomFromField(connectionTypes));
 
             if(((int)(Math.random()*100)) < 10) {
                 ArrayList<MessageItemModel> messages = new ArrayList<MessageItemModel>();
@@ -399,17 +400,17 @@ public class Mock {
                         connection.setMessages(messages);
                         break;
                 }
-                myMockConversations.put(connection.getUuid(), connection);
+                myMockConversations.put(connection.getURI(), connection);
             }
         }
     }
 
-    public static ArrayList<Connection> getConversationsByPostId(UUID postId) {
+    public static ArrayList<Connection> getConversationsByPostId(URI postId) {
         ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
         ArrayList<Connection> foundConnections = new ArrayList<Connection>();
 
         for(Connection connection : connections) {
-            if(connection.getType() != ConnectionType.SUGGESTED && connection.getType() != ConnectionType.REQUEST_RECEIVED && connection.getMyPost().getUuid().equals(postId)){
+            if(connection.getType() != ConnectionType.SUGGESTED && connection.getType() != ConnectionType.REQUEST_RECEIVED && connection.getMyPost().getURI().equals(postId)){
                 foundConnections.add(connection);
             }
         }
@@ -428,24 +429,24 @@ public class Mock {
         return foundConnections;
     }
 
-    public static ArrayList<Connection> getRequestsByPostId(UUID postId) {
+    public static ArrayList<Connection> getRequestsByPostId(URI postId) {
         ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
         ArrayList<Connection> foundConnections = new ArrayList<Connection>();
 
         for(Connection connection : connections) {
-            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getUuid().equals(postId))){
+            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getURI().equals(postId))){
                 foundConnections.add(connection);
             }
         }
         return foundConnections;
     }
 
-    public static ArrayList<Post> getMatchesByPostId(UUID postId) {
+    public static ArrayList<Post> getMatchesByPostId(URI postId) {
         ArrayList<Connection> connections = new ArrayList<Connection>(myMockConversations.values());
         ArrayList<Post> matches = new ArrayList<Post>();
 
         for(Connection connection : connections) {
-            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getUuid().equals(postId))){
+            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getURI().equals(postId))){
                 matches.add(connection.getMatchedPost());
             }
         }
@@ -453,7 +454,7 @@ public class Mock {
         return matches;
     }
 
-    public static ArrayList<MessageItemModel> getMessagesByConversationId(UUID conversationId) {
+    public static ArrayList<MessageItemModel> getMessagesByConversationId(URI conversationId) {
         Connection connection = myMockConversations.get(conversationId);
 
         if(connection != null){
@@ -465,9 +466,9 @@ public class Mock {
 
     public static void setNotificationCounters(){
         for(Post post : myMockPosts.values()){
-            post.setMatches(Mock.getMatchesByPostId(post.getUuid()).size());
-            post.setConversations(Mock.getConversationsByPostId(post.getUuid()).size());
-            post.setRequests(Mock.getRequestsByPostId(post.getUuid()).size());
+            post.setMatches(Mock.getMatchesByPostId(post.getURI()).size());
+            post.setConversations(Mock.getConversationsByPostId(post.getURI()).size());
+            post.setRequests(Mock.getRequestsByPostId(post.getURI()).size());
         }
     }
 }

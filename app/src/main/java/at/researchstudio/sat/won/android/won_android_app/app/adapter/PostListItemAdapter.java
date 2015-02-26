@@ -157,16 +157,16 @@ public class PostListItemAdapter extends ArrayAdapter {
 
             if (holder.typeHolder != null) {
                 switch(item.getType()){
-                    case OFFER:
+                    case SUPPLY:
                         holder.typeHolder.setImageResource(R.drawable.offer);
                         break;
-                    case WANT:
+                    case DEMAND:
                         holder.typeHolder.setImageResource(R.drawable.want);
                         break;
-                    case ACTIVITY:
+                    case DO_TOGETHER:
                         holder.typeHolder.setImageResource(R.drawable.activity);
                         break;
-                    case CHANGE:
+                    case CRITIQUE:
                         holder.typeHolder.setImageResource(R.drawable.change);
                         break;
                 }

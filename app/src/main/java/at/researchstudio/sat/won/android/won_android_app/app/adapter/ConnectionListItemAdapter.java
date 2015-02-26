@@ -24,9 +24,9 @@ import android.widget.*;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
-import at.researchstudio.sat.won.android.won_android_app.app.enums.PostType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
+import won.protocol.model.BasicNeedType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,19 +179,19 @@ public class ConnectionListItemAdapter extends ArrayAdapter {
         }
     }
 
-    private static void setType(ImageView holder, PostType type) {
+    private static void setType(ImageView holder, BasicNeedType type) {
         if(holder != null) {
             switch (type) {
-                case OFFER:
+                case SUPPLY:
                     holder.setImageResource(R.drawable.offer);
                     break;
-                case WANT:
+                case DEMAND:
                     holder.setImageResource(R.drawable.want);
                     break;
-                case ACTIVITY:
+                case DO_TOGETHER:
                     holder.setImageResource(R.drawable.activity);
                     break;
-                case CHANGE:
+                case CRITIQUE:
                     holder.setImageResource(R.drawable.change);
                     break;
             }
