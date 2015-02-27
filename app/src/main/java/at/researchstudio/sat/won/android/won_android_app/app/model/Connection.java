@@ -15,10 +15,9 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.model;
 
-import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import won.protocol.model.BasicNeedType;
-import won.protocol.service.impl.WonNodeInformationServiceImpl;
+import won.protocol.model.ConnectionState;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class Connection extends Model {
     private Post myPost;
     private Post matchedPost;
 
-    private ConnectionType type;
+    private ConnectionState state;
 
     private ArrayList<MessageItemModel> messages;
 
@@ -41,13 +40,13 @@ public class Connection extends Model {
         this.setURI(uri);
     }
 
-    public Connection(URI uri, Post myPost, Post matchedPost, ArrayList<MessageItemModel> messages, ConnectionType type){
+    public Connection(URI uri, Post myPost, Post matchedPost, ArrayList<MessageItemModel> messages, ConnectionState state){
         //this(new WonNodeInformationServiceImpl().generateConnectionURI()); //TODO: DO NOT IMPLEMENT THIS LIKE THAT
         setURI(uri);
         this.myPost = myPost;
         this.matchedPost = matchedPost;
         this.messages = messages;
-        this.type = type;
+        this.state = state;
     }
 
     public Post getMyPost() {
@@ -58,12 +57,12 @@ public class Connection extends Model {
         this.myPost = myPost;
     }
 
-    public void setType(ConnectionType type) {
-        this.type = type;
+    public ConnectionState getState() {
+        return state;
     }
 
-    public ConnectionType getType() {
-        return type;
+    public void setState(ConnectionState state) {
+        this.state = state;
     }
 
     public Post getMatchedPost() {

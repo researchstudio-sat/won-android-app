@@ -15,7 +15,6 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.constants;
 
-import at.researchstudio.sat.won.android.won_android_app.app.enums.ConnectionType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
@@ -24,6 +23,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListItemModel;
 import com.google.android.gms.maps.model.LatLng;
 import won.protocol.model.BasicNeedType;
+import won.protocol.model.ConnectionState;
 
 import java.net.URI;
 import java.util.*;
@@ -216,7 +216,7 @@ public class Mock {
 
     public static final RepeatType[] repeatTypes = RepeatType.values();
 
-    public static final ConnectionType[] connectionTypes = ConnectionType.values();
+    public static final ConnectionState[] connectionStates = ConnectionState.values();
 
     public static final String[] tags = {"couch","soccer","running","free","help","tennis","car","donaudampfschiff","irreregulär","nsa","music","guitar","running","yoga","movies","cinema","bar","translation"};
 
@@ -237,7 +237,7 @@ public class Mock {
         return field[((int)(Math.random()*100))%field.length];
     }
 
-    public static ConnectionType getRandomFromField(ConnectionType[] field) {
+    public static ConnectionState getRandomFromField(ConnectionState[] field) {
         return field[((int)(Math.random()*100))%field.length];
     }
 
@@ -373,12 +373,12 @@ public class Mock {
         int amount = 500;
 
         for(int i = 0; i < amount; i++){
-            Connection connection = new Connection(URI.create("cid"+i), getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages(),getRandomFromField(connectionTypes));
+            Connection connection = new Connection(URI.create("cid"+i), getRandomFromList(new ArrayList<Post>(myMockPosts.values())),getRandomFromList(new ArrayList<Post>(myMockMatches.values())),getRandomMessages(),getRandomFromField(connectionStates));
 
             if(((int)(Math.random()*100)) < 10) {
                 ArrayList<MessageItemModel> messages = new ArrayList<MessageItemModel>();
 
-                switch(connection.getType()){
+                switch(connection.getState()){
                     case CLOSED:
                         //DO NOTHING
                         break;
@@ -410,7 +410,7 @@ public class Mock {
         ArrayList<Connection> foundConnections = new ArrayList<Connection>();
 
         for(Connection connection : connections) {
-            if(connection.getType() != ConnectionType.SUGGESTED && connection.getType() != ConnectionType.REQUEST_RECEIVED && connection.getMyPost().getURI().equals(postId)){
+            if(connection.getState() != ConnectionState.SUGGESTED && connection.getState() != ConnectionState.REQUEST_RECEIVED && connection.getMyPost().getURI().equals(postId)){
                 foundConnections.add(connection);
             }
         }
@@ -422,7 +422,7 @@ public class Mock {
         ArrayList<Connection> foundConnections = new ArrayList<Connection>();
 
         for(Connection connection : connections) {
-            if(connection.getType() != ConnectionType.SUGGESTED && connection.getType() != ConnectionType.REQUEST_RECEIVED){
+            if(connection.getState() != ConnectionState.SUGGESTED && connection.getState() != ConnectionState.REQUEST_RECEIVED){
                 foundConnections.add(connection);
             }
         }
@@ -434,7 +434,7 @@ public class Mock {
         ArrayList<Connection> foundConnections = new ArrayList<Connection>();
 
         for(Connection connection : connections) {
-            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getURI().equals(postId))){
+            if(connection.getState() == ConnectionState.REQUEST_RECEIVED && (connection.getMyPost().getURI().equals(postId))){
                 foundConnections.add(connection);
             }
         }
@@ -446,7 +446,7 @@ public class Mock {
         ArrayList<Post> matches = new ArrayList<Post>();
 
         for(Connection connection : connections) {
-            if(connection.getType() == ConnectionType.REQUEST_RECEIVED && (connection.getMyPost().getURI().equals(postId))){
+            if(connection.getState() == ConnectionState.REQUEST_RECEIVED && (connection.getMyPost().getURI().equals(postId))){
                 matches.add(connection.getMatchedPost());
             }
         }

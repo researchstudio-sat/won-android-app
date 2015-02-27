@@ -49,6 +49,15 @@ import static junit.framework.Assert.assertEquals;
 public class DataService {
     private static final String LOG_TAG = DataService.class.getSimpleName();
 
+    private static final String SPARQL_PREFIX = "PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>"+
+                                                "PREFIX geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#>"+
+                                                "PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>"+
+                                                "PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
+                                                "PREFIX won:   <http://purl.org/webofneeds/model#>"+
+                                                "PREFIX gr:    <http://purl.org/goodrelations/v1#>"+
+                                                "PREFIX sioc:  <http://rdfs.org/sioc/ns#>"+
+                                                "PREFIX ldp:   <http://www.w3.org/ns/ldp#>";
+
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
     private Context context; //used for string resources
@@ -115,29 +124,16 @@ public class DataService {
         });
 
         if(builder!=null) {
-            Log.d(LOG_TAG, builder.build().toString());
             PostModelBuilder postModelBuilder = new PostModelBuilder();
             builder.copyValuesToBuilder(postModelBuilder);
-            Post p = postModelBuilder.build();
-
-            Log.d(LOG_TAG, "post: "+p);
-
-            return p;
+            return postModelBuilder.build();
         }
         return null;
     }
 
     public Dataset crawlDataForPost(URI uri){
         Dataset needDataset = linkedDataSource.getDataForResourceWithPropertyPath(uri,configurePropertyPaths(),8,300,true);
-        String sparqlPrefix = "PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>"+
-                "PREFIX geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#>"+
-                "PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>"+
-                "PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
-                "PREFIX won:   <http://purl.org/webofneeds/model#>"+
-                "PREFIX gr:    <http://purl.org/goodrelations/v1#>"+
-                "PREFIX sioc:  <http://rdfs.org/sioc/ns#>"+
-                "PREFIX ldp:   <http://www.w3.org/ns/ldp#>";
-        String queryString = sparqlPrefix +
+        String queryString = SPARQL_PREFIX +
                 "SELECT ?need ?connection ?need2 WHERE {" +
                 "   ?need won:hasConnections ?connections ." +
                 "?connections rdfs:member ?connection ." +
@@ -186,14 +182,11 @@ public class DataService {
 
     public static List<Path> configurePropertyPaths(){
         List<Path> propertyPaths = new ArrayList<Path>();
-        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS +">");
-        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member");
-        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member"+"/<"+WON
-                .HAS_REMOTE_CONNECTION+">");
-        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member"+"/<"+WON
-                .HAS_EVENT_CONTAINER+">/<rdfs:member>");
-        addPropertyPath(propertyPaths, "<"+WON.HAS_CONNECTIONS+">"+"/"+"rdfs:member"+"/<"+WON
-                .HAS_REMOTE_CONNECTION+">/<"+WON.BELONGS_TO_NEED+">");
+        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS + ">");
+        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS + ">" + "/" + "rdfs:member");
+        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS + ">" + "/" + "rdfs:member" + "/<" + WON.HAS_REMOTE_CONNECTION + ">");
+        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS + ">" + "/" + "rdfs:member" + "/<" + WON.HAS_EVENT_CONTAINER + ">/<rdfs:member>");
+        addPropertyPath(propertyPaths, "<" + WON.HAS_CONNECTIONS + ">" + "/" + "rdfs:member" + "/<" + WON.HAS_REMOTE_CONNECTION + ">/<" +WON.BELONGS_TO_NEED + ">");
         return propertyPaths;
     }
 
