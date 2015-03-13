@@ -376,7 +376,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     public AuthenticationService getAuthService(){
         if(authService == null){
-            Log.d(LOG_TAG, "AUTH SERVICE IS NULL, INITIZIALIZING AUTH SERVICE");
+            Log.d(LOG_TAG, "AUTH SERVICE IS NULL, INITIALIZING AUTH SERVICE");
             authService = new AuthenticationService(this);
         }
 
@@ -399,7 +399,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     public PostService getPostService(){
         if(postService == null){
-            Log.d(LOG_TAG, "POST SERVICE IS NULL, INITIZIALIZING POST SERVICE");
+            Log.d(LOG_TAG, "POST SERVICE IS NULL, INITIALIZING POST SERVICE");
             postService = new PostService(getDataService());
         }
 

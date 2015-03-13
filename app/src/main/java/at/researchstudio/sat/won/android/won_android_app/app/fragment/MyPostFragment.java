@@ -62,7 +62,7 @@ public class MyPostFragment extends Fragment {
         }
         this.inflater = inflater;
         this.container = container;
-        rootView = inflater.inflate(R.layout.include_loading, container, false);
+        rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
 
         return rootView;
     }
@@ -118,8 +118,6 @@ public class MyPostFragment extends Fragment {
         }
 
         private void putListInView(Post post) {
-            rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
-
             mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
             mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
 
@@ -134,7 +132,9 @@ public class MyPostFragment extends Fragment {
             //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
 
             mIndicator.setViewPager(mMyPostViewPager);
-            activity.setContentView(rootView);
+
+            mIndicator.setVisibility(View.VISIBLE);
+            mMyPostViewPager.setVisibility(View.VISIBLE);
         }
     }
 }

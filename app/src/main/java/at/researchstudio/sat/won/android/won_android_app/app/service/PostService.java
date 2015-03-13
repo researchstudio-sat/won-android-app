@@ -15,16 +15,19 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.service;
 
+import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
+import won.protocol.model.ConnectionState;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PostService {
@@ -33,14 +36,6 @@ public class PostService {
 
     public PostService(DataService dataService) {
         this.dataService = dataService;
-        //TODO REFACTOR THIS AWAY FROM HERE THIS BLOCKS EVERYTHING ONLY HERE FOR VIEW TESTING PURPOSES
-        //TODO: REFACTOR THIS MOCK METHOD
-        //MOCK DATA RETRIEVAL
-        //THIS IS ALSO THE CAUSE WHY THE CHOREOGRAPHER DROPS SOME FRAMES DURING INITIALIZING THE ACTIVITY AND AFTER RESUMING FROM CAMERA INTENT
-        //Mock.fillMyMockMatches();
-        //Mock.fillMyMockPosts();
-        //Mock.fillMyMockConnections();
-        //Mock.setNotificationCounters();
     }
 
     public ArrayList<Connection> getConversations() {
@@ -53,12 +48,33 @@ public class PostService {
     }
 
     public ArrayList<Connection> getRequestsByPostId(URI postId){
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.getRequestsByPostId(postId);
+        Log.d(LOG_TAG, "Getting requests by postid: "+postId);
+        List<Connection> connections = dataService.getConnectionsByPost(postId);
+        Log.d(LOG_TAG, "FOUND :"+connections.size()+" Connections");
+
+        ArrayList<Connection> requests = new ArrayList<Connection>();
+
+        for(Connection con : connections){
+            if(con.getState() == ConnectionState.REQUEST_RECEIVED){
+                Log.d("Retrieve", "GOT: "+con);
+                requests.add(con);
+            }
+        }
+        Log.d(LOG_TAG, "FOUND: "+requests.size()+" Requests");
+
+        return requests;
     }
 
     public ArrayList<Post> getMyPosts() {
-        return dataService.getMyPosts();
+        ArrayList<Post> myPosts = dataService.getMyPosts();
+
+        for(Post post : myPosts){
+            post.setMatches(getMatchesByPostId(post.getURI()).size());
+            post.setConversations(getConversationsByPostId(post.getURI()).size());
+            post.setRequests(getRequestsByPostId(post.getURI()).size());
+        }
+
+        return myPosts;
     }
 
     public ArrayList<Connection> getConversationsByPostId(String postId){
@@ -66,8 +82,21 @@ public class PostService {
     }
 
     public ArrayList<Connection> getConversationsByPostId(URI postId) {
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.getConversationsByPostId(postId);
+        Log.d(LOG_TAG, "Getting requests by postid: "+postId);
+        List<Connection> connections = dataService.getConnectionsByPost(postId);
+        Log.d(LOG_TAG, "FOUND :"+connections.size()+" Connections");
+
+        ArrayList<Connection> requests = new ArrayList<Connection>();
+
+        for(Connection con : connections){
+            if(con.getState() == ConnectionState.CONNECTED || con.getState() == ConnectionState.REQUEST_SENT){
+                Log.d("Retrieve", "GOT: "+con);
+                requests.add(con);
+            }
+        }
+        Log.d(LOG_TAG, "FOUND: "+requests.size()+" Conversations");
+
+        return requests;
     }
 
     public ArrayList<MessageItemModel> getMessagesByConversationId(String conversationId){
@@ -84,8 +113,21 @@ public class PostService {
     }
 
     public ArrayList<Post> getMatchesByPostId(URI postId) {
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.getMatchesByPostId(postId);
+        Log.d(LOG_TAG, "Getting matches by postid: "+postId);
+        List<Connection> connections = dataService.getConnectionsByPost(postId);
+        Log.d(LOG_TAG, "FOUND :"+connections.size()+" Connections");
+
+        ArrayList<Post> matches = new ArrayList<Post>();
+
+        for(Connection con : connections){
+            if(con.getState() == ConnectionState.SUGGESTED){
+                Log.d("Retrieve", "GOT: "+con.getMatchedPost());
+                matches.add(con.getMatchedPost());
+            }
+        }
+        Log.d(LOG_TAG, "FOUND: "+matches.size()+" Matches");
+
+        return matches;
     }
 
     public Connection getConversationById(String id){
@@ -110,8 +152,7 @@ public class PostService {
     }
 
     public Post getMatchById(URI id){
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.myMockMatches.get(id);
+        return dataService.getPostById(id);
     }
 
     public Post savePost(Post newPost){

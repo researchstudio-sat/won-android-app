@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import com.google.android.gms.maps.model.LatLng;
 import won.protocol.model.BasicNeedType;
+import won.protocol.model.NeedState;
 import won.protocol.service.impl.WonNodeInformationServiceImpl;
 
 import java.net.URI;
@@ -69,7 +70,7 @@ public class Post extends Model implements Parcelable {
     private long startTime;
     private long stopTime;
 
-    private boolean closed;
+    private boolean closed; //TODO: REFACTOR THIS TO NEEDSTATE
 
     private RepeatType repeat;
 

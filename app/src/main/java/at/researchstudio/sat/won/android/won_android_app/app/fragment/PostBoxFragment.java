@@ -252,7 +252,6 @@ public class PostBoxFragment extends Fragment{
         @Override
         protected ArrayList<Post> doInBackground(String... params) {
             if(isPostBox()) {
-                //return activity.getDataService().getMyPosts();
                 return activity.getPostService().getMyPosts();
             }else{
                 return activity.getPostService().getMatchesByPostId(postId);

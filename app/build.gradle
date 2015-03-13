@@ -33,7 +33,7 @@ buildscript {
 apply plugin: 'com.android.application'
 
 configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 18000, 'seconds'
+    resolutionStrategy.cacheChangingModulesFor 180000, 'seconds'
 }
 
 configurations.compile {

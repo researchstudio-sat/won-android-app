@@ -1,12 +1,17 @@
 package at.researchstudio.sat.won.android.won_android_app.app.util;
 
+import android.util.Log;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
 import com.hp.hpl.jena.sparql.path.Path;
+import com.hp.hpl.jena.tdb.TDB;
+import com.hp.hpl.jena.tdb.TDBFactory;
 import won.protocol.rest.LinkedDataRestClient;
 import won.protocol.util.RdfUtils;
 import won.protocol.util.linkeddata.LinkedDataSource;
@@ -22,12 +27,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SimpleLinkedDataSource implements LinkedDataSource {
     private LinkedDataRestClientAndroid linkedDataRestClient = new LinkedDataRestClientAndroid();
 
-    //private ConcurrentHashMap<URI, Object> myCache = new ConcurrentHashMap<URI, Object>();
+    private ConcurrentHashMap<URI, Object> myCache = new ConcurrentHashMap<URI, Object>();
 
     @Override
     public Dataset getDataForResource(URI resourceURI) {
         assert resourceURI != null : "resource must not be null";
-        Object dataset = linkedDataRestClient.readResourceData(resourceURI);
+
+        Object dataset = myCache.get(resourceURI);
+
+        if (dataset == null) {
+            dataset = linkedDataRestClient.readResourceData(resourceURI);
+            Log.d("Retrieve", "PUT uri: " + resourceURI + " into cache");
+            myCache.put(resourceURI, dataset);
+        } else {
+            Log.d("Retrieve", "GOT uri: " + resourceURI + " from cache");
+        }
+
         if (dataset instanceof Dataset) return (Dataset) dataset;
         throw new IllegalStateException(
                 new MessageFormat("The underlying linkedDataCache should only contain Datasets, but we got a {0} for URI {1}")
@@ -66,7 +81,6 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
 
     @Override
     public Dataset getDataForResourceWithPropertyPath(URI resourceURI, List<Path> properties, int maxRequest, int maxDepth, boolean moveAllTriplesInDefaultGraph) {
-        //TODO: IMPL THIS
         Set<URI> crawledURIs = new HashSet<URI>();
         Set<URI> newlyDiscoveredURIs = new HashSet<URI>();
         Set<URI> urisToCrawl = null;
@@ -74,7 +88,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
         int depth = 0;
         int requests = 0;
 
-        Dataset resultDataset = DatasetFactory.createMem();
+        Dataset resultDataset = makeDataset();
 
         OUTER: while (newlyDiscoveredURIs.size() > 0 && depth < maxDepth && requests < maxRequest){
             urisToCrawl = newlyDiscoveredURIs;
@@ -83,6 +97,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
                 //add all models from urisToCrawl
 
                 Dataset currentDataset =  getDataForResource(currentURI);
+                //logger.debug("current dataset: {} "+RdfUtils.toString(currentModel));
                 if (moveAllTriplesInDefaultGraph){
                     RdfUtils.copyDatasetTriplesToModel(currentDataset, resultDataset.getDefaultModel());
                 } else {
@@ -112,7 +127,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
     private Set<URI> getURIsToCrawlWithPropertyPath(Dataset dataset, URI resourceURI, Set<URI> excludedUris, List<Path> properties){
         Set<URI> toCrawl = new HashSet<URI>();
         for (int i = 0; i<properties.size();i++){
-            Iterator<URI> newURIs = RdfUtils.getURIsForPropertyPath(dataset,
+            Iterator<URI> newURIs = RdfUtils.getURIsForPropertyPathByQuery(dataset,
                     resourceURI,
                     properties.get(i));
             while (newURIs.hasNext()){
@@ -158,5 +173,11 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
 
         }
         return toCrawl;
+    }
+
+    public static Dataset makeDataset() {
+        DatasetGraph dsg = TDBFactory.createDatasetGraph();
+        dsg.getContext().set(TDB.symUnionDefaultGraph, new NodeValueBoolean(true));
+        return DatasetFactory.create(dsg);
     }
 }
