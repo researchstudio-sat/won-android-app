@@ -1,18 +1,18 @@
 package at.researchstudio.sat.won.android.won_android_app.app.util;
 
+import android.util.Log;
 import com.hp.hpl.jena.query.Dataset;
+import org.apache.commons.lang3.time.StopWatch;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.model.internal.CommonConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import won.protocol.rest.DatasetReaderWriter;
 import won.protocol.rest.RDFMediaType;
+import won.protocol.util.linkeddata.LinkedDataSource;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Configuration;
+import java.io.IOException;
 import java.net.URI;
 import java.text.MessageFormat;
 
@@ -20,7 +20,17 @@ import java.text.MessageFormat;
  * Created by fsuda on 24.02.2015.
  */
 public class LinkedDataRestClientAndroid {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final String LOG_TAG = LinkedDataSource.class.getSimpleName();
+
+    private ClientConfig cc = new ClientConfig();
+    private Client c;
+
+    public LinkedDataRestClientAndroid() {
+        cc = new ClientConfig();
+        cc.property(ClientProperties.FOLLOW_REDIRECTS, true);
+        cc.register(DatasetReaderWriter.class);
+        c = ClientBuilder.newClient(cc);
+    }
 
     /**
      * Retrieves RDF for the specified resource URI.
@@ -32,12 +42,6 @@ public class LinkedDataRestClientAndroid {
      */
     public Dataset readResourceData(URI resourceURI){
         assert resourceURI != null : "resource URI must not be null";
-        logger.debug("fetching linked data resource: {}", resourceURI);
-
-        ClientConfig cc = new ClientConfig();
-        cc.property(ClientProperties.FOLLOW_REDIRECTS, true);
-        cc.register(DatasetReaderWriter.class);
-        Client c = ClientBuilder.newClient(cc);
 
         WebTarget r = c.target(resourceURI);
         //TODO: improve error handling
@@ -53,10 +57,6 @@ public class LinkedDataRestClientAndroid {
                             "caught a clientHandler exception, " +
                                     "which may indicate that the URI that was accessed isn''t a" +
                                     " linked data URI, please check {0}", resourceURI), e);
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("fetched model with {} statements in default model for resource {}",result.getDefaultModel().size(),
-                    resourceURI);
         }
         return result;
     }

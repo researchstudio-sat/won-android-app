@@ -16,6 +16,7 @@ import won.protocol.rest.LinkedDataRestClient;
 import won.protocol.util.RdfUtils;
 import won.protocol.util.linkeddata.LinkedDataSource;
 
+import java.io.IOException;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.*;
@@ -25,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by fsuda on 24.02.2015.
  */
 public class SimpleLinkedDataSource implements LinkedDataSource {
+    private static final String LOG_TAG = SimpleLinkedDataSource.class.getSimpleName();
     private LinkedDataRestClientAndroid linkedDataRestClient = new LinkedDataRestClientAndroid();
 
     private ConcurrentHashMap<URI, Object> myCache = new ConcurrentHashMap<URI, Object>();
@@ -37,10 +39,10 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
 
         if (dataset == null) {
             dataset = linkedDataRestClient.readResourceData(resourceURI);
-            Log.d("Retrieve", "PUT uri: " + resourceURI + " into cache");
+            Log.d(LOG_TAG, "PUT uri: " + resourceURI + " into cache");
             myCache.put(resourceURI, dataset);
         } else {
-            Log.d("Retrieve", "GOT uri: " + resourceURI + " from cache");
+            Log.d(LOG_TAG, "GOT uri: " + resourceURI + " from cache");
         }
 
         if (dataset instanceof Dataset) return (Dataset) dataset;
@@ -68,6 +70,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
                 //add all models from urisToCrawl
                 Dataset currentModel =  getDataForResource(currentURI);
                 RdfUtils.addDatasetToDataset(dataset, currentModel);
+                //RdfUtils.addDatasetToDataset(dataset, currentModel, true); //TODO: CHANGE ONCE WON UPDATE IN ARTIFACTORY
                 newlyDiscoveredURIs.addAll(getURIsToCrawl(currentModel, crawledURIs, properties));
                 crawledURIs.add(currentURI);
                 requests++;
@@ -102,6 +105,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
                     RdfUtils.copyDatasetTriplesToModel(currentDataset, resultDataset.getDefaultModel());
                 } else {
                     RdfUtils.addDatasetToDataset(resultDataset, currentDataset);
+                    //RdfUtils.addDatasetToDataset(resultDataset, currentDataset,true); //TODO: CHANGE ONCE WON UPDATE IN ARTIFACTORY
                 }
                 newlyDiscoveredURIs.addAll(getURIsToCrawlWithPropertyPath(resultDataset, resourceURI, crawledURIs, properties));
                 crawledURIs.add(currentURI);
@@ -111,6 +115,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
             }
             depth++;
         }
+        Log.d(LOG_TAG, "Crawled URI: "+resourceURI+" - requests made: "+requests);
         return resultDataset;
 
     }
@@ -176,6 +181,7 @@ public class SimpleLinkedDataSource implements LinkedDataSource {
     }
 
     public static Dataset makeDataset() {
+        Log.d(LOG_TAG,"Creating tdb dataset...");
         DatasetGraph dsg = TDBFactory.createDatasetGraph();
         dsg.getContext().set(TDB.symUnionDefaultGraph, new NodeValueBoolean(true));
         return DatasetFactory.create(dsg);

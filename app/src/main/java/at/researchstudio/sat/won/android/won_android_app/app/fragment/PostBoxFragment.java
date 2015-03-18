@@ -30,6 +30,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import won.protocol.model.NeedState;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -93,7 +94,7 @@ public class PostBoxFragment extends Fragment{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Post post = (Post) mPostListItemAdapter.getItem(position);
 
-                if(!post.isClosed()) {
+                if(post.getNeedState() == NeedState.ACTIVE) {
                     Fragment fragment;
 
                     Bundle args = new Bundle();
@@ -186,7 +187,7 @@ public class PostBoxFragment extends Fragment{
 
         if(isPostBox()){
             //CLOSED MYPOST PICKER
-            if(post.isClosed()){
+            if(post.getNeedState() == NeedState.INACTIVE){
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(R.string.dialog_select_action_title)
                         .setItems(R.array.postbox_closed_action_picker, new DialogInterface.OnClickListener() {

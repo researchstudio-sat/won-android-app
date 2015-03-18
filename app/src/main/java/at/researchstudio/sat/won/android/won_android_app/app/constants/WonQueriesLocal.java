@@ -12,7 +12,8 @@ public class WonQueriesLocal {
             "PREFIX gr:    <http://purl.org/goodrelations/v1#>"+
             "PREFIX sioc:  <http://rdfs.org/sioc/ns#>"+
             "PREFIX ldp:   <http://www.w3.org/ns/ldp#>"+
-            "PREFIX dc:    <http://purl.org/dc/elements/1.1/>";
+            "PREFIX dc:    <http://purl.org/dc/elements/1.1/>"+
+            "PREFIX msg:   <http://purl.org/webofneeds/message#>";
 
     public static final String SPARQL_ALL_TRIPLES = SPARQL_PREFIX + "SELECT * WHERE { graph ?g {?s ?p ?o} . }";
 
@@ -85,6 +86,8 @@ public class WonQueriesLocal {
             "FILTER (?need in (::need::))"+
             "}";
 
+    public static final String SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI_AND_CONNECTION_STATE = "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasConnectionState ?state; won:hasRemoteNeed ?remoteNeed; won:belongsToNeed ?localNeed. FILTER ((?need in (::need::)) && ?state in (::state::))}";
+
     /*public static final String SPARQL_MESSAGES_BY_CONNECTION = SPARQL_PREFIX + "SELECT ?message "+
             "WHERE {"+
             "?connection won:hasEventContainer ?event ."+
@@ -97,6 +100,9 @@ public class WonQueriesLocal {
             "?container rdfs:member ?event. "+
             "?event won:hasTextMessage ?text."+
             "}";
+
+
+    public static final String SPARQL_EVENTS = SPARQL_PREFIX + "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasEventContainer ?events. ?events rdfs:member ?event. ?event msg:hasMessageType ?msgType. OPTIONAL {?event won:hasTextMessage ?msgText.} LIMIT (?need IN (::need::))}";
 
 
     //public static final String SPARQL_MY_NEED = "SELECT * WHERE {?need won:containedInPrivateGraph ?graph. ?need won:hasContent ?x; won:isInState ?state. ?x won:hasTextDescription ?desc; won:hasTag ?tag; dc:title ?title.}";

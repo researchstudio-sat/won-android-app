@@ -31,14 +31,8 @@ public class PostModelBuilder extends NeedBuilderBase<Post> {
 
         Log.d(LOG_TAG, ""+getURI());
 
-        switch (getStateNS()){
-            case ACTIVE:
-                post.setClosed(false);
-                break;
-            case INACTIVE:
-                post.setClosed(true);
-                break;
-        }
+        post.setNeedState(getStateNS());
+
         //TODO: FULL IMPLEMENTATION
         return post;
     }
@@ -50,7 +44,7 @@ public class PostModelBuilder extends NeedBuilderBase<Post> {
         setTags((String[])post.getTags().toArray());
         //setAvailableAtLocation(post.getLocation().latitude,post.getLocation().longitude);
 
-        setState(post.isClosed()? NeedState.INACTIVE : NeedState.ACTIVE);
+        setState(post.getNeedState());
         //TODO: FULL IMPLEMENTATION
         setBasicNeedType(post.getType());
         setUri(post.getURI());

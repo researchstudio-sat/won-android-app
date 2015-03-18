@@ -20,10 +20,13 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FileUtils {
     private static final String LOG_TAG = FileUtils.class.getSimpleName();
     private static final String TEMPALBUM_DIR = "won";
+    private static final String TEMPDATASET_DIR ="won_dataset";
     private static final String TEMPIMAGE_EXTENSION = ".jpg";
     private static final String TEMPIMAGE_PREFIX = "img_";
 

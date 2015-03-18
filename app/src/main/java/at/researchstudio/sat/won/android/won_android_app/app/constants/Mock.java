@@ -24,6 +24,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.RequestListIt
 import com.google.android.gms.maps.model.LatLng;
 import won.protocol.model.BasicNeedType;
 import won.protocol.model.ConnectionState;
+import won.protocol.model.NeedState;
 
 import java.net.URI;
 import java.util.*;
@@ -212,6 +213,8 @@ public class Mock {
 
     public static final BasicNeedType[] postTypes = BasicNeedType.values();
 
+    public static final NeedState[] needStates = NeedState.values();
+
     public static final MessageType[] messageTypes = MessageType.values();
 
     public static final RepeatType[] repeatTypes = RepeatType.values();
@@ -226,6 +229,10 @@ public class Mock {
     }
 
     public static BasicNeedType getRandomFromField(BasicNeedType[] field){
+        return field[((int)(Math.random()*100))%field.length];
+    }
+
+    public static NeedState getRandomFromField(NeedState[] field){
         return field[((int)(Math.random()*100))%field.length];
     }
 
@@ -284,11 +291,11 @@ public class Mock {
 
     //MOCK MODEL GENERATOR
     public static Post getRandomPost() {
-       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),0, getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
+       return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),getRandom(100),getRandom(100),getRandom(100),getRandomList(6,imgUrls),0, getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomFromField(needStates));
     }
 
     public static Post getRandomMatch(){
-        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),0, getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomBoolean());
+        return new Post(getRandomFromField(postTypes), getRandomFromField(CHEESES), getLongRandomText(),getRandomList(25,tags),0,0,0,getRandomList(6,imgUrls),0, getRandomLocation(), 0L, 0L, getRandomFromField(repeatTypes),getRandomFromField(needStates));
     }
 
     public static RequestListItemModel getRandomRequest(){

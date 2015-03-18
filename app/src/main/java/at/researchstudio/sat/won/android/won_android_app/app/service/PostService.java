@@ -23,10 +23,11 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
 import won.protocol.model.ConnectionState;
+import won.protocol.model.NeedState;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +40,21 @@ public class PostService {
     }
 
     public ArrayList<Connection> getConversations() {
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.getConversations();
+        List<URI> states = new ArrayList<URI>();
+        states.add(ConnectionState.REQUEST_SENT.getURI());
+        states.add(ConnectionState.CONNECTED.getURI());
+        List<Connection> connections = dataService.getConnectionsByState(states);
+
+        ArrayList<Connection> conversations = new ArrayList<Connection>();
+
+        for(Connection con : connections){
+            if(con.getMatchedPost()!= null && con.getMatchedPost().getNeedState() == NeedState.ACTIVE){
+                conversations.add(con);
+            }
+        }
+        Log.d(LOG_TAG, "Getting Conversations : ("+connections.size()+" Connections / "+conversations.size()+" Conversations)");
+
+        return conversations;
     }
 
     public ArrayList<Connection> getRequestsByPostId(String postId){
@@ -48,33 +62,32 @@ public class PostService {
     }
 
     public ArrayList<Connection> getRequestsByPostId(URI postId){
-        Log.d(LOG_TAG, "Getting requests by postid: "+postId);
-        List<Connection> connections = dataService.getConnectionsByPost(postId);
-        Log.d(LOG_TAG, "FOUND :"+connections.size()+" Connections");
+        List<Connection> connections = dataService.getConnectionsByPostAndState(postId, Collections.singletonList(ConnectionState.REQUEST_RECEIVED.getURI()));
 
         ArrayList<Connection> requests = new ArrayList<Connection>();
 
         for(Connection con : connections){
-            if(con.getState() == ConnectionState.REQUEST_RECEIVED){
-                Log.d("Retrieve", "GOT: "+con);
+            if(con.getMatchedPost()!= null && con.getMatchedPost().getNeedState() == NeedState.ACTIVE){
                 requests.add(con);
             }
         }
-        Log.d(LOG_TAG, "FOUND: "+requests.size()+" Requests");
+        Log.d(LOG_TAG, "Getting Requests by postid: "+postId+" ("+connections.size()+" Connections / "+requests.size()+" Requests)");
 
         return requests;
     }
 
     public ArrayList<Post> getMyPosts() {
-        ArrayList<Post> myPosts = dataService.getMyPosts();
+        Map<URI, Post> myPosts = dataService.getMyPosts();
 
-        for(Post post : myPosts){
-            post.setMatches(getMatchesByPostId(post.getURI()).size());
-            post.setConversations(getConversationsByPostId(post.getURI()).size());
-            post.setRequests(getRequestsByPostId(post.getURI()).size());
+        for(Post post : myPosts.values()){
+            if(post.getNeedState() == NeedState.ACTIVE) {
+                post.setMatches(getMatchesByPostId(post.getURI()).size());
+                post.setConversations(getConversationsByPostId(post.getURI()).size());
+                post.setRequests(getRequestsByPostId(post.getURI()).size());
+            }
         }
 
-        return myPosts;
+        return new ArrayList<Post>(myPosts.values());
     }
 
     public ArrayList<Connection> getConversationsByPostId(String postId){
@@ -82,21 +95,21 @@ public class PostService {
     }
 
     public ArrayList<Connection> getConversationsByPostId(URI postId) {
-        Log.d(LOG_TAG, "Getting requests by postid: "+postId);
-        List<Connection> connections = dataService.getConnectionsByPost(postId);
-        Log.d(LOG_TAG, "FOUND :"+connections.size()+" Connections");
+        List<URI> states = new ArrayList<URI>();
+        states.add(ConnectionState.REQUEST_SENT.getURI());
+        states.add(ConnectionState.CONNECTED.getURI());
+        List<Connection> connections = dataService.getConnectionsByPostAndState(postId, states);
 
-        ArrayList<Connection> requests = new ArrayList<Connection>();
+        ArrayList<Connection> conversations = new ArrayList<Connection>();
 
         for(Connection con : connections){
-            if(con.getState() == ConnectionState.CONNECTED || con.getState() == ConnectionState.REQUEST_SENT){
-                Log.d("Retrieve", "GOT: "+con);
-                requests.add(con);
+            if(con.getMatchedPost()!= null && con.getMatchedPost().getNeedState() == NeedState.ACTIVE){
+                conversations.add(con);
             }
         }
-        Log.d(LOG_TAG, "FOUND: "+requests.size()+" Conversations");
+        Log.d(LOG_TAG, "Getting conversations by postid: "+postId+" ("+connections.size()+" Connections / "+conversations.size()+" Conversations)");
 
-        return requests;
+        return conversations;
     }
 
     public ArrayList<MessageItemModel> getMessagesByConversationId(String conversationId){
@@ -113,20 +126,16 @@ public class PostService {
     }
 
     public ArrayList<Post> getMatchesByPostId(URI postId) {
-        Log.d(LOG_TAG, "Getting matches by postid: "+postId);
-        List<Connection> connections = dataService.getConnectionsByPost(postId);
-        Log.d(LOG_TAG, "FOUND :"+connections.size()+" Connections");
+        List<Connection> connections = dataService.getConnectionsByPostAndState(postId, Collections.singletonList(ConnectionState.SUGGESTED.getURI()));
 
         ArrayList<Post> matches = new ArrayList<Post>();
 
         for(Connection con : connections){
-            if(con.getState() == ConnectionState.SUGGESTED){
-                Log.d("Retrieve", "GOT: "+con.getMatchedPost());
+            if(con.getMatchedPost()!= null && con.getMatchedPost().getNeedState() == NeedState.ACTIVE){
                 matches.add(con.getMatchedPost());
             }
         }
-        Log.d(LOG_TAG, "FOUND: "+matches.size()+" Matches");
-
+        Log.d(LOG_TAG, "Getting requests by postid: "+postId+" ("+connections.size()+" Connections / "+matches.size()+" Matches)");
         return matches;
     }
 
@@ -167,14 +176,14 @@ public class PostService {
 
     public Post closePost(URI postId){
         Post post = Mock.myMockPosts.get(postId);
-        post.setClosed(true);
+        post.setNeedState(NeedState.INACTIVE);
         //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
         return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 
     public Post reOpenPost(URI postId){
         Post post = Mock.myMockPosts.get(postId);
-        post.setClosed(false);
+        post.setNeedState(NeedState.ACTIVE);
         //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
         return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }

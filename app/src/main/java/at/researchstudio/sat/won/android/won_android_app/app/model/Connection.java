@@ -120,11 +120,11 @@ public class Connection extends Model {
     }
 
     public MessageType getLastUserMessageType() {
-        return getLastUserMessage().type;
+        return getLastUserMessage()==null? MessageType.SYSTEM : getLastUserMessage().type;  //TODO: REFACTOR THIS NULL SHOULD NOT BE POSSIBLE
     }
 
     public String getLastUserMessageString() {
-        return getLastUserMessage().text;
+        return getLastUserMessage()==null? "Conversation wasn't loaded" : getLastUserMessage().text; //TODO: REFACTOR THIS NULL SHOULD NOT BE POSSIBLE
     }
 
     public boolean contains(String filterSeq){

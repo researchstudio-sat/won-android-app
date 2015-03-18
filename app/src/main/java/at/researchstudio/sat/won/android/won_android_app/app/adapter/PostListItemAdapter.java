@@ -25,6 +25,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
+import won.protocol.model.NeedState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +117,7 @@ public class PostListItemAdapter extends ArrayAdapter {
             }
 
             if(holder.closedHolder != null){
-                holder.closedHolder.setVisibility(item.isClosed()? View.VISIBLE : View.GONE);
+                holder.closedHolder.setVisibility(item.getNeedState() == NeedState.INACTIVE ? View.VISIBLE : View.GONE);
             }
 
             if (holder.descriptionHolder != null)
@@ -134,7 +135,7 @@ public class PostListItemAdapter extends ArrayAdapter {
                 }
             }
 
-            if(!item.isClosed() && item.hasNotifications()) {
+            if(item.getNeedState() == NeedState.ACTIVE && item.hasNotifications()) {
                 setCountersVisible(holder);
                 setCounter(holder.matchesHolder, item.getMatches(), 9);
                 setCounter(holder.requestHolder, item.getRequests(), 9);

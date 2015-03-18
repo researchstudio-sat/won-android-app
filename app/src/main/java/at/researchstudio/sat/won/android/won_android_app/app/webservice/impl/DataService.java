@@ -22,6 +22,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.constants.WonQuerie
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.util.SimpleLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
 import com.hp.hpl.jena.query.*;
@@ -29,8 +30,7 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.sparql.path.PathParser;
 import com.hp.hpl.jena.tdb.TDB;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -45,10 +45,10 @@ import won.protocol.util.linkeddata.LinkedDataSource;
 import won.protocol.vocabulary.WON;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -58,14 +58,21 @@ public class DataService {
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
     private Context context; //used for string resources
-    private LinkedDataSource linkedDataSource = new SimpleLinkedDataSource();
     private Dataset initialDataset;
     private List<URI> myneeds;
+
+    private Vector<Dataset> retrievedDatasets;
+    private LinkedDataSource linkedDataSourceAsync;
+    private LinkedDataSource linkedDataSourceSync;
+
 
     public DataService(AuthenticationService authService){
         this.context = authService.getContext(); //used for stringresource retrieval
         requestFactory = authService.getRequestFactory(); //used for cookie handling within connections
+        linkedDataSourceAsync = new AsyncLinkedDataSource();
+        linkedDataSourceSync = new SimpleLinkedDataSource();
         restTemplate = new RestTemplate(true, requestFactory);
+        retrievedDatasets = new Vector<Dataset>();
 
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
         restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
@@ -79,30 +86,51 @@ public class DataService {
         try{
             HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
             verboseLogOutput(response);
-            //**************************************************************************
-            //http://rsa021.researchstudio.at:8080/won/resource/need/1869023001744244700
-            //http://rsa021.researchstudio.at:8080/won/resource/need/1135026076691464200 Accept: application/trig
 
             initialDataset = SimpleLinkedDataSource.makeDataset();
             myneeds = new ArrayList<URI>();
 
-            int i = 0;
-
+            ExecutorService es = Executors.newFixedThreadPool(2);
             for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
-                i++;
-                if(i==5){
-                    URI uri = URI.create(uriString);
-                    myneeds.add(uri);
-                    Log.d(LOG_TAG, "retrieve data for uri: "+uriString);
-                    RdfUtils.addDatasetToDataset(initialDataset, linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 5, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
-                }
-            }
+                URI uri = URI.create(uriString);
+                myneeds.add(uri);
+                Log.d(LOG_TAG, "retrieve data for uri: "+uriString);
 
+                RetrievalThread rt = new RetrievalThread(uri, linkedDataSourceAsync);
+                es.execute(rt);
+
+                //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, false));
+                //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 3, false), true); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
+            }
+            es.shutdown();
+            boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
+
+            for(Dataset ds : retrievedDatasets){
+                RdfUtils.addDatasetToDataset(initialDataset, ds);
+                //RdfUtils.addDatasetToDataset(initialDataset, ds, true); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
+            }
         }catch (HttpClientErrorException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
             Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+        } catch (InterruptedException e){
+            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+        }
+    }
+
+    class RetrievalThread extends Thread{
+        private LinkedDataSource linkedDataSource;
+        private URI uri;
+
+        public RetrievalThread(URI uri, LinkedDataSource linkedDataSource){
+            this.linkedDataSource = linkedDataSource;
+            this.uri= uri;
+        }
+
+        public void run(){
+            Log.d(LOG_TAG, "Thread started");
+            retrievedDatasets.add(linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, false));
         }
     }
 
@@ -110,42 +138,90 @@ public class DataService {
         initialDataset = null;
     }
 
-    public ArrayList<Post> getMyPosts(){
+    public Map<URI, Post> getMyPosts(){
         if(initialDataset == null){
             retrieveInitialDataset();
         }
 
-        ArrayList<Post> postList = new ArrayList<Post>();
+        Map<URI,Post> postMap = new HashMap<URI,Post>();
 
-        for(QuerySolution soln : executeQuery(initialDataset, setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI,"need", myneeds))){
+        for(QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", myneeds))){
             Post p = new Post(URI.create(soln.get("need").toString()));
             p.setTitle(soln.get("title").toString());
             p.setDescription(soln.get("desc").toString());
             p.setTags(soln.get("tag").toString());
             p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
-            p.setClosed(NeedState.INACTIVE==NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
+            p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
             //TODO: SET THE OTHER VARIABLES AS WELL
-            postList.add(p);
+            postMap.put(p.getURI(), p);
         }
 
-        return postList;
+        return postMap;
     }
 
-    public ArrayList<Connection> getConnectionsByPost(URI uri){
+    public ArrayList<Connection> getConnectionsByPostAndState(URI uri, List<URI> states){
+        return getConnectionsByPostAndState(uri, states, getMyPosts());
+    }
+
+    public ArrayList<Connection> getConnectionsByPostAndState(URI uri, List<URI> states, Map<URI, Post> myPosts){
+        Log.d(LOG_TAG, "Getting Connections by need id: "+uri);
         if(initialDataset == null){
             retrieveInitialDataset();
         }
 
         ArrayList<Connection> connectionList = new ArrayList<Connection>();
 
-        List<QuerySolution> solutions = executeQuery(initialDataset, setSparqlVars(WonQueriesLocal.SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI,"need", uri));
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("need", uri);
+        params.put("state", states);
+
+        List<QuerySolution> solutions = executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI, params));
         Log.d(LOG_TAG,"Solutionsize: "+solutions.size());
 
         for(QuerySolution soln : solutions){
             try {
-                Log.d(LOG_TAG, "SOLUTION FOUND!!!!!" + soln.toString());
-                Log.d(LOG_TAG, "localNeed: " + soln.get("localNeed").asResource().getURI());
-                Log.d(LOG_TAG, "remoteNeed: " + soln.get("remoteNeed").asResource().getURI());
+                Log.d(LOG_TAG, "remoteNeed: " + soln.get("remoteNeed").asResource().getURI()+" localNeed: " + soln.get("localNeed").asResource().getURI());
+                Post myPost = myPosts.get(URI.create(soln.get("localNeed").asResource().getURI()));
+
+                if(myPost==null){
+                    Log.e(LOG_TAG, "MyPost was not found skipping this iteration");
+                    break;
+                }
+
+                Connection c = new Connection(URI.create(soln.get("connection").toString()),
+                        myPost,
+                        getPostById(URI.create(soln.get("remoteNeed").asResource().getURI())),
+                        new ArrayList<MessageItemModel>(),
+                        ConnectionState.fromURI(URI.create(soln.get("state").asResource().getURI()))
+                );
+                connectionList.add(c);
+            }catch (IllegalArgumentException e){
+                Log.e(LOG_TAG, "URI OF SOLUTION WAS INVALID, SOLUTION WILL BE SKIPPED, value of solution: "+ soln.toString());
+            }
+        }
+
+        return connectionList;
+    }
+
+    public ArrayList<Connection> getConnectionsByState(List<URI> states) {
+        Log.d(LOG_TAG, "Getting Connections");
+        if(initialDataset == null){
+            retrieveInitialDataset();
+        }
+
+        ArrayList<Connection> connectionList = new ArrayList<Connection>();
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("need", myneeds);
+        params.put("state", states);
+
+        List<QuerySolution> solutions = executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI, params));
+        Log.d(LOG_TAG,"Solutionsize: "+solutions.size());
+
+        for(QuerySolution soln : solutions){
+            try {
+                Log.d(LOG_TAG, "remoteNeed: " + soln.get("remoteNeed").asResource().getURI()+" localNeed: " + soln.get("localNeed").asResource().getURI());
+
                 Connection c = new Connection(URI.create(soln.get("connection").toString()),
                         getPostById(URI.create(soln.get("localNeed").asResource().getURI())),
                         getPostById(URI.create(soln.get("remoteNeed").asResource().getURI())),
@@ -154,45 +230,39 @@ public class DataService {
                 );
                 connectionList.add(c);
             }catch (IllegalArgumentException e){
-                Log.e(LOG_TAG, "URI OF ONE CONNECTION WAS INVALID, SOLUTION WILL BE SKIPPED");
+                Log.e(LOG_TAG, "URI OF SOLUTION WAS INVALID, SOLUTION WILL BE SKIPPED, value of solution: "+ soln.toString());
             }
         }
-
         return connectionList;
     }
 
     public Post getPostById(URI uri) {
-        Log.d(LOG_TAG, "Getting Post by id: "+uri);
         if(initialDataset == null){
             retrieveInitialDataset();
         }
 
         ArrayList<Post> postList = new ArrayList<Post>();
 
-        for(QuerySolution soln : executeQuery(initialDataset, setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI,"need",uri))){
+        for(QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", uri))){
             StringBuilder sb = new StringBuilder();
             Iterator<String> it = soln.varNames();
-
-            while(it.hasNext()){
-                String var = it.next();
-                sb.append(var).append(": ").append(soln.get(var)).append(" ");
-            }
-            Log.d("Retrieve", "getPostById(): "+sb.toString());
 
             Post p = new Post(URI.create(soln.get("need").toString()));
             p.setTitle(soln.get("title").toString());
             p.setDescription(soln.get("desc").toString());
             p.setTags(soln.get("tag").toString());
             p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
-            p.setClosed(NeedState.INACTIVE==NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
+            p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
             //TODO: SET THE OTHER VARIABLES AS WELL
             postList.add(p);
         }
 
-        if (postList.size() != 1) {
+        if (postList.size() == 0) {
+            Log.d(LOG_TAG, "Getting Post by id with linkedDataSource: "+uri);
             //TODO: THIS RECURSION DOES NOT SEEM TO BE THAT GREAT
-            Log.d(LOG_TAG, "add uri: "+uri+ "to dataset");
-            RdfUtils.addDatasetToDataset(initialDataset, linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 5, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
+            //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 1, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
+            RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResource(uri));
+
             return getPostById(uri);
         }
 
@@ -322,30 +392,5 @@ public class DataService {
             Log.d(LOG_TAG, sb.toString());
         }
         Log.d(LOG_TAG, "---------------------------------------------------------------------");
-    }
-
-    /**
-     * Sets the vars of a given sparql query
-     * Replaces every instance of ::var:: with the given object (this can only be an URI or a List of URIS at the moment)
-     * @param stmt
-     * @param var that will be replaced
-     * @param obj object that is replacing the variable
-     * @return replaced statement
-     */
-    public static String setSparqlVars(String stmt, String var, Object obj){
-        StringBuilder replacement = new StringBuilder();
-
-        if(obj instanceof URI){
-            replacement.append("<").append(obj.toString()).append(">");
-        }else if(obj instanceof List){
-            for(Object itm : (List)obj){
-                if(itm instanceof URI){
-                    replacement.append("<").append(itm.toString()).append(">,");
-                }
-            }
-            replacement.deleteCharAt(replacement.length()-1);
-        }
-
-        return stmt.replaceAll("::"+var+"::",replacement.toString());
     }
 }

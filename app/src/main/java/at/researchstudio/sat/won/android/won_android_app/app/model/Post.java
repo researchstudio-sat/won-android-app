@@ -70,17 +70,18 @@ public class Post extends Model implements Parcelable {
     private long startTime;
     private long stopTime;
 
-    private boolean closed; //TODO: REFACTOR THIS TO NEEDSTATE
+    private NeedState needState;
 
     private RepeatType repeat;
 
-    public Post(BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
-        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageIndex, location, startTime, stopTime, repeat, closed);
+    public Post(BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, NeedState needState) {
+        this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageIndex, location, startTime, stopTime, repeat, needState);
     }
 
     public Post(URI uri){
         this.setURI(uri);
         this.type = BasicNeedType.DEMAND;
+        this.needState = NeedState.ACTIVE;
         this.repeat = RepeatType.NONE;
         this.location = new LatLng(0,0);
         this.imageUrls = new ArrayList<String>();
@@ -104,10 +105,10 @@ public class Post extends Model implements Parcelable {
         this.startTime          = bundle.getLong(STARTTIME_REF);
         this.stopTime           = bundle.getLong(STOPTIME_REF);
         this.repeat             = RepeatType.values()[bundle.getInt(REPEAT_REF)];
-        this.closed             = bundle.getBoolean(CLOSED_REF);
+        this.needState          = NeedState.values()[bundle.getInt(CLOSED_REF)];
     }
 
-    public Post(URI uri, BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, boolean closed) {
+    public Post(URI uri, BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, NeedState needState) {
         if(uri==null){
             this.setURI(new WonNodeInformationServiceImpl().generateNeedURI()); //TODO: do not implement this like that
         }else{
@@ -126,7 +127,7 @@ public class Post extends Model implements Parcelable {
         this.startTime = startTime;
         this.stopTime = stopTime;
         this.repeat = repeat;
-        this.closed = closed;
+        this.needState = needState;
     }
 
     public int getTitleImageIndex() {
@@ -269,12 +270,12 @@ public class Post extends Model implements Parcelable {
         this.tags = tags;
     }
 
-    public boolean isClosed() {
-        return closed;
+    public NeedState getNeedState() {
+        return needState;
     }
 
-    public void setClosed(boolean closed) {
-        this.closed = closed;
+    public void setNeedState(NeedState needState) {
+        this.needState = needState;
     }
 
     public String getTagsAsString() {
@@ -369,7 +370,7 @@ public class Post extends Model implements Parcelable {
                 ", location=" + location +
                 ", startTime=" + startTime +
                 ", stopTime=" + stopTime +
-                ", closed=" + closed +
+                ", needState=" + needState +
                 ", repeat=" + repeat +
                 '}';
     }
@@ -389,6 +390,7 @@ public class Post extends Model implements Parcelable {
         Bundle bundle = new Bundle();
         bundle.putString(URI_REF, getURI().toString());
         bundle.putInt(TYPE_REF, type.ordinal());
+        bundle.putInt(CLOSED_REF, needState.ordinal());
         bundle.putInt(REPEAT_REF, repeat.ordinal());
         bundle.putString(TITLE_REF, title);
         bundle.putStringArrayList(TAGS_REF, new ArrayList<String>(tags));
