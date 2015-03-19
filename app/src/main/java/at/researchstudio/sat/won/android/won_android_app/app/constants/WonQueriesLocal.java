@@ -86,7 +86,17 @@ public class WonQueriesLocal {
             "FILTER (?need in (::need::))"+
             "}";
 
-    public static final String SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI_AND_CONNECTION_STATE = "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasConnectionState ?state; won:hasRemoteNeed ?remoteNeed; won:belongsToNeed ?localNeed. FILTER ((?need in (::need::)) && ?state in (::state::))}";
+    public static final String SPARQL_CONNECTION_FILTERED_BY_CONNECTION_URI = SPARQL_PREFIX + "SELECT * WHERE " +
+            "{ " +
+            "?need won:hasConnections ?connections. " +
+            "?connections rdfs:member ?connection. " +
+            "?connection won:hasConnectionState ?state; " +
+            "won:hasRemoteNeed ?remoteNeed; " +
+            "won:belongsToNeed ?localNeed. " +
+            "FILTER (?connection in (::connection::))"+
+            "}";
+
+    public static final String SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI_AND_CONNECTION_STATE = SPARQL_PREFIX + "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasConnectionState ?state; won:hasRemoteNeed ?remoteNeed; won:belongsToNeed ?localNeed. FILTER ((?need in (::need::)) && ?state in (::state::))}";
 
     /*public static final String SPARQL_MESSAGES_BY_CONNECTION = SPARQL_PREFIX + "SELECT ?message "+
             "WHERE {"+
@@ -102,7 +112,8 @@ public class WonQueriesLocal {
             "}";
 
 
-    public static final String SPARQL_EVENTS = SPARQL_PREFIX + "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasEventContainer ?events. ?events rdfs:member ?event. ?event msg:hasMessageType ?msgType. OPTIONAL {?event won:hasTextMessage ?msgText.} LIMIT (?need IN (::need::))}";
+    public static final String SPARQL_EVENTS = SPARQL_PREFIX + "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasEventContainer ?events. ?events rdfs:member ?event. ?event msg:hasMessageType ?msgType. OPTIONAL {?event won:hasTextMessage ?msgText.} FILTER (?need IN (::need::))}";
+    public static final String SPARQL_EVENTS_BY_CONNECTION_URI = SPARQL_PREFIX + "SELECT * WHERE {?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasEventContainer ?events. ?events rdfs:member ?event. ?event msg:hasMessageType ?msgType. OPTIONAL {?event won:hasTextMessage ?msgText.} FILTER (?connection IN (::connection::))}";
 
 
     //public static final String SPARQL_MY_NEED = "SELECT * WHERE {?need won:containedInPrivateGraph ?graph. ?need won:hasContent ?x; won:isInState ?state. ?x won:hasTextDescription ?desc; won:hasTag ?tag; dc:title ?title.}";

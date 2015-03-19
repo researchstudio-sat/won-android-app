@@ -17,7 +17,7 @@
 <resources>
     <string name="admob_id">test</string> <!-- AdMob Id for test purposes only-->
 
-    <string name="app_name">WebOfNeeds</string>
+    <string name="app_name">Web Of Needs</string>
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>

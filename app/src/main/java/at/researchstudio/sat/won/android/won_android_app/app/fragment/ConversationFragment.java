@@ -180,7 +180,7 @@ public class ConversationFragment extends Fragment {
         @Override
         protected void onCancelled(ArrayList<MessageItemModel> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            putConversationInView(linkArray);
+            //putConversationInView(linkArray);
         }
 
         protected void onPostExecute(ArrayList<MessageItemModel> linkArray) {

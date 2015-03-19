@@ -68,6 +68,7 @@ public class PostService {
 
         for(Connection con : connections){
             if(con.getMatchedPost()!= null && con.getMatchedPost().getNeedState() == NeedState.ACTIVE){
+                con.setMessages(getMessagesByConversationId(con.getURI()));
                 requests.add(con);
             }
         }
@@ -104,10 +105,11 @@ public class PostService {
 
         for(Connection con : connections){
             if(con.getMatchedPost()!= null && con.getMatchedPost().getNeedState() == NeedState.ACTIVE){
+                con.setMessages(getMessagesByConversationId(con.getURI()));
                 conversations.add(con);
             }
         }
-        Log.d(LOG_TAG, "Getting conversations by postid: "+postId+" ("+connections.size()+" Connections / "+conversations.size()+" Conversations)");
+        Log.d(LOG_TAG, "Getting Conversations by postid: "+postId+" ("+connections.size()+" Connections / "+conversations.size()+" Conversations)");
 
         return conversations;
     }
@@ -117,8 +119,7 @@ public class PostService {
     }
 
     public ArrayList<MessageItemModel> getMessagesByConversationId(URI conversationId){
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.getMessagesByConversationId(conversationId);
+        return dataService.getMessagesByConnectionId(conversationId);
     }
 
     public ArrayList<Post> getMatchesByPostId(String postId) {
@@ -135,7 +136,7 @@ public class PostService {
                 matches.add(con.getMatchedPost());
             }
         }
-        Log.d(LOG_TAG, "Getting requests by postid: "+postId+" ("+connections.size()+" Connections / "+matches.size()+" Matches)");
+        Log.d(LOG_TAG, "Getting Matches by postid: "+postId+" ("+connections.size()+" Connections / "+matches.size()+" Matches)");
         return matches;
     }
 
@@ -144,8 +145,7 @@ public class PostService {
     }
 
     public Connection getConversationById(URI id){
-        //TODO: REFACTOR THIS MOCK METHOD
-        return Mock.myMockConversations.get(id);
+        return dataService.getConnectionById(id);
     }
 
     public Post getMyPostById(String id) {

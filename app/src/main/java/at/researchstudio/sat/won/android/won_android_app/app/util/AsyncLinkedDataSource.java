@@ -33,7 +33,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     private ConcurrentHashMap<URI, Object> myCache = new ConcurrentHashMap<URI, Object>();
 
     @Override
-    public synchronized Dataset getDataForResource(URI resourceURI) {
+    public Dataset getDataForResource(URI resourceURI) {
         assert resourceURI != null : "resource must not be null";
 
         Object dataset = myCache.get(resourceURI);
@@ -57,7 +57,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     }
 
     @Override
-    public synchronized Dataset getDataForResource(URI resourceURI, List<URI> properties, int maxRequest, int maxDepth) {
+    public Dataset getDataForResource(URI resourceURI, List<URI> properties, int maxRequest, int maxDepth) {
         Set<URI> crawledURIs = new HashSet<URI>();
         Set<URI> newlyDiscoveredURIs = new HashSet<URI>();
         Set<URI> urisToCrawl = null;
@@ -88,7 +88,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     }
 
     @Override
-     public synchronized Dataset getDataForResourceWithPropertyPath(URI resourceURI, List<Path> properties, int maxRequest, int maxDepth, boolean moveAllTriplesInDefaultGraph){
+     public Dataset getDataForResourceWithPropertyPath(URI resourceURI, List<Path> properties, int maxRequest, int maxDepth, boolean moveAllTriplesInDefaultGraph){
         Set<URI> crawledURIs = new HashSet<URI>();
         Set<URI> newlyDiscoveredURIs = new HashSet<URI>();
         Set<URI> urisToCrawl = null;
@@ -100,7 +100,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
         OUTER: while (newlyDiscoveredURIs.size() > 0 && depth < maxDepth && requests < maxRequest){
             //ExecutorService es = Executors.newCachedThreadPool();
-            ExecutorService es = Executors.newFixedThreadPool(6);
+            ExecutorService es = Executors.newFixedThreadPool(8);
             urisToCrawl = newlyDiscoveredURIs;
             newlyDiscoveredURIs = new HashSet<URI>();
 
@@ -169,6 +169,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
             assert resourceURI != null : "resource must not be null";
 
             Object dataset = myCache.get(resourceURI);
+            //TODO: PUT IF ABSENT
 
             if (dataset == null) {
                 try {
@@ -199,7 +200,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
      * @param properties
      * @return
      */
-    private synchronized Set<URI> getURIsToCrawlWithPropertyPath(Dataset dataset, URI resourceURI, Set<URI> excludedUris, List<Path> properties){
+    private Set<URI> getURIsToCrawlWithPropertyPath(Dataset dataset, URI resourceURI, Set<URI> excludedUris, List<Path> properties){
         Set<URI> toCrawl = new HashSet<URI>();
         for (int i = 0; i<properties.size();i++){
             Iterator<URI> newURIs = RdfUtils.getURIsForPropertyPathByQuery(dataset,
@@ -223,7 +224,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
       * @param properties
      * @return
      */
-    private synchronized Set<URI> getURIsToCrawl(Dataset dataset, Set<URI> excludedUris, final List<URI> properties) {
+    private Set<URI> getURIsToCrawl(Dataset dataset, Set<URI> excludedUris, final List<URI> properties) {
         Set<URI> toCrawl = new HashSet<URI>();
         for (int i = 0; i<properties.size();i++){
             final URI property = properties.get(i);
@@ -250,7 +251,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
         return toCrawl;
     }
 
-    public synchronized static Dataset makeDataset() {
+    public static Dataset makeDataset() {
         Log.d(LOG_TAG,"Creating tdb dataset...");
         DatasetGraph dsg = TDBFactory.createDatasetGraph();
         dsg.getContext().set(TDB.symUnionDefaultGraph, new NodeValueBoolean(true));

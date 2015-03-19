@@ -44,22 +44,20 @@ import at.researchstudio.sat.won.android.won_android_app.app.service.SettingsSer
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.AuthenticationService;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import won.protocol.service.impl.WonNodeInformationServiceImpl;
 
 import java.net.URI;
 
 
 public class MainActivity extends FragmentActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-                                                              GooglePlayServicesClient.ConnectionCallbacks,
-                                                              GooglePlayServicesClient.OnConnectionFailedListener {
+                                                              GoogleApiClient.ConnectionCallbacks,
+                                                              GoogleApiClient.OnConnectionFailedListener {
     private static final String APP_STARTED_REF = "app_started_ref";
     private static final String TEMPPOST_REF = "temppost_ref";
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private ImageLoaderService mImgLoader;
-
-    private WonNodeInformationServiceImpl mWonNodeInformationService = new WonNodeInformationServiceImpl();
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
@@ -94,7 +92,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         }
 
         //Initialize LocationService
-        LocationService.init(new LocationClient(this, this, this));
+        LocationService.init(new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build());
         //Initialize PreferencesService
         SettingsService.init(getSharedPreferences(SettingsService.PREFS_NAME, Context.MODE_PRIVATE));
 
@@ -149,7 +147,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     }
 
     @Override
-    public void onDisconnected() {
+    public void onConnectionSuspended(int i) {
         //TODO: DO NOTHING FOR NOW
     }
 
@@ -184,7 +182,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
 
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
     }
 

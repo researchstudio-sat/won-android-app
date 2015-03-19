@@ -79,7 +79,6 @@ public class PostBoxFragment extends Fragment{
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
         swipeLayout.setRefreshing(true);
-        styleActionBar();
 
         mNeedListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -154,7 +153,7 @@ public class PostBoxFragment extends Fragment{
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(activity.isDrawerOpen()){
+        if(activity!=null && activity.isDrawerOpen()){
             super.onCreateOptionsMenu(menu, inflater);
         }else {
             menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
@@ -262,7 +261,6 @@ public class PostBoxFragment extends Fragment{
         @Override
         protected void onCancelled(ArrayList<Post> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            putListInView(linkArray);
         }
 
         protected void onPostExecute(ArrayList<Post> linkArray) {
@@ -277,6 +275,7 @@ public class PostBoxFragment extends Fragment{
 
             mNeedListView.setAdapter(mPostListItemAdapter);
             swipeLayout.setRefreshing(false);
+            styleActionBar();
         }
     }
 

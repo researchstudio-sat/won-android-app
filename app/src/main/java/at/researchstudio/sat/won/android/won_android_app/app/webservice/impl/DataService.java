@@ -19,6 +19,7 @@ import android.content.Context;
 import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.WonQueriesLocal;
+import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
@@ -26,11 +27,11 @@ import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDat
 import at.researchstudio.sat.won.android.won_android_app.app.util.SimpleLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
 import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.sparql.path.PathParser;
 import com.hp.hpl.jena.tdb.TDB;
-import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -86,11 +87,13 @@ public class DataService {
         try{
             HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
             verboseLogOutput(response);
+            verboseLogOutput(response);
+            verboseLogOutput(response);
 
             initialDataset = SimpleLinkedDataSource.makeDataset();
             myneeds = new ArrayList<URI>();
 
-            ExecutorService es = Executors.newFixedThreadPool(2);
+            /*ExecutorService es = Executors.newFixedThreadPool(2);
             for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
@@ -98,9 +101,6 @@ public class DataService {
 
                 RetrievalThread rt = new RetrievalThread(uri, linkedDataSourceAsync);
                 es.execute(rt);
-
-                //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, false));
-                //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 3, false), true); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
             }
             es.shutdown();
             boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
@@ -108,15 +108,15 @@ public class DataService {
             for(Dataset ds : retrievedDatasets){
                 RdfUtils.addDatasetToDataset(initialDataset, ds);
                 //RdfUtils.addDatasetToDataset(initialDataset, ds, true); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
-            }
+            }*/
         }catch (HttpClientErrorException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
             Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-        } catch (InterruptedException e){
+        } /*catch (InterruptedException e){
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-        }
+        }*/
     }
 
     class RetrievalThread extends Thread{
@@ -129,8 +129,8 @@ public class DataService {
         }
 
         public void run(){
-            Log.d(LOG_TAG, "Thread started");
             retrievedDatasets.add(linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, false));
+            //retrievedDatasets.add(linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, true)); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
         }
     }
 
@@ -145,26 +145,26 @@ public class DataService {
 
         Map<URI,Post> postMap = new HashMap<URI,Post>();
 
-        for(QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", myneeds))){
-            Post p = new Post(URI.create(soln.get("need").toString()));
-            p.setTitle(soln.get("title").toString());
-            p.setDescription(soln.get("desc").toString());
-            p.setTags(soln.get("tag").toString());
-            p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
-            p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
-            //TODO: SET THE OTHER VARIABLES AS WELL
-            postMap.put(p.getURI(), p);
+        if(myneeds.size()>0) {
+            for (QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", myneeds))) {
+                Post p = new Post(URI.create(soln.get("need").toString()));
+                p.setTitle(soln.get("title").toString());
+                p.setDescription(soln.get("desc").toString());
+                p.setTags(soln.get("tag").toString());
+                p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
+                p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
+                //TODO: SET THE OTHER VARIABLES AS WELL
+                postMap.put(p.getURI(), p);
+            }
         }
-
         return postMap;
     }
 
     public ArrayList<Connection> getConnectionsByPostAndState(URI uri, List<URI> states){
-        return getConnectionsByPostAndState(uri, states, getMyPosts());
+        return getConnectionsByPostAndState(Collections.singletonList(uri), states, getMyPosts());
     }
 
-    public ArrayList<Connection> getConnectionsByPostAndState(URI uri, List<URI> states, Map<URI, Post> myPosts){
-        Log.d(LOG_TAG, "Getting Connections by need id: "+uri);
+    public ArrayList<Connection> getConnectionsByPostAndState(List<URI> uris, List<URI> states, Map<URI, Post> myPosts){
         if(initialDataset == null){
             retrieveInitialDataset();
         }
@@ -172,68 +172,59 @@ public class DataService {
         ArrayList<Connection> connectionList = new ArrayList<Connection>();
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("need", uri);
+        params.put("need", uris);
         params.put("state", states);
 
-        List<QuerySolution> solutions = executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI, params));
-        Log.d(LOG_TAG,"Solutionsize: "+solutions.size());
+        if(myneeds.size()>0) {
+            List<QuerySolution> solutions = executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI_AND_CONNECTION_STATE, params));
 
-        for(QuerySolution soln : solutions){
-            try {
-                Log.d(LOG_TAG, "remoteNeed: " + soln.get("remoteNeed").asResource().getURI()+" localNeed: " + soln.get("localNeed").asResource().getURI());
-                Post myPost = myPosts.get(URI.create(soln.get("localNeed").asResource().getURI()));
+            for (QuerySolution soln : solutions) {
+                try {
+                    Post myPost = myPosts.get(URI.create(soln.get("localNeed").asResource().getURI()));
 
-                if(myPost==null){
-                    Log.e(LOG_TAG, "MyPost was not found skipping this iteration");
-                    break;
+                    Connection c = new Connection(URI.create(soln.get("connection").toString()),
+                            myPost == null ? getPostById(URI.create(soln.get("localNeed").asResource().getURI())) : myPost,
+                            getPostById(URI.create(soln.get("remoteNeed").asResource().getURI())),
+                            getMessagesByConnectionId(URI.create(soln.get("connection").toString())),
+                            ConnectionState.fromURI(URI.create(soln.get("state").asResource().getURI()))
+                    );
+                    connectionList.add(c);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "URI OF SOLUTION WAS INVALID, SOLUTION WILL BE SKIPPED, value of solution: " + soln.toString());
                 }
-
-                Connection c = new Connection(URI.create(soln.get("connection").toString()),
-                        myPost,
-                        getPostById(URI.create(soln.get("remoteNeed").asResource().getURI())),
-                        new ArrayList<MessageItemModel>(),
-                        ConnectionState.fromURI(URI.create(soln.get("state").asResource().getURI()))
-                );
-                connectionList.add(c);
-            }catch (IllegalArgumentException e){
-                Log.e(LOG_TAG, "URI OF SOLUTION WAS INVALID, SOLUTION WILL BE SKIPPED, value of solution: "+ soln.toString());
             }
         }
 
         return connectionList;
+    }
+
+    public ArrayList<MessageItemModel> getMessagesByConnectionId(URI uri) {
+        ArrayList<MessageItemModel> messageList = new ArrayList<MessageItemModel>();
+
+        List<QuerySolution> solutions = executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_EVENTS_BY_CONNECTION_URI, "connection", uri));
+
+        for(QuerySolution soln : solutions){
+            try {
+                //TODO: CHANGE THIS
+                RDFNode msgText = soln.get("msgText");
+                RDFNode msgType = soln.get("msgType");
+                MessageItemModel msg;
+                if(msgText!=null) {
+                    msg = new MessageItemModel(MessageType.RECEIVE, msgText.toString());
+                }else{
+                    msg = new MessageItemModel(MessageType.SYSTEM, msgType==null? "NO TYPE" :msgType.asResource().getURI());
+                }
+
+                messageList.add(msg);
+            }catch (IllegalArgumentException e){
+                Log.e(LOG_TAG, "URI OF SOLUTION WAS INVALID, SOLUTION WILL BE SKIPPED, value of solution: "+ soln.toString());
+            }
+        }
+        return messageList;
     }
 
     public ArrayList<Connection> getConnectionsByState(List<URI> states) {
-        Log.d(LOG_TAG, "Getting Connections");
-        if(initialDataset == null){
-            retrieveInitialDataset();
-        }
-
-        ArrayList<Connection> connectionList = new ArrayList<Connection>();
-
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("need", myneeds);
-        params.put("state", states);
-
-        List<QuerySolution> solutions = executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI, params));
-        Log.d(LOG_TAG,"Solutionsize: "+solutions.size());
-
-        for(QuerySolution soln : solutions){
-            try {
-                Log.d(LOG_TAG, "remoteNeed: " + soln.get("remoteNeed").asResource().getURI()+" localNeed: " + soln.get("localNeed").asResource().getURI());
-
-                Connection c = new Connection(URI.create(soln.get("connection").toString()),
-                        getPostById(URI.create(soln.get("localNeed").asResource().getURI())),
-                        getPostById(URI.create(soln.get("remoteNeed").asResource().getURI())),
-                        new ArrayList<MessageItemModel>(),
-                        ConnectionState.fromURI(URI.create(soln.get("state").asResource().getURI()))
-                );
-                connectionList.add(c);
-            }catch (IllegalArgumentException e){
-                Log.e(LOG_TAG, "URI OF SOLUTION WAS INVALID, SOLUTION WILL BE SKIPPED, value of solution: "+ soln.toString());
-            }
-        }
-        return connectionList;
+        return getConnectionsByPostAndState(myneeds, states, getMyPosts());
     }
 
     public Post getPostById(URI uri) {
@@ -269,41 +260,34 @@ public class DataService {
         return postList.get(0);
     }
 
-//    public Dataset crawlDataForPost(URI uri){
-//        Dataset needDataset = linkedDataSource.getDataForResourceWithPropertyPath(uri,configurePropertyPaths(),300,8,true);
-//
-//        String queryString = WonQueriesLocal.SPARQL_PREFIX +
-//                "SELECT ?need ?connection ?need2 WHERE {" +
-//                "   ?need won:hasConnections ?connections ." +
-//                "?connections rdfs:member ?connection ." +
-//                "?connection won:hasRemoteConnection ?connection2."+
-//                "?connection2 won:belongsToNeed ?need2 ." +
-//                "}";
-//
-//        Log.d(LOG_TAG, queryString);
-//        Query query = QueryFactory.create(queryString);
-//        QuerySolutionMap initialBinding = new QuerySolutionMap();
-//        initialBinding.add("need",needDataset.getDefaultModel().createResource(uri.toString()));
-//        QueryExecution qExec = QueryExecutionFactory.create(query, needDataset);
-//        ResultSet results = qExec.execSelect();
-//
-//        Log.d(LOG_TAG,"need: " + uri);
-//        while (results.hasNext()) {
-//            QuerySolution soln = results.nextSolution();
-//
-//            //**********
-//            /*NeedModelBuilder builder = new NeedModelBuilder();
-//            builder.copyValuesFromProduct(soln.get("?need").getModel());
-//            PostModelBuilder postModelBuilder = new PostModelBuilder();
-//            builder.copyValuesToBuilder(postModelBuilder);
-//
-//            Log.d(LOG_TAG,"need:"+ postModelBuilder.build()); */
-//            //**********
-//            Log.d(LOG_TAG, "con:" + soln.get("?connection") + ", need2:" + soln.get("?need2"));
-//        }
-//        qExec.close();
-//        return needDataset;
-//    }
+    public Connection getConnectionById(URI uri) {
+        if(initialDataset == null){
+            retrieveInitialDataset();
+        }
+
+        ArrayList<Connection> connectionList = new ArrayList<Connection>();
+
+        for(QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_CONNECTION_FILTERED_BY_CONNECTION_URI, "connection", uri))){
+            Connection c = new Connection(URI.create(soln.get("connection").toString()),
+                    getPostById(URI.create(soln.get("localNeed").asResource().getURI())),
+                    getPostById(URI.create(soln.get("remoteNeed").asResource().getURI())),
+                    getMessagesByConnectionId(uri),
+                    ConnectionState.fromURI(URI.create(soln.get("state").asResource().getURI()))
+            );
+            connectionList.add(c);
+        }
+
+        if (connectionList.size() == 0) {
+            Log.d(LOG_TAG, "Getting Connection by id with linkedDataSource: "+uri);
+            //TODO: THIS RECURSION DOES NOT SEEM TO BE THAT GREAT
+            //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 1, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
+            RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResource(uri));
+
+            return getConnectionById(uri);
+        }
+
+        return connectionList.get(0);
+    }
 
     public Context getContext() {
         return context;

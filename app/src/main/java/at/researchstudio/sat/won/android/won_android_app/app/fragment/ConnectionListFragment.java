@@ -185,7 +185,7 @@ public class ConnectionListFragment extends Fragment {
         @Override
         protected void onCancelled(ArrayList<Connection> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            putListInView(linkArray);
+            //putListInView(linkArray);
         }
 
         protected void onPostExecute(ArrayList<Connection> linkArray) {

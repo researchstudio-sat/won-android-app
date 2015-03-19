@@ -192,9 +192,9 @@ public class NavigationDrawerFragment extends Fragment {
 
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
         // per the navigation drawer design guidelines.
-        if ((SettingsService.appStarts == 0) && !mFromSavedInstanceState) {
+        /*if ((SettingsService.appStarts == 0) && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mFragmentContainerView);
-        }
+        }*/
 
         // Defer code dependent on restoration of previous instance state.
         mDrawerLayout.post(new Runnable() {

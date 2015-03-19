@@ -16,8 +16,9 @@
 
 <resources>
     <!-- ActionBar -->
-    <color name="actionbar_bg">#178acc</color>
-    <color name="actionbar_text">#FFF</color>
+    <!-- WON LOGO COLOR: #F04646 -->
+    <color name="actionbar_bg">#FFFFFF</color>
+    <color name="actionbar_text">#F04646</color>
 
     <!-- Navigation Drawer -->
     <color name="navdrawer_bg">#CCC</color>
