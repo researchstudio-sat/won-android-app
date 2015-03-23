@@ -34,7 +34,7 @@ public class WonClientHttpRequestFactory extends SimpleClientHttpRequestFactory 
         Log.d(LOG_TAG, "Connection: " + connection.toString() + " Method: "+httpMethod);
 
         connection.setRequestProperty("accept-charset", "UTF-8");
-
+        
         if(cookieValue!=null) {
             connection.setRequestProperty("Cookie", cookieValue);
         }else{

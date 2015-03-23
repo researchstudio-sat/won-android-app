@@ -12,7 +12,6 @@ import won.protocol.util.linkeddata.LinkedDataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import java.io.IOException;
 import java.net.URI;
 import java.text.MessageFormat;
 

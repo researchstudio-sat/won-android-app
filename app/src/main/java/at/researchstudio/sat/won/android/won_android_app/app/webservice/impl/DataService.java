@@ -38,6 +38,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
+import org.springframework.web.socket.sockjs.client.SockJsClient;
+import org.springframework.web.socket.sockjs.client.Transport;
 import won.protocol.model.BasicNeedType;
 import won.protocol.model.ConnectionState;
 import won.protocol.model.NeedState;
@@ -66,6 +70,7 @@ public class DataService {
     private LinkedDataSource linkedDataSourceAsync;
     private LinkedDataSource linkedDataSourceSync;
 
+    private SockJsClient sockJsClient;
 
     public DataService(AuthenticationService authService){
         this.context = authService.getContext(); //used for stringresource retrieval
@@ -87,13 +92,11 @@ public class DataService {
         try{
             HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
             verboseLogOutput(response);
-            verboseLogOutput(response);
-            verboseLogOutput(response);
 
             initialDataset = SimpleLinkedDataSource.makeDataset();
             myneeds = new ArrayList<URI>();
 
-            /*ExecutorService es = Executors.newFixedThreadPool(2);
+            ExecutorService es = Executors.newFixedThreadPool(2);
             for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
@@ -108,15 +111,25 @@ public class DataService {
             for(Dataset ds : retrievedDatasets){
                 RdfUtils.addDatasetToDataset(initialDataset, ds);
                 //RdfUtils.addDatasetToDataset(initialDataset, ds, true); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
-            }*/
+            }
+            //TODO: SET HANDLER SOMEHOW (HTTPHEADER) --> change null value
+
+            RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
+
+            sockJsClient = new SockJsClient(Collections.singletonList((Transport)transport));
+
+
+            sockJsClient.doHandshake(new WonWebSocketHandler(), null, URI.create(context.getString(R.string.base_uri) + context.getString(R.string.websocket_path))); //TODO: NOT SURE IF THIS IS THE WAY OR POSITION WHERE ITS SUPPOSED TO BE
+            sockJsClient.start();
+            Log.d(LOG_TAG, "WebSocket is running: "+sockJsClient.isRunning());
         }catch (HttpClientErrorException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
             Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-        } /*catch (InterruptedException e){
+        } catch (InterruptedException e){
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-        }*/
+        }
     }
 
     class RetrievalThread extends Thread{
@@ -130,7 +143,6 @@ public class DataService {
 
         public void run(){
             retrievedDatasets.add(linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, false));
-            //retrievedDatasets.add(linkedDataSource.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 4, true)); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
         }
     }
 
