@@ -34,7 +34,8 @@
     <string name="action_compose">Compose</string>
 
     <!-- Error Messages -->
-    <string name="error_login_failed">Login Failed</string>
+    <string name="error_login_failed">Login Failed, Username Password combination not correct</string>
+    <string name="error_server_not_found">Login Failed, server was not found</string>
 
     <!-- Generic Items -->
     <string name="yes">Yes</string>
@@ -49,10 +50,14 @@
     <string name="gallery">Gallery</string>
     <string name="loading">Loading&#8230;</string>
     <string name="closed">closed</string>
-    <string name="username">Username</string>
+    <string name="username">Email address</string>
     <string name="password">Password</string>
+    <string name="repeatpassword">Repeat Password</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+    <string name="register">Register</string>
+    <string name="signup">Sign Up</string>
+    <string name="back">Back</string>
 
     <!-- MENU ITEMS -->
     <string name="mi_profile">Profile</string>

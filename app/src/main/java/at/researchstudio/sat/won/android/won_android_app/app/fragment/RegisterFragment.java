@@ -16,8 +16,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,34 +30,36 @@ import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
-import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
+import at.researchstudio.sat.won.android.won_android_app.app.webservice.model.User;
 
 /**
  * Created by fsuda on 25.08.2014.
  */
-public class LoginFragment extends Fragment {
-    private static final String LOG_TAG = LoginFragment.class.getSimpleName();
+public class RegisterFragment extends Fragment {
+    private static final String LOG_TAG = RegisterFragment.class.getSimpleName();
 
     private TextView mErrorText;
     private EditText mUsername;
     private EditText mPassword;
-    private Button mLoginButton;
+    private EditText mRepeatPassword;
     private Button mRegisterButton;
+    private Button mBackButton;
 
     private MainActivity activity;
 
     //*******FRAGMENT LIFECYCLE************************************************************************
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_login, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_register, container, false);
 
-        mLoginButton = (Button) rootView.findViewById(R.id.login_login);
-        mRegisterButton = (Button) rootView.findViewById(R.id.login_register);
-        mUsername = (EditText) rootView.findViewById(R.id.login_username);
-        mPassword = (EditText) rootView.findViewById(R.id.login_password);
+        mRegisterButton = (Button) rootView.findViewById(R.id.register_register);
+        mBackButton = (Button) rootView.findViewById(R.id.register_back);
+        mUsername = (EditText) rootView.findViewById(R.id.register_username);
+        mPassword = (EditText) rootView.findViewById(R.id.register_password);
+        mRepeatPassword = (EditText) rootView.findViewById(R.id.register_repeatpassword);
 
-        mErrorText = (TextView) rootView.findViewById(R.id.login_error);
+        mErrorText = (TextView) rootView.findViewById(R.id.register_error);
 
         return rootView;
     }
@@ -69,36 +69,32 @@ public class LoginFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         activity = (MainActivity) getActivity();
 
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activity.showLoading();
-                new LoginTask().execute();
-            }
-        });
-
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment fragment = new RegisterFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                activity.showLoading();
+                new RegisterTask().execute();
+            }
+        });
+
+        mBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.popBackStackIfPossible();
             }
         });
     }
 
     //*************************************************************************************************
 
-    private class LoginTask extends AsyncTask<Void, Void, Integer> {
+    private class RegisterTask extends AsyncTask<Void, Void, Integer> {
 
         @Override
         protected Integer doInBackground(Void... params) {
             InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mUsername.getWindowToken(), 0);
-            return activity.getAuthService().login(mUsername.getText().toString(), mPassword.getText().toString());
+            //TODO: IMPL HANDLING IF PW!=PWREPEAT
+            return activity.getAuthService().register(new User(mUsername.getText().toString(), mPassword.getText().toString()));
         }
 
         @Override
@@ -123,6 +119,7 @@ public class LoginFragment extends Fragment {
                     activity.hideLoading();
                     Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
                     break;
+                //TODO: REFACTOR STUFF FOR REGISTER AND NOT LOGIN
             }
         }
     }

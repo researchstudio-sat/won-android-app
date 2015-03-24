@@ -22,6 +22,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemMo
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
+import org.apache.commons.lang3.time.StopWatch;
 import won.protocol.model.ConnectionState;
 import won.protocol.model.NeedState;
 
@@ -78,6 +79,9 @@ public class PostService {
     }
 
     public ArrayList<Post> getMyPosts() {
+        Log.d(LOG_TAG, "Retrieve My Posts");
+        StopWatch sp = new StopWatch();
+        sp.start();
         Map<URI, Post> myPosts = dataService.getMyPosts();
 
         for(Post post : myPosts.values()){
@@ -87,7 +91,8 @@ public class PostService {
                 post.setRequests(getRequestsByPostId(post.getURI()).size());
             }
         }
-
+        sp.stop();
+        Log.d(LOG_TAG,"Time it took to Retrieve MyPosts: "+sp.toString());
         return new ArrayList<Post>(myPosts.values());
     }
 

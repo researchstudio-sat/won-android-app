@@ -285,7 +285,6 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
         getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
     }
 
-
     private void showSettings() {
         if((mNavigationDrawerFragment != null) && (mNavigationDrawerFragment.isDrawerOpen())){
             mNavigationDrawerFragment.closeDrawer();

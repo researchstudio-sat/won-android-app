@@ -12,6 +12,8 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.tdb.TDBFactory;
+import org.springframework.web.client.RestClientException;
+import won.protocol.rest.LinkedDataRestClient;
 import won.protocol.util.RdfUtils;
 import won.protocol.util.linkeddata.LinkedDataSource;
 
@@ -28,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AsyncLinkedDataSource implements LinkedDataSource {
     private static final String LOG_TAG = AsyncLinkedDataSource.class.getSimpleName();
-    private LinkedDataRestClientAndroid linkedDataRestClient = new LinkedDataRestClientAndroid();
+    private LinkedDataRestClient linkedDataRestClient = new LinkedDataRestClient(1000,5000); //SET A TIMEOUT OF A SECOND FOR THOSE URIS
 
     private ConcurrentHashMap<URI, Object> myCache = new ConcurrentHashMap<URI, Object>();
 
@@ -43,8 +45,9 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                 dataset = linkedDataRestClient.readResourceData(resourceURI);
                 Log.d(LOG_TAG, "PUT uri: " + resourceURI + " into cache");
                 myCache.put(resourceURI, dataset);
-            }catch(IllegalArgumentException e){
-                Log.e(LOG_TAG, "uri retrieval not possible from: "+resourceURI);
+            }catch(RestClientException e){
+                Log.e(LOG_TAG, "Error while retrieving from URI: "+resourceURI);
+                return null;
             }
         } else {
             Log.d(LOG_TAG, "GOT uri: " + resourceURI + " from cache");
@@ -67,22 +70,25 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
         Dataset dataset = getDataForResource(resourceURI);
 
+        if(dataset!=null) {
+            OUTER:
+            while (newlyDiscoveredURIs.size() > 0 && depth < maxDepth && requests < maxRequest) {
+                urisToCrawl = newlyDiscoveredURIs;
+                newlyDiscoveredURIs = new HashSet<URI>();
+                for (URI currentURI : urisToCrawl) {
+                    //add all models from urisToCrawl
+                    Dataset currentModel = getDataForResource(currentURI);
+                    if (currentModel != null) {
+                        RdfUtils.addDatasetToDataset(dataset, currentModel, true);
+                        newlyDiscoveredURIs.addAll(getURIsToCrawl(currentModel, crawledURIs, properties));
+                    }
+                    crawledURIs.add(currentURI);
+                    requests++;
+                    if (requests >= maxRequest) break OUTER;
 
-        OUTER: while (newlyDiscoveredURIs.size() > 0 && depth < maxDepth && requests < maxRequest){
-            urisToCrawl = newlyDiscoveredURIs;
-            newlyDiscoveredURIs = new HashSet<URI>();
-            for (URI currentURI: urisToCrawl) {
-                //add all models from urisToCrawl
-                Dataset currentModel =  getDataForResource(currentURI);
-                RdfUtils.addDatasetToDataset(dataset, currentModel);
-                //RdfUtils.addDatasetToDataset(dataset, currentModel, true); //TODO: CHANGE ONCE WON UPDATE IN ARTIFACTORY
-                newlyDiscoveredURIs.addAll(getURIsToCrawl(currentModel, crawledURIs, properties));
-                crawledURIs.add(currentURI);
-                requests++;
-                if (requests >= maxRequest) break OUTER;
-
+                }
+                depth++;
             }
-            depth++;
         }
         return dataset;
     }
@@ -100,7 +106,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
         OUTER: while (newlyDiscoveredURIs.size() > 0 && depth < maxDepth && requests < maxRequest){
             //ExecutorService es = Executors.newCachedThreadPool();
-            ExecutorService es = Executors.newFixedThreadPool(8);
+            ExecutorService es = Executors.newFixedThreadPool(10);
             urisToCrawl = newlyDiscoveredURIs;
             newlyDiscoveredURIs = new HashSet<URI>();
 
@@ -127,8 +133,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                     if (moveAllTriplesInDefaultGraph) {
                         RdfUtils.copyDatasetTriplesToModel(currentDataset, resultDataset.getDefaultModel());
                     } else {
-                        RdfUtils.addDatasetToDataset(resultDataset, currentDataset);
-                        //RdfUtils.addDatasetToDataset(resultDataset, currentDataset,true); //TODO: CHANGE ONCE WON UPDATE IN ARTIFACTORY
+                        RdfUtils.addDatasetToDataset(resultDataset, currentDataset, true);
                     }
                     newlyDiscoveredURIs.addAll(getURIsToCrawlWithPropertyPath(resultDataset, resourceURI, crawledURIs, properties));
                 }
@@ -165,7 +170,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
 
         public Dataset getDataForResource(URI resourceURI) {
-            LinkedDataRestClientAndroid linkedDataRestClient = new LinkedDataRestClientAndroid();
+            LinkedDataRestClient linkedDataRestClient = new LinkedDataRestClient();
             assert resourceURI != null : "resource must not be null";
 
             Object dataset = myCache.get(resourceURI);
@@ -176,8 +181,9 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                     dataset = linkedDataRestClient.readResourceData(resourceURI);
                     Log.d(LOG_TAG, "PUT uri: " + resourceURI + " into cache");
                     myCache.put(resourceURI, dataset);
-                }catch(IllegalArgumentException e){
-                    Log.e(LOG_TAG, "uri retrieval not possible from: "+resourceURI);
+                }catch(RestClientException e){
+                    Log.e(LOG_TAG, "Error while retrieving from URI: "+resourceURI);
+                    return null;
                 }
             } else {
                 Log.d(LOG_TAG, "GOT uri: " + resourceURI + " from cache");

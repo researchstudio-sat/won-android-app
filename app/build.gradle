@@ -107,7 +107,6 @@ dependencies {
 
     /*Other dependencies*/
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
-    compile 'org.glassfish.jersey.core:jersey-client:2.16'
 
     compile(group:'webofneeds', name:'won-owner', version:'0.2-SNAPSHOT', changing: true) {
         exclude module: 'aopalliance'
@@ -138,8 +137,6 @@ dependencies {
         exclude module: 'jena-arq'
         exclude module: 'jena-iri'
         exclude module: 'jena-tdb'
-        exclude module: 'jersey-core'
-        exclude module: 'jersey-client'
         exclude module: 'spring-beans'
         exclude module: 'spring-security-core'
         exclude module: 'spring-data-commons'
@@ -147,13 +144,10 @@ dependencies {
         exclude module: 'servlet-api'
         exclude module: 'xalan'
         exclude module: 'postgresql'
-        exclude module: 'jaxws-api'
-        exclude module: 'jaxws-tools'
-        exclude module: 'jaxws-api'
-        exclude module: 'jaxws-rt'
         exclude module: 'super-csv'
         exclude module: 'ehcache-core'
         exclude module: 'javax.inject'
+        exclude module: 'guava'
     }
     compile ('org.springframework.android:spring-android-auth:1.0.1.RELEASE') {
         exclude module: 'spring-android-core'

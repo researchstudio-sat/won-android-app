@@ -24,7 +24,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDataSource;
-import at.researchstudio.sat.won.android.won_android_app.app.util.SimpleLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -32,13 +31,13 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.sparql.path.PathParser;
 import com.hp.hpl.jena.tdb.TDB;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
@@ -55,8 +54,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.assertEquals;
-
 public class DataService {
     private static final String LOG_TAG = DataService.class.getSimpleName();
 
@@ -68,7 +65,6 @@ public class DataService {
 
     private Vector<Dataset> retrievedDatasets;
     private LinkedDataSource linkedDataSourceAsync;
-    private LinkedDataSource linkedDataSourceSync;
 
     private SockJsClient sockJsClient;
 
@@ -76,7 +72,6 @@ public class DataService {
         this.context = authService.getContext(); //used for stringresource retrieval
         requestFactory = authService.getRequestFactory(); //used for cookie handling within connections
         linkedDataSourceAsync = new AsyncLinkedDataSource();
-        linkedDataSourceSync = new SimpleLinkedDataSource();
         restTemplate = new RestTemplate(true, requestFactory);
         retrievedDatasets = new Vector<Dataset>();
 
@@ -90,13 +85,15 @@ public class DataService {
         final String url = context.getString(R.string.base_uri) + context.getString(R.string.needs_path);
 
         try{
+            StopWatch sp = new StopWatch();
+            sp.start();
             HttpEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
             verboseLogOutput(response);
 
-            initialDataset = SimpleLinkedDataSource.makeDataset();
+            initialDataset = AsyncLinkedDataSource.makeDataset();
             myneeds = new ArrayList<URI>();
 
-            ExecutorService es = Executors.newFixedThreadPool(2);
+            ExecutorService es = Executors.newFixedThreadPool(3);
             for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
@@ -109,9 +106,13 @@ public class DataService {
             boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
 
             for(Dataset ds : retrievedDatasets){
-                RdfUtils.addDatasetToDataset(initialDataset, ds);
-                //RdfUtils.addDatasetToDataset(initialDataset, ds, true); //TODO: CHANGE ONCE NEW WON APP IS IN ARTIFACTORY
+                RdfUtils.addDatasetToDataset(initialDataset, ds, true);
             }
+
+            sp.stop();
+            Log.d(LOG_TAG, "Retrieved all initialDatasets in: "+sp.toString());
+            sp.reset();
+            sp.start();
             //TODO: SET HANDLER SOMEHOW (HTTPHEADER) --> change null value
 
             RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
@@ -121,7 +122,8 @@ public class DataService {
 
             sockJsClient.doHandshake(new WonWebSocketHandler(), null, URI.create(context.getString(R.string.base_uri) + context.getString(R.string.websocket_path))); //TODO: NOT SURE IF THIS IS THE WAY OR POSITION WHERE ITS SUPPOSED TO BE
             sockJsClient.start();
-            Log.d(LOG_TAG, "WebSocket is running: "+sockJsClient.isRunning());
+            sp.stop();
+            Log.d(LOG_TAG, "WebSocket is running: "+sockJsClient.isRunning()+ " took: "+sp.toString());
         }catch (HttpClientErrorException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
             Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
@@ -264,9 +266,12 @@ public class DataService {
             Log.d(LOG_TAG, "Getting Post by id with linkedDataSource: "+uri);
             //TODO: THIS RECURSION DOES NOT SEEM TO BE THAT GREAT
             //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 1, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
-            RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResource(uri));
-
-            return getPostById(uri);
+            Dataset dataset = linkedDataSourceAsync.getDataForResource(uri);
+            if(dataset != null) {
+                RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceAsync.getDataForResource(uri));
+                return getPostById(uri);
+            }
+            return null;
         }
 
         return postList.get(0);
@@ -293,9 +298,12 @@ public class DataService {
             Log.d(LOG_TAG, "Getting Connection by id with linkedDataSource: "+uri);
             //TODO: THIS RECURSION DOES NOT SEEM TO BE THAT GREAT
             //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 1, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
-            RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResource(uri));
-
-            return getConnectionById(uri);
+            Dataset dataset = linkedDataSourceAsync.getDataForResource(uri);
+            if(dataset != null) {
+                RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceAsync.getDataForResource(uri));
+                return getConnectionById(uri);
+            }
+            return null;
         }
 
         return connectionList.get(0);
@@ -345,6 +353,8 @@ public class DataService {
     }
 
     public static List<QuerySolution> executeQuery(Dataset dataset, String statement, QuerySolutionMap initialBinding){
+        StopWatch sp = new StopWatch();
+        sp.start();
         ArrayList<QuerySolution> results = new ArrayList<QuerySolution>();
         QueryExecution qExec = null;
 
@@ -369,6 +379,8 @@ public class DataService {
                 qExec.close();
             }
         }
+        sp.stop();
+        Log.d(LOG_TAG, "SPARQL-Query took: "+sp.toString());
         return results;
     }
 

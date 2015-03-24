@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/login_error"
+            android:id="@+id/register_error"
             android:background="@android:color/holo_red_dark"
             android:gravity="center_horizontal" android:textColor="@android:color/white"
             android:visibility="gone"/>
@@ -35,9 +35,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
-            android:text="fabian.suda@researchstudio.at"
+            android:text=""
             android:ems="10"
-            android:id="@+id/login_username" android:layout_gravity="center_horizontal"/>
+            android:id="@+id/register_username" android:layout_gravity="center_horizontal"/>
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -47,17 +47,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:text="testtest"
+            android:text=""
             android:ems="10"
-            android:id="@+id/login_password" android:layout_gravity="center_horizontal"/>
+            android:id="@+id/register_password" android:layout_gravity="center_horizontal"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/repeatpassword"/>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:text=""
+            android:ems="10"
+            android:id="@+id/register_repeatpassword" android:layout_gravity="center_horizontal"/>
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/login"
-            android:id="@+id/login_login" android:layout_gravity="center_horizontal"/>
+            android:text="@string/register"
+            android:id="@+id/register_register" android:layout_gravity="center_horizontal"/>
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/signup"
-            android:id="@+id/login_register" android:layout_gravity="center_horizontal"/>
+            android:text="@string/back"
+            android:id="@+id/register_back" android:layout_gravity="center_horizontal"/>
 </LinearLayout>
