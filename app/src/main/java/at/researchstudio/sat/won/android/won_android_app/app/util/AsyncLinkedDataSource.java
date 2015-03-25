@@ -27,6 +27,8 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.tdb.TDBFactory;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.jena.riot.RiotException;
 import org.springframework.web.client.RestClientException;
 import won.protocol.rest.LinkedDataRestClient;
 import won.protocol.util.RdfUtils;
@@ -121,7 +123,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
         OUTER: while (newlyDiscoveredURIs.size() > 0 && depth < maxDepth && requests < maxRequest){
             //ExecutorService es = Executors.newCachedThreadPool();
-            ExecutorService es = Executors.newFixedThreadPool(10);
+            ExecutorService es = Executors.newFixedThreadPool(14);
             urisToCrawl = newlyDiscoveredURIs;
             newlyDiscoveredURIs = new HashSet<URI>();
 
@@ -166,24 +168,23 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     class RetrievalThread extends Thread{
         private URI uri;
         private ConcurrentHashMap<URI, Dataset> retrievedDatasets;
+        private LinkedDataRestClient linkedDataRestClient;
 
         public RetrievalThread(URI uri, ConcurrentHashMap<URI, Dataset> retrievedDatasets, LinkedDataRestClient linkedDataRestClient){
             this.uri= uri;
             this.retrievedDatasets = retrievedDatasets;
+            this.linkedDataRestClient = linkedDataRestClient;
         }
 
         public void run(){
-            Log.d(LOG_TAG, this.getId() + " CrawlThread started");
             try{
                 retrievedDatasets.put(uri, getDataForResource(uri));
             }catch(NullPointerException e){
                 Log.e(LOG_TAG, "NPE! URI OR DATASETMAP NULL: uri: " + uri + " ds: " + retrievedDatasets);
             }
-            Log.d(LOG_TAG, this.getId() + "CrawlThread done.");
         }
 
         public Dataset getDataForResource(URI resourceURI) {
-            LinkedDataRestClient linkedDataRestClient = new LinkedDataRestClient();
             assert resourceURI != null : "resource must not be null";
 
             Object dataset = myCache.get(resourceURI);
@@ -195,6 +196,10 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                     Log.d(LOG_TAG, this.getId() + " PUT uri: " + resourceURI + " into cache");
                     myCache.put(resourceURI, dataset);
                 }catch(RestClientException e){
+                    Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+resourceURI);
+                    return null;
+                }catch(RiotException e){
+                    //TODO: Sometimes a RiotException happens here i am not sure why
                     Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+resourceURI);
                     return null;
                 }

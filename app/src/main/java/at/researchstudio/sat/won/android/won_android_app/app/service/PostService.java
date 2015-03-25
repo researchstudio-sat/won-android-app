@@ -86,6 +86,7 @@ public class PostService {
 
         for(Post post : myPosts.values()){
             if(post.getNeedState() == NeedState.ACTIVE) {
+                //TODO: HUGE PERFORMANCE OPTIMIZATION POSSIBLE HERE!
                 post.setMatches(getMatchesByPostId(post.getURI()).size());
                 post.setConversations(getConversationsByPostId(post.getURI()).size());
                 post.setRequests(getRequestsByPostId(post.getURI()).size());

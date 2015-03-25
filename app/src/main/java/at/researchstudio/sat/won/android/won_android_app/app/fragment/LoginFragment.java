@@ -108,14 +108,10 @@ public class LoginFragment extends Fragment {
                     activity.showMainMenu();
                     break;
                 case ResponseCode.LOGIN_NOUSER:
-                    //TODO: SET STUFF FOR FALSE LOGIN
-                    Log.d(LOG_TAG, "USERNAME PASSWORD ERROR");
                     activity.hideLoading();
                     Toast.makeText(activity, activity.getText(R.string.error_login_failed), Toast.LENGTH_LONG).show();
                     break;
                 case ResponseCode.CONNECTION_ERR:
-                    //TODO: SET STUFF FOR CONNECTION ERRORS
-                    Log.d(LOG_TAG, "CONNECTION ERROR");
                     activity.hideLoading();
                     Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
                     break;

@@ -93,7 +93,7 @@ public class DataService {
             initialDataset = AsyncLinkedDataSource.makeDataset();
             myneeds = new ArrayList<URI>();
 
-            ExecutorService es = Executors.newFixedThreadPool(3);
+            ExecutorService es = Executors.newFixedThreadPool(4);
             for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
@@ -112,13 +112,13 @@ public class DataService {
             Log.d(LOG_TAG, "Retrieved all initialDatasets in: "+sp.toString());
             sp.reset();
             sp.start();
-            //TODO: SET HANDLER SOMEHOW (HTTPHEADER) --> change null value
+
 
             RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 
             sockJsClient = new SockJsClient(Collections.singletonList((Transport)transport));
 
-
+            //TODO: SET HANDLER SOMEHOW (HTTPHEADER) --> change null value OR USE OTHER DOHANDSHAKE METHOD
             sockJsClient.doHandshake(new WonWebSocketHandler(), null, URI.create(context.getString(R.string.base_uri) + context.getString(R.string.websocket_path))); //TODO: NOT SURE IF THIS IS THE WAY OR POSITION WHERE ITS SUPPOSED TO BE
             sockJsClient.start();
             sp.stop();
@@ -245,35 +245,33 @@ public class DataService {
             retrieveInitialDataset();
         }
 
-        ArrayList<Post> postList = new ArrayList<Post>();
+        Post p = null;
 
         for(QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", uri))){
             StringBuilder sb = new StringBuilder();
             Iterator<String> it = soln.varNames();
 
-            Post p = new Post(URI.create(soln.get("need").toString()));
+            p = new Post(URI.create(soln.get("need").toString()));
             p.setTitle(soln.get("title").toString());
             p.setDescription(soln.get("desc").toString());
             p.setTags(soln.get("tag").toString());
             p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
             p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
             //TODO: SET THE OTHER VARIABLES AS WELL
-            postList.add(p);
+            break;
         }
 
-        if (postList.size() == 0) {
+        if (p == null) {
             Log.d(LOG_TAG, "Getting Post by id with linkedDataSource: "+uri);
-            //TODO: THIS RECURSION DOES NOT SEEM TO BE THAT GREAT
-            //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 1, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
             Dataset dataset = linkedDataSourceAsync.getDataForResource(uri);
             if(dataset != null) {
-                RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceAsync.getDataForResource(uri));
+                RdfUtils.addDatasetToDataset(initialDataset, dataset);
                 return getPostById(uri);
             }
             return null;
         }
 
-        return postList.get(0);
+        return p;
     }
 
     public Connection getConnectionById(URI uri) {
@@ -295,11 +293,9 @@ public class DataService {
 
         if (connectionList.size() == 0) {
             Log.d(LOG_TAG, "Getting Connection by id with linkedDataSource: "+uri);
-            //TODO: THIS RECURSION DOES NOT SEEM TO BE THAT GREAT
-            //RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceSync.getDataForResourceWithPropertyPath(uri, configurePropertyPaths(), 10000, 1, false)); //TODO: find a good depth, and also find a better caching algorithm thingy instead of ehcache
             Dataset dataset = linkedDataSourceAsync.getDataForResource(uri);
             if(dataset != null) {
-                RdfUtils.addDatasetToDataset(initialDataset, linkedDataSourceAsync.getDataForResource(uri));
+                RdfUtils.addDatasetToDataset(initialDataset, dataset);
                 return getConnectionById(uri);
             }
             return null;
@@ -379,7 +375,6 @@ public class DataService {
         return results;
     }
 
-    //TODO: METHODS BELOW ARE ALREADY IN THE NEWER VERSION OF THE ONE LIBS REMOVE THOSE
     private void printResults(ResultSet results){
         Log.d(LOG_TAG, "---------------------------RESULTS-----------------------------------");
         while (results.hasNext()) {

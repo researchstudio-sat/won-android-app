@@ -64,18 +64,6 @@ public class WonQueriesLocal {
             "FILTER (?need in (::need::))" +
             "}";
 
-    //TODO: PUT STATEMENTS HERE
-
-
-    public static final String SPARQL_NEEDS_AND_CONNECTIONS = SPARQL_PREFIX + "SELECT ?need ?connection ?need2 ?state" + //TODO: PLEASE RENAME THIS, THE NAME ISNT SAYING WHATS GOING ON
-            "WHERE {" +
-            "?need won:hasConnections ?connections ." +
-            "?connections rdfs:member ?connection ." +
-            "?connection won:hasRemoteNeed ?need2;"+
-            "won:hasConnectionState ?state."+
-            //"?connection2 won:belongsToNeed ?need2 ." +
-            "}";
-
     public static final String SPARQL_CONNECTIONS_FILTERED_BY_NEED_URI = SPARQL_PREFIX + "SELECT * WHERE " +
             "{ " +
             "?need won:hasConnections ?connections. " +
