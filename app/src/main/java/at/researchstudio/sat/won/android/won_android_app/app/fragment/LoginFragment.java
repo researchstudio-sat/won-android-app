@@ -40,7 +40,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.webservice.constant
 public class LoginFragment extends Fragment {
     private static final String LOG_TAG = LoginFragment.class.getSimpleName();
 
-    private TextView mErrorText;
     private EditText mUsername;
     private EditText mPassword;
     private Button mLoginButton;
@@ -57,8 +56,6 @@ public class LoginFragment extends Fragment {
         mRegisterButton = (Button) rootView.findViewById(R.id.login_register);
         mUsername = (EditText) rootView.findViewById(R.id.login_username);
         mPassword = (EditText) rootView.findViewById(R.id.login_password);
-
-        mErrorText = (TextView) rootView.findViewById(R.id.login_error);
 
         return rootView;
     }

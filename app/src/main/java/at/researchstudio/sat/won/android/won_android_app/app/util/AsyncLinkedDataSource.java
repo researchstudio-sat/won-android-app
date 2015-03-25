@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015 Research Studios Austria Forschungsges.m.b.H.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package at.researchstudio.sat.won.android.won_android_app.app.util;
 
 import android.util.Log;
@@ -113,7 +128,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
             ConcurrentHashMap<URI, Dataset> retrievedDatasets = new ConcurrentHashMap<URI, Dataset>();
 
             for(URI currentURI: urisToCrawl){
-                RetrievalThread rt = new RetrievalThread(currentURI, retrievedDatasets);
+                RetrievalThread rt = new RetrievalThread(currentURI, retrievedDatasets, linkedDataRestClient);
                 es.execute(rt);
             }
 
@@ -152,22 +167,20 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
         private URI uri;
         private ConcurrentHashMap<URI, Dataset> retrievedDatasets;
 
-        public RetrievalThread(URI uri, ConcurrentHashMap<URI, Dataset> retrievedDatasets){
+        public RetrievalThread(URI uri, ConcurrentHashMap<URI, Dataset> retrievedDatasets, LinkedDataRestClient linkedDataRestClient){
             this.uri= uri;
             this.retrievedDatasets = retrievedDatasets;
         }
 
         public void run(){
-            Log.d(LOG_TAG, "CrawlThread started");
+            Log.d(LOG_TAG, this.getId() + " CrawlThread started");
             try{
                 retrievedDatasets.put(uri, getDataForResource(uri));
             }catch(NullPointerException e){
                 Log.e(LOG_TAG, "NPE! URI OR DATASETMAP NULL: uri: " + uri + " ds: " + retrievedDatasets);
             }
-            Log.d(LOG_TAG, "CrawlThread done.");
+            Log.d(LOG_TAG, this.getId() + "CrawlThread done.");
         }
-
-
 
         public Dataset getDataForResource(URI resourceURI) {
             LinkedDataRestClient linkedDataRestClient = new LinkedDataRestClient();
@@ -179,14 +192,14 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
             if (dataset == null) {
                 try {
                     dataset = linkedDataRestClient.readResourceData(resourceURI);
-                    Log.d(LOG_TAG, "PUT uri: " + resourceURI + " into cache");
+                    Log.d(LOG_TAG, this.getId() + " PUT uri: " + resourceURI + " into cache");
                     myCache.put(resourceURI, dataset);
                 }catch(RestClientException e){
-                    Log.e(LOG_TAG, "Error while retrieving from URI: "+resourceURI);
+                    Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+resourceURI);
                     return null;
                 }
             } else {
-                Log.d(LOG_TAG, "GOT uri: " + resourceURI + " from cache");
+                Log.d(LOG_TAG, this.getId() + " GOT uri: " + resourceURI + " from cache");
             }
 
             if (dataset instanceof Dataset) return (Dataset) dataset;

@@ -75,8 +75,8 @@ public class DataService {
         restTemplate = new RestTemplate(true, requestFactory);
         retrievedDatasets = new Vector<Dataset>();
 
-        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
-        restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
     }
 
     public void retrieveInitialDataset(){
@@ -97,7 +97,6 @@ public class DataService {
             for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
-                Log.d(LOG_TAG, "retrieve data for uri: "+uriString);
 
                 RetrievalThread rt = new RetrievalThread(uri, linkedDataSourceAsync);
                 es.execute(rt);
@@ -353,8 +352,6 @@ public class DataService {
     }
 
     public static List<QuerySolution> executeQuery(Dataset dataset, String statement, QuerySolutionMap initialBinding){
-        StopWatch sp = new StopWatch();
-        sp.start();
         ArrayList<QuerySolution> results = new ArrayList<QuerySolution>();
         QueryExecution qExec = null;
 
@@ -379,8 +376,6 @@ public class DataService {
                 qExec.close();
             }
         }
-        sp.stop();
-        Log.d(LOG_TAG, "SPARQL-Query took: "+sp.toString());
         return results;
     }
 

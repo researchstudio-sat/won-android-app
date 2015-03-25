@@ -13,21 +13,7 @@
  *    limitations under the License.
  */
 
-package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;/*
- * Copyright 2015  Research Studios Austria Forschungsges.m.b.H.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;
 
 import android.content.Context;
 import android.util.Log;
@@ -59,8 +45,8 @@ public class AuthenticationService{
         requestFactory = new WonClientHttpRequestFactory(); //used for cookie handling within connections
         restTemplate = new RestTemplate(true, requestFactory);
 
-        restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
-        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
+        restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
     }
 
     public int login(User user){
@@ -78,10 +64,7 @@ public class AuthenticationService{
 
             return ResponseCode.LOGIN_SUCCESS;
         }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
-            Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
-            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
-            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
+            verboseLogClientError(e);
 
             if(e.getStatusCode() == HttpStatus.FORBIDDEN){
                 return ResponseCode.LOGIN_NOUSER;
@@ -89,7 +72,7 @@ public class AuthenticationService{
                 return ResponseCode.CONNECTION_ERR;
             }
         } catch (ResourceAccessException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+            Log.e(LOG_TAG, e.getLocalizedMessage());
             return ResponseCode.CONNECTION_ERR;
         }
     }
@@ -108,10 +91,7 @@ public class AuthenticationService{
 
             return this.login(user);
         }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
-            Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
-            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
-            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
+            verboseLogClientError(e);
 
             if(e.getStatusCode() == HttpStatus.FORBIDDEN){
                 return ResponseCode.LOGIN_NOUSER;
@@ -121,7 +101,7 @@ public class AuthenticationService{
                 return ResponseCode.CONNECTION_ERR;
             }
         } catch (ResourceAccessException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+            Log.e(LOG_TAG, e.getLocalizedMessage());
             return ResponseCode.CONNECTION_ERR;
         }
     }
@@ -144,10 +124,7 @@ public class AuthenticationService{
 
             return ResponseCode.LOGOUT_SUCCESS;
         }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
-            Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
-            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
-            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
+            verboseLogClientError(e);
 
             if(e.getStatusCode() == HttpStatus.FORBIDDEN){
                 return ResponseCode.LOGIN_NOUSER;
@@ -155,7 +132,7 @@ public class AuthenticationService{
                 return ResponseCode.CONNECTION_ERR;
             }
         } catch (ResourceAccessException e) {
-            Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+            Log.e(LOG_TAG, e.getLocalizedMessage());
             return ResponseCode.CONNECTION_ERR;
         }
     }
@@ -170,6 +147,13 @@ public class AuthenticationService{
                 }
             }
         }
+    }
+
+    private void verboseLogClientError(HttpClientErrorException e){
+        Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
+        Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
+        Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
+        Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
     }
 
     public WonClientHttpRequestFactory getRequestFactory() {
