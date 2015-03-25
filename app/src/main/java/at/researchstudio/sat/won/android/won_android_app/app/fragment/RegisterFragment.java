@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
+import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.model.User;
 
@@ -72,8 +73,24 @@ public class RegisterFragment extends Fragment {
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.showLoading();
-                new RegisterTask().execute();
+                mErrorText.setVisibility(View.GONE);
+                Log.d(LOG_TAG,"PW: "+mPassword.getText());
+                Log.d(LOG_TAG,"PR: "+mRepeatPassword.getText());
+
+                if(!StringUtils.isEmail(mUsername.getText())){
+                    mErrorText.setText(activity.getString(R.string.error_register_email_invalid));
+                    mErrorText.setVisibility(View.VISIBLE);
+                }else if(mPassword.getText().length()<6){
+                    mErrorText.setText(activity.getString(R.string.error_register_pw_short));
+                    mErrorText.setVisibility(View.VISIBLE);
+                }else if(!(mPassword.getText().toString().equals(mRepeatPassword.getText().toString()))) {
+                    mErrorText.setText(activity.getString(R.string.error_register_pw_notequal));
+                    mErrorText.setVisibility(View.VISIBLE);
+                }else{
+                    activity.showLoading();
+                    mErrorText.setVisibility(View.GONE);
+                    new RegisterTask().execute();
+                }
             }
         });
 
@@ -93,7 +110,6 @@ public class RegisterFragment extends Fragment {
         protected Integer doInBackground(Void... params) {
             InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mUsername.getWindowToken(), 0);
-            //TODO: IMPL HANDLING IF PW!=PWREPEAT
             return activity.getAuthService().register(new User(mUsername.getText().toString(), mPassword.getText().toString()));
         }
 
@@ -105,21 +121,18 @@ public class RegisterFragment extends Fragment {
         protected void onPostExecute(Integer responseCode) {
             switch(responseCode){
                 case ResponseCode.LOGIN_SUCCESS:
+                    Toast.makeText(activity, activity.getText(R.string.toast_register_success), Toast.LENGTH_LONG).show();
                     activity.showMainMenu();
                     break;
-                case ResponseCode.LOGIN_NOUSER:
-                    //TODO: SET STUFF FOR FALSE LOGIN
-                    Log.d(LOG_TAG, "USERNAME PASSWORD ERROR");
+                case ResponseCode.REGISTER_USEREXISTS:
                     activity.hideLoading();
-                    Toast.makeText(activity, activity.getText(R.string.error_login_failed), Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, activity.getText(R.string.error_register_email_registered), Toast.LENGTH_LONG).show();
                     break;
-                case ResponseCode.LOGIN_CONNECTION_ERR:
-                    //TODO: SET STUFF FOR CONNECTION ERRORS
+                case ResponseCode.CONNECTION_ERR:
                     Log.d(LOG_TAG, "CONNECTION ERROR");
                     activity.hideLoading();
                     Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
                     break;
-                //TODO: REFACTOR STUFF FOR REGISTER AND NOT LOGIN
             }
         }
     }

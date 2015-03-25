@@ -35,7 +35,11 @@
 
     <!-- Error Messages -->
     <string name="error_login_failed">Login Failed, Username Password combination not correct</string>
+    <string name="error_register_email_registered">Register Failed, Username already taken</string>
     <string name="error_server_not_found">Login Failed, server was not found</string>
+    <string name="error_register_pw_notequal">Repeat Password does not match</string>
+    <string name="error_register_pw_short">Password too short (minimum 6 Characters)</string>
+    <string name="error_register_email_invalid">E-Mail Address is not valid</string>
 
     <!-- Generic Items -->
     <string name="yes">Yes</string>
@@ -147,7 +151,7 @@
     <string name="toast_create_draft">Draft created</string>
     <string name="toast_create_dismiss">Post was dismissed</string>
     <string name="toast_close_mypost">Post was closed</string>
-
+    <string name="toast_register_success">Registration successful</string>
 
     <!-- DIALOG TEXTS -->
     <string name="dialog_delete_image_text">Do you want to remove the Image from the Post?</string>

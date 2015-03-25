@@ -32,5 +32,8 @@ package at.researchstudio.sat.won.android.won_android_app.app.webservice.constan
 public abstract class ResponseCode {
     public static final int LOGIN_SUCCESS = 0;
     public static final int LOGIN_NOUSER = 1;
-    public static final int LOGIN_CONNECTION_ERR = 2;
+    public static final int CONNECTION_ERR = 2;
+    public static final int REGISTER_SUCCESS = 3;
+    public static final int REGISTER_USEREXISTS = 4;
+    public static final int LOGOUT_SUCCESS = 5;
 }

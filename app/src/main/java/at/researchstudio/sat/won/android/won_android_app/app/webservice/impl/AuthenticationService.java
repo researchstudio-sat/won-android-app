@@ -59,8 +59,8 @@ public class AuthenticationService{
         requestFactory = new WonClientHttpRequestFactory(); //used for cookie handling within connections
         restTemplate = new RestTemplate(true, requestFactory);
 
-        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
         restTemplate.getMessageConverters().add(new FormHttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); //TODO: NOT SURE IF NECESSARY
     }
 
     public int login(User user){
@@ -78,51 +78,51 @@ public class AuthenticationService{
 
             return ResponseCode.LOGIN_SUCCESS;
         }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode(), e);
-            Log.e(LOG_TAG, "StatusText: "+e.getStatusText(), e);
-            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage(), e);
-            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString(), e);
+            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
+            Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
+            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
+            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
 
             if(e.getStatusCode() == HttpStatus.FORBIDDEN){
                 return ResponseCode.LOGIN_NOUSER;
             }else{
-                return ResponseCode.LOGIN_CONNECTION_ERR;
+                return ResponseCode.CONNECTION_ERR;
             }
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
+            return ResponseCode.CONNECTION_ERR;
         }
     }
 
     public int register(User user){
-        //TODO: IMPLEMENT THIS METHOD CORRECT
         final String url = context.getString(R.string.base_uri) + context.getString(R.string.register_path);
 
         try{
             Log.d(LOG_TAG, url);
+            user.setPasswordAgain(user.getPassword());
 
             HttpEntity<User> request = new HttpEntity<User>(user);
             HttpEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
 
             verboseLogOutput(response);
 
-            requestFactory.setCookieValue(response.getHeaders().get("Set-Cookie").get(0)); //NOT SURE IF GET 0 is VALID AS THE COOKIE apparently cookie value seems to be set already
-
-            return ResponseCode.LOGIN_SUCCESS;
+            return this.login(user);
         }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode(), e);
-            Log.e(LOG_TAG, "StatusText: "+e.getStatusText(), e);
-            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage(), e);
-            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString(), e);
+            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
+            Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
+            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
+            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
 
             if(e.getStatusCode() == HttpStatus.FORBIDDEN){
                 return ResponseCode.LOGIN_NOUSER;
+            }else if(e.getStatusCode() == HttpStatus.CONFLICT){
+                return ResponseCode.REGISTER_USEREXISTS;
             }else{
-                return ResponseCode.LOGIN_CONNECTION_ERR;
+                return ResponseCode.CONNECTION_ERR;
             }
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
+            return ResponseCode.CONNECTION_ERR;
         }
     }
 
@@ -142,21 +142,21 @@ public class AuthenticationService{
 
             requestFactory.setCookieValue(response.getHeaders().get("Set-Cookie").get(0)); //NOT SURE IF GET 0 is VALID AS THE COOKIE apparently cookie value seems to be set already
 
-            return ResponseCode.LOGIN_SUCCESS;
+            return ResponseCode.LOGOUT_SUCCESS;
         }catch (HttpClientErrorException e) {
-            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode(), e);
-            Log.e(LOG_TAG, "StatusText: "+e.getStatusText(), e);
-            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage(), e);
-            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString(), e);
+            Log.e(LOG_TAG, "StatusCode: "+e.getStatusCode());
+            Log.e(LOG_TAG, "StatusText: "+e.getStatusText());
+            Log.e(LOG_TAG, "LocMessage: "+e.getLocalizedMessage());
+            Log.e(LOG_TAG, "Resp.BodySt "+e.getResponseBodyAsString());
 
             if(e.getStatusCode() == HttpStatus.FORBIDDEN){
                 return ResponseCode.LOGIN_NOUSER;
             }else{
-                return ResponseCode.LOGIN_CONNECTION_ERR;
+                return ResponseCode.CONNECTION_ERR;
             }
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-            return ResponseCode.LOGIN_CONNECTION_ERR;
+            return ResponseCode.CONNECTION_ERR;
         }
     }
 

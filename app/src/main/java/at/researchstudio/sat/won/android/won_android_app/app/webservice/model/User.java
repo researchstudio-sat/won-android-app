@@ -32,6 +32,7 @@ package at.researchstudio.sat.won.android.won_android_app.app.webservice.model;/
 public class User {
     private String username;
     private String password;
+    private String passwordAgain;
 
     public User(String username, String password) {
         this.username = username;
@@ -52,5 +53,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPasswordAgain() {
+        return passwordAgain;
+    }
+
+    public void setPasswordAgain(String passwordAgain) {
+        this.passwordAgain = passwordAgain;
     }
 }

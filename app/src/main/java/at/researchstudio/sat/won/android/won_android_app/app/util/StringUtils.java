@@ -40,4 +40,8 @@ public class StringUtils {
     public static boolean isEmpty(String string){
         return string==null || string.length()==0;
     }
+
+    public static boolean isEmail(CharSequence cs){
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(cs).matches();
+    }
 }

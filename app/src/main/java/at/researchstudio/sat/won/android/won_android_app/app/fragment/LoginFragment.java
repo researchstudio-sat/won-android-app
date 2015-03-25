@@ -32,7 +32,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
-import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
 
 /**
@@ -117,7 +116,7 @@ public class LoginFragment extends Fragment {
                     activity.hideLoading();
                     Toast.makeText(activity, activity.getText(R.string.error_login_failed), Toast.LENGTH_LONG).show();
                     break;
-                case ResponseCode.LOGIN_CONNECTION_ERR:
+                case ResponseCode.CONNECTION_ERR:
                     //TODO: SET STUFF FOR CONNECTION ERRORS
                     Log.d(LOG_TAG, "CONNECTION ERROR");
                     activity.hideLoading();
