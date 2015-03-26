@@ -27,6 +27,7 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.tdb.TDBFactory;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jena.riot.RiotException;
 import org.springframework.web.client.RestClientException;
@@ -60,14 +61,14 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
         if (dataset == null) {
             try {
                 dataset = linkedDataRestClient.readResourceData(resourceURI);
-                Log.d(LOG_TAG, "PUT uri: " + resourceURI + " into cache");
+                Log.d(LOG_TAG, "Cache PUT uri: " + resourceURI);
                 myCache.put(resourceURI, dataset);
             }catch(RestClientException e){
                 Log.e(LOG_TAG, "Error while retrieving from URI: "+resourceURI);
                 return null;
             }
         } else {
-            Log.d(LOG_TAG, "GOT uri: " + resourceURI + " from cache");
+            Log.d(LOG_TAG, "Cache GOT uri: " + resourceURI);
         }
 
         if (dataset instanceof Dataset) return (Dataset) dataset;
@@ -139,6 +140,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                 boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
             }catch (InterruptedException e){
                 Log.e(LOG_TAG, e.getLocalizedMessage(), e);
+                return resultDataset; //TODO: NOT SURE IF THIS IS NECESSARY
             }
 
             for(Map.Entry<URI,Dataset> entry : retrievedDatasets.entrySet()){
@@ -178,40 +180,36 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
         public void run(){
             try{
-                retrievedDatasets.put(uri, getDataForResource(uri));
+                assert uri != null : "resource must not be null";
+
+                Object dataset = myCache.get(uri);
+                //TODO: PUT IF ABSENT
+
+                if (dataset == null) {
+                    try {
+                        dataset = linkedDataRestClient.readResourceData(uri);
+                        Log.d(LOG_TAG, this.getId() + " Cache PUT uri: " + uri);
+                        myCache.put(uri, dataset);
+                    }catch(RestClientException e){
+                        Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+uri);
+                        throw new NullPointerException();
+                    }catch(RiotException e){
+                        //TODO: Sometimes a RiotException happens here i am not sure why
+                        Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+uri);
+                        throw new NullPointerException();
+                    }
+                } else {
+                    Log.d(LOG_TAG, this.getId() + " Cache GOT uri: " + uri);
+                }
+
+                if (dataset instanceof Dataset) {
+                    retrievedDatasets.put(uri, (Dataset)dataset);
+                }else{
+                    throw new NullPointerException();
+                }
             }catch(NullPointerException e){
                 Log.e(LOG_TAG, "NPE! URI OR DATASETMAP NULL: uri: " + uri + " ds: " + retrievedDatasets);
             }
-        }
-
-        public Dataset getDataForResource(URI resourceURI) {
-            assert resourceURI != null : "resource must not be null";
-
-            Object dataset = myCache.get(resourceURI);
-            //TODO: PUT IF ABSENT
-
-            if (dataset == null) {
-                try {
-                    dataset = linkedDataRestClient.readResourceData(resourceURI);
-                    Log.d(LOG_TAG, this.getId() + " PUT uri: " + resourceURI + " into cache");
-                    myCache.put(resourceURI, dataset);
-                }catch(RestClientException e){
-                    Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+resourceURI);
-                    return null;
-                }catch(RiotException e){
-                    //TODO: Sometimes a RiotException happens here i am not sure why
-                    Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+resourceURI);
-                    return null;
-                }
-            } else {
-                Log.d(LOG_TAG, this.getId() + " GOT uri: " + resourceURI + " from cache");
-            }
-
-            if (dataset instanceof Dataset) return (Dataset) dataset;
-            /*throw new IllegalStateException(
-                    new MessageFormat("The underlying linkedDataCache should only contain Datasets, but we got a {0} for URI {1}")
-                            .format(new Object[]{dataset.getClass(), resourceURI}));*/
-            return null;
         }
     }
 
