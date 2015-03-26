@@ -40,6 +40,8 @@ public class WonQueriesLocal {
             "}" +
             "}";
 
+    public static final String SPARQL_ALL_NEEDS_FILTERED_BY_URI_PLUS_COUNT = SPARQL_PREFIX + "SELECT ?state ?type ?desc ?tag ?lat ?lng ?address ?endtime ?starttime ?recinf ?recin ?need ?title ?connState (count(?connState) as ?connCount) WHERE { ?need won:hasContent ?x; won:isInState ?state; won:hasBasicNeedType ?type. ?need won:hasConnections ?connections. ?connections rdfs:member ?connection. ?connection won:hasRemoteNeed ?remoteNeed; won:hasConnectionState ?connState. ?x  won:hasTextDescription ?desc; won:hasTag ?tag; dc:title ?title. ?x won:hasContentDescription ?y. OPTIONAL {?y won:hasLocationSpecification ?loc. ?loc won:hasAddress ?address; geo:latitude ?lat; geo:longitude ?lng.} OPTIONAL {?y won:hasTimespecification ?time. ?time won:hasEndTime ?endtime; won:hasStartTime ?starttime; won:hasRecurInfiniteTimes ?recinf; won:hasRecursIn ?recin.}FILTER (?need in (::need::))} GROUP BY ?state ?type ?desc ?tag ?lat ?lng ?address ?endtime ?starttime ?recinf ?recin ?need ?title ?connState";
+
     public static final String SPARQL_NEEDS_FILTERED_BY_URI = SPARQL_PREFIX + "SELECT * WHERE " +
             "{ ?need won:hasContent ?x; " +
             "won:isInState ?state; " +

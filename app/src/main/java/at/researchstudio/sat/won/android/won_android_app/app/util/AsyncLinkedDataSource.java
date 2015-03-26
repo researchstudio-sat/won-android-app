@@ -227,6 +227,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     private Set<URI> getURIsToCrawlWithPropertyPath(Dataset dataset, URI resourceURI, Set<URI> excludedUris, List<Path> properties){
         Set<URI> toCrawl = new HashSet<URI>();
         for (int i = 0; i<properties.size();i++){
+            //TODO: CONCURRENT MODIFICATION EXCEPTION HAPPENED HERE!!! NOT THREADSAFE APPARENTLY
             Iterator<URI> newURIs = RdfUtils.getURIsForPropertyPathByQuery(dataset,
                     resourceURI,
                     properties.get(i));

@@ -159,14 +159,41 @@ public class DataService {
         Map<URI,Post> postMap = new HashMap<URI,Post>();
 
         if(myneeds.size()>0) {
-            for (QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", myneeds))) {
-                Post p = new Post(URI.create(soln.get("need").toString()));
-                p.setTitle(soln.get("title").toString());
-                p.setDescription(soln.get("desc").toString());
-                p.setTags(soln.get("tag").toString());
-                p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
-                p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
-                //TODO: SET THE OTHER VARIABLES AS WELL
+            //TODO: WARNING THIS QUERY STILL INCLUDES THE ALREADY CLOSED REMOTEPOSTS FOR THE COUNT VARS
+            for (QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_ALL_NEEDS_FILTERED_BY_URI_PLUS_COUNT, "need", myneeds))) {
+                URI postURI = URI.create(soln.get("need").toString());
+                Post p = postMap.get(postURI);
+
+                if(p==null) {
+                    p = new Post(URI.create(soln.get("need").toString()));
+
+                    p.setTitle(soln.get("title").toString());
+                    p.setDescription(soln.get("desc").toString());
+                    p.setTags(soln.get("tag").toString());
+                    p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
+                    p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
+                    //TODO: SET THE OTHER VARIABLES AS WELL
+                }
+
+                if(p.getNeedState() == NeedState.ACTIVE) {
+                    ConnectionState connState = ConnectionState.fromURI(URI.create(soln.get("connState").asResource().getURI()));
+                    int count =  soln.get("connCount").asLiteral().getInt();
+                    switch(connState){
+                        case CONNECTED:
+                            p.setConversations(p.getConversations()+count);
+                            break;
+                        case REQUEST_SENT:
+                            p.setConversations(p.getConversations()+count);
+                            break;
+                        case SUGGESTED:
+                            p.setMatches(p.getMatches()+count);
+                            break;
+                        case REQUEST_RECEIVED:
+                            p.setRequests(p.getRequests()+count);
+                            break;
+                    }
+                }
+
                 postMap.put(p.getURI(), p);
             }
         }

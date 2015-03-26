@@ -80,20 +80,8 @@ public class PostService {
 
     public ArrayList<Post> getMyPosts() {
         Log.d(LOG_TAG, "Retrieve My Posts");
-        StopWatch sp = new StopWatch();
-        sp.start();
         Map<URI, Post> myPosts = dataService.getMyPosts();
 
-        for(Post post : myPosts.values()){
-            if(post.getNeedState() == NeedState.ACTIVE) {
-                //TODO: HUGE PERFORMANCE OPTIMIZATION POSSIBLE HERE!
-                post.setMatches(getMatchesByPostId(post.getURI()).size());
-                post.setConversations(getConversationsByPostId(post.getURI()).size());
-                post.setRequests(getRequestsByPostId(post.getURI()).size());
-            }
-        }
-        sp.stop();
-        Log.d(LOG_TAG,"Time it took to Retrieve MyPosts: "+sp.toString());
         return new ArrayList<Post>(myPosts.values());
     }
 

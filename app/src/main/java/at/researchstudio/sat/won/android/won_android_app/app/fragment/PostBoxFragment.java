@@ -132,6 +132,7 @@ public class PostBoxFragment extends Fragment{
     @Override
     public void onStart() {
         super.onStart();
+        swipeLayout.setRefreshing(true);
         createListTask = new CreateListTask();
         createListTask.execute();
     }
@@ -261,6 +262,7 @@ public class PostBoxFragment extends Fragment{
         @Override
         protected void onCancelled(ArrayList<Post> linkArray) {
             Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
+            swipeLayout.setRefreshing(false);
         }
 
         protected void onPostExecute(ArrayList<Post> linkArray) {
