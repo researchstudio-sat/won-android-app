@@ -22,7 +22,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemMo
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
-import org.apache.commons.lang3.time.StopWatch;
 import won.protocol.model.ConnectionState;
 import won.protocol.model.NeedState;
 
@@ -147,7 +146,7 @@ public class PostService {
     }
 
     public Post getMyPostById(URI id) {
-        return dataService.getPostById(id);
+        return dataService.getMyPostById(id);
     }
 
     public Post getMatchById(String id){
@@ -169,17 +168,11 @@ public class PostService {
     }
 
     public Post closePost(URI postId){
-        Post post = Mock.myMockPosts.get(postId);
-        post.setNeedState(NeedState.INACTIVE);
-        //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
-        return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+        return dataService.changePostState(postId, NeedState.INACTIVE); //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 
     public Post reOpenPost(URI postId){
-        Post post = Mock.myMockPosts.get(postId);
-        post.setNeedState(NeedState.ACTIVE);
-        //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
-        return post; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+        return dataService.changePostState(postId, NeedState.ACTIVE); //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 
     public Post createDraft(URI postId, URI newId) {

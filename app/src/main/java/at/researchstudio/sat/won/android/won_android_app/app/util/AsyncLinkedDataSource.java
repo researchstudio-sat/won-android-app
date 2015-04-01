@@ -182,6 +182,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
             try{
                 assert uri != null : "resource must not be null";
 
+                //********************************************************************
                 Object dataset = myCache.get(uri);
                 //TODO: PUT IF ABSENT
 

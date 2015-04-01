@@ -107,7 +107,7 @@ public class PostBoxFragment extends Fragment{
 
                     postId = post.getURIString();
                     args.putString(Post.ID_REF, postId);
-
+                    
                     fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

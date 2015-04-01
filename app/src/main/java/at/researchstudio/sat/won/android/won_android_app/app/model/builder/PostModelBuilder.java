@@ -5,6 +5,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import com.google.android.gms.maps.model.LatLng;
 import won.protocol.model.NeedState;
 import won.protocol.util.NeedBuilderBase;
+import won.protocol.util.NeedModelBuilder;
 
 import java.util.Arrays;
 

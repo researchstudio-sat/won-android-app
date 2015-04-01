@@ -148,6 +148,7 @@
                 android:layout_marginRight="@dimen/create_edit_margin_lr"
                 android:imeOptions="actionSearch"
                 android:visibility="gone"/>
+
         <RelativeLayout
                 android:id="@+id/create_location_container"
                 android:layout_width="match_parent"

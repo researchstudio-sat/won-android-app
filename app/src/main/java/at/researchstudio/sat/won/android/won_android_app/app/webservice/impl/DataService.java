@@ -25,12 +25,18 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemMo
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
+import com.github.jsonldjava.core.RDFDatasetUtils;
 import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.sparql.path.PathParser;
 import com.hp.hpl.jena.tdb.TDB;
+import com.hp.hpl.jena.update.GraphStore;
+import com.hp.hpl.jena.update.GraphStoreFactory;
+import com.hp.hpl.jena.update.UpdateAction;
+import com.hp.hpl.jena.update.UpdateRequest;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -41,12 +47,16 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
-import won.protocol.model.BasicNeedType;
-import won.protocol.model.ConnectionState;
-import won.protocol.model.NeedState;
+import won.protocol.exception.*;
+import won.protocol.message.WonMessage;
+import won.protocol.model.*;
+import won.protocol.owner.OwnerProtocolNeedService;
+import won.protocol.service.NeedInformationService;
+import won.protocol.util.NeedModelBuilder;
 import won.protocol.util.RdfUtils;
 import won.protocol.util.linkeddata.LinkedDataSource;
 import won.protocol.vocabulary.WON;
+import won.protocol.vocabulary.sparql.WonQueries;
 
 import java.net.URI;
 import java.util.*;
@@ -113,7 +123,6 @@ public class DataService {
             sp.reset();
             sp.start();
 
-
             RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 
             sockJsClient = new SockJsClient(Collections.singletonList((Transport)transport));
@@ -160,7 +169,7 @@ public class DataService {
 
         if(myneeds.size()>0) {
             //TODO: WARNING THIS QUERY STILL INCLUDES THE ALREADY CLOSED REMOTEPOSTS FOR THE COUNT VARS
-            for (QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_ALL_NEEDS_FILTERED_BY_URI_PLUS_COUNT, "need", myneeds))) {
+            for (QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI_PLUS_COUNT, "need", myneeds))) {
                 URI postURI = URI.create(soln.get("need").toString());
                 Post p = postMap.get(postURI);
 
@@ -301,6 +310,55 @@ public class DataService {
         return p;
     }
 
+    public Post getMyPostById(URI uri){
+        if(initialDataset == null){
+            retrieveInitialDataset();
+        }
+
+        Map<URI,Post> postMap = new HashMap<URI,Post>();
+
+        if(myneeds.size()>0) {
+            //TODO: WARNING THIS QUERY STILL INCLUDES THE ALREADY CLOSED REMOTEPOSTS FOR THE COUNT VARS
+            for (QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI_PLUS_COUNT, "need", uri))) {
+                URI postURI = URI.create(soln.get("need").toString());
+                Post p = postMap.get(postURI);
+
+                if(p==null) {
+                    p = new Post(URI.create(soln.get("need").toString()));
+
+                    p.setTitle(soln.get("title").toString());
+                    p.setDescription(soln.get("desc").toString());
+                    p.setTags(soln.get("tag").toString());
+                    p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
+                    p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
+                    //TODO: SET THE OTHER VARIABLES AS WELL
+                }
+
+                if(p.getNeedState() == NeedState.ACTIVE) {
+                    ConnectionState connState = ConnectionState.fromURI(URI.create(soln.get("connState").asResource().getURI()));
+                    int count =  soln.get("connCount").asLiteral().getInt();
+                    switch(connState){
+                        case CONNECTED:
+                            p.setConversations(p.getConversations()+count);
+                            break;
+                        case REQUEST_SENT:
+                            p.setConversations(p.getConversations()+count);
+                            break;
+                        case SUGGESTED:
+                            p.setMatches(p.getMatches()+count);
+                            break;
+                        case REQUEST_RECEIVED:
+                            p.setRequests(p.getRequests()+count);
+                            break;
+                    }
+                }
+
+                postMap.put(p.getURI(), p);
+            }
+        }
+        return postMap.get(uri);
+    }
+
     public Connection getConnectionById(URI uri) {
         if(initialDataset == null){
             retrieveInitialDataset();
@@ -329,6 +387,21 @@ public class DataService {
         }
 
         return connectionList.get(0);
+    }
+
+    public Post changePostState(URI uri, NeedState state) {
+        try {
+            GraphStore graphStore = GraphStoreFactory.create(initialDataset);
+            Map<String, Object> varMap = new HashMap<String, Object>();
+            varMap.put("need", uri);
+            varMap.put("state", state.getURI());
+            UpdateAction.parseExecute(RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_UPDATE_STATE_OF_NEED, varMap), graphStore);
+        } catch (QueryParseException e) {
+            Log.e(LOG_TAG, e.getMessage());
+        }
+
+        //TODO: send message to server that post state has changed
+        return getMyPostById(uri);
     }
 
     public Context getContext() {
@@ -400,6 +473,11 @@ public class DataService {
             }
         }
         return results;
+    }
+
+    public static void executeModify(Dataset dataset, String statement){
+        GraphStore graphStore = GraphStoreFactory.create(dataset) ;
+        UpdateAction.parseExecute(statement, graphStore) ;
     }
 
     private void printResults(ResultSet results){

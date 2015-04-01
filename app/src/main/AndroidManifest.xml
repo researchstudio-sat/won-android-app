@@ -50,7 +50,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity" />
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
-        <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyDmlDaWGxI1-qQmWhNyviiZKRvWiRD0NBk"/> <!-- change this key to get a valid g-maps key for deployment -->
+        <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyAf57dtaL54XNkXNdU-BWHRDiUlLpQ4LBQ"/> <!-- change this key to get a valid g-maps key for deployment -->
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -63,4 +63,5 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <!-- #### -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 </manifest>
