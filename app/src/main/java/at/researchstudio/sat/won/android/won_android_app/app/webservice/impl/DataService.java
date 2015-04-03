@@ -29,6 +29,7 @@ import com.github.jsonldjava.core.RDFDatasetUtils;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.sparql.path.PathParser;
@@ -55,6 +56,7 @@ import won.protocol.service.NeedInformationService;
 import won.protocol.util.NeedModelBuilder;
 import won.protocol.util.RdfUtils;
 import won.protocol.util.linkeddata.LinkedDataSource;
+import won.protocol.vocabulary.GEO;
 import won.protocol.vocabulary.WON;
 import won.protocol.vocabulary.sparql.WonQueries;
 
@@ -181,6 +183,7 @@ public class DataService {
                     p.setTags(soln.get("tag").toString());
                     p.setType(BasicNeedType.fromURI(URI.create(soln.get("type").asResource().getURI())));
                     p.setNeedState(NeedState.fromURI(URI.create(soln.get("state").asResource().getURI())));
+
                     //TODO: SET THE OTHER VARIABLES AS WELL
                 }
 

@@ -46,13 +46,19 @@ public class PostListItemAdapter extends ArrayAdapter {
         this.context = context;
         mImgLoader = new ImageLoaderService(context);
         this.objects = new ArrayList<Post>();
-
     }
 
     public void addItem(Post postListItem) {
         add(postListItem);
         objects.add(postListItem);
     }
+
+    public void swapItem(Post postListItem, int position) {
+        super.remove(postListItem);
+        super.insert(postListItem, position);
+    }
+
+
 
     public static class ViewHolder {
         public final TextView titleHolder;

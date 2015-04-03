@@ -24,4 +24,21 @@ public abstract class Model {
     public void setURI(String uri){
         this.uri = URI.create(uri);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Model model = (Model) o;
+
+        if (!uri.equals(model.uri)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
+    }
 }

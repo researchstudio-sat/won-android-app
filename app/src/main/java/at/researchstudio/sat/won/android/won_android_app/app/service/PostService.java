@@ -168,10 +168,12 @@ public class PostService {
     }
 
     public Post closePost(URI postId){
+        //TODO: DOESNT CHANGE THE CURRENT ELEMENT WITHOUT UPDATE
         return dataService.changePostState(postId, NeedState.INACTIVE); //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 
     public Post reOpenPost(URI postId){
+        //TODO: DOESNT CHANGE THE CURRENT ELEMENT WITHOUT UPDATE
         return dataService.changePostState(postId, NeedState.ACTIVE); //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 

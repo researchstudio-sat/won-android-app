@@ -16,10 +16,13 @@
 package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;
 
 import android.util.Log;
+import org.apache.jena.riot.Lang;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import won.owner.protocol.message.base.MessageExtractingWonMessageHandlerAdapter;
+import won.protocol.message.WonMessageDecoder;
 
 import java.util.Collections;
 
@@ -27,6 +30,7 @@ import java.util.Collections;
  * Created by fsuda on 19.03.2015.
  */
 public class WonWebSocketHandler implements WebSocketHandler {
+    public MessageExtractingWonMessageHandlerAdapter messageHandlerAdapter = new MessageExtractingWonMessageHandlerAdapter(new OwnerCallbackImpl());
     private static final String LOG_TAG = WonWebSocketHandler.class.getSimpleName();
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -38,9 +42,11 @@ public class WonWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+        Log.d(LOG_TAG,"handleMessage");
         Log.d(LOG_TAG,"msg:"+message);
         Log.d(LOG_TAG,"msg:"+message.getPayload());
-        Log.d(LOG_TAG,"handleMessage");
+
+        messageHandlerAdapter.process(WonMessageDecoder.decode(Lang.JSONLD, message.getPayload().toString()));
     }
 
     @Override

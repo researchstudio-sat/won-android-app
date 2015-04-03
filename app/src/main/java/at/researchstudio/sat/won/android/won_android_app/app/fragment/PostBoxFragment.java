@@ -197,8 +197,7 @@ public class PostBoxFragment extends Fragment{
                                         activity.createDraft(postId);
                                         break;
                                     case 1: //REOPEN POST
-                                        activity.getPostService().reOpenPost(postId);
-                                        updateItemAtPosition(position);
+                                        updateItemAtPosition(activity.getPostService().reOpenPost(postId), position);
                                         break;
                                 }
                             }
@@ -216,8 +215,7 @@ public class PostBoxFragment extends Fragment{
                                         activity.createDraft(postId);
                                         break;
                                     case 1: //CLOSE
-                                        activity.getPostService().closePost(postId);
-                                        updateItemAtPosition(position);
+                                        updateItemAtPosition(activity.getPostService().closePost(postId), position);
                                         break;
                                 }
                             }
@@ -285,9 +283,12 @@ public class PostBoxFragment extends Fragment{
      * Updates the view of the given position
      * @param position
      */
-    private void updateItemAtPosition(int position) {
+    private void updateItemAtPosition(Post post, int position) {
         int visiblePosition = mNeedListView.getFirstVisiblePosition();
+
         View view = mNeedListView.getChildAt(position - visiblePosition); //needed because mNeedListView encapsulates only items that are visible (not all items)
+        //((Post)mPostListItemAdapter.getItem(position)).setNeedState(post.getNeedState());
+        mPostListItemAdapter.swapItem(post, position);
         mNeedListView.getAdapter().getView(position, view, mNeedListView);
     }
 
