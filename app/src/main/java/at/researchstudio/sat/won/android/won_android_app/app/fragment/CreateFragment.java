@@ -36,6 +36,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.TypeSpinnerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.model.PostTypeSpinnerModel;
@@ -55,7 +56,6 @@ import com.viewpagerindicator.IconPageIndicator;
 import won.protocol.model.BasicNeedType;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -279,55 +279,22 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
 
     private void displaySaveDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getString(R.string.dialog_create_save));
-        builder.setTitle(getString(R.string.dialog_create_save_title));
-
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(activity, getString(R.string.toast_create_saved), Toast.LENGTH_SHORT).show();
-
-                if(!mDateTimeSwitch.isChecked()){
-                    activity.getTempPost().setStartTime(0);
-                    activity.getTempPost().setStopTime(0);
-                    activity.getTempPost().setRepeat(RepeatType.NONE);
-                }else {
-                    //TODO: SET RECURRENCE THING
-                }
-
-                if(!mImagesSwitch.isChecked()) {
-                    activity.getTempPost().setImageUrls(null);
-                }
-
-                if(!mLocationSwitch.isChecked()){
-                    activity.getTempPost().setLocation(null);
-                }
-
-                Post post = activity.getPostService().savePost(activity.getTempPost());
-                activity.setTempPost(new Post(URI.create("INVALIDPOSTID"))); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
-
-                Fragment fragment;
-
-                Bundle args = new Bundle();
-
-                fragment = new MyPostFragment();
-
-                args.putString(Post.ID_REF, post.getURIString());
-
-                fragment.setArguments(args);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        });
-        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //DO NOTHING
-            }
-        });
+        builder.setMessage(getString(R.string.dialog_create_save))
+                .setTitle(getString(R.string.dialog_create_save_title))
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(LOG_TAG, "Saving the post");
+                        SaveTask saveTask = new SaveTask();
+                        saveTask.execute();
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //DO NOTHING
+                    }
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -335,24 +302,23 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
 
     private void displayDismissDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getString(R.string.dialog_create_dismiss));
-        builder.setTitle(getString(R.string.dialog_create_dismiss_title));
-
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                activity.setTempPost(new Post(URI.create("INVALIDPOSTID"))); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
-                createTask = new CreateTask();
-                createTask.execute();
-                Toast.makeText(activity, getString(R.string.toast_create_dismiss), Toast.LENGTH_SHORT).show();
-            }
-        });
-        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //DO NOTHING
-            }
-        });
+        builder.setMessage(getString(R.string.dialog_create_dismiss))
+                .setTitle(getString(R.string.dialog_create_dismiss_title))
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                            activity.setTempPost(new Post());
+                            createTask = new CreateTask();
+                            createTask.execute();
+                            Toast.makeText(activity, getString(R.string.toast_create_dismiss), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //DO NOTHING
+                    }
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -384,6 +350,52 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
                 mDescription.setHint(R.string.create_description_change_hint);
                 mLocationText.setHint(R.string.create_location_change_hint);
                 break;
+        }
+    }
+
+    private class SaveTask extends AsyncTask<String, Integer, Post> {
+        @Override
+        protected Post doInBackground(String... params) {
+            Log.d(LOG_TAG, "Trying to save Post started AsyncTask");
+            if(!mDateTimeSwitch.isChecked()){
+                activity.getTempPost().setStartTime(0);
+                activity.getTempPost().setStopTime(0);
+                activity.getTempPost().setRepeat(RepeatType.NONE);
+            }else {
+                //TODO: SET RECURRENCE THING
+            }
+
+            if(!mImagesSwitch.isChecked()) {
+                activity.getTempPost().setImageUrls(null);
+            }
+
+            if(!mLocationSwitch.isChecked()){
+                activity.getTempPost().setLocation(null);
+            }
+
+            return activity.getPostService().savePost(activity.getTempPost());
+        }
+
+        @Override
+        protected void onPostExecute(Post post) {
+            Log.d(LOG_TAG, "Post Saved");
+            Toast.makeText(activity, getString(R.string.toast_create_saved), Toast.LENGTH_SHORT).show();
+            activity.setTempPost(new Post());
+
+            Fragment fragment;
+
+            Bundle args = new Bundle();
+
+            fragment = new MyPostFragment();
+
+            args.putString(Post.ID_REF, post.getURIString());
+
+            fragment.setArguments(args);
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
         }
     }
 

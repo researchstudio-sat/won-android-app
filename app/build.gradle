@@ -33,7 +33,7 @@ buildscript {
 apply plugin: 'com.android.application'
 
 configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 180000, 'seconds'
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
 configurations.compile {
@@ -147,7 +147,6 @@ dependencies {
         exclude module: 'super-csv'
         exclude module: 'ehcache-core'
         exclude module: 'javax.inject'
-        exclude module: 'guava'
     }
     compile ('org.springframework.android:spring-android-auth:1.0.1.RELEASE') {
         exclude module: 'spring-android-core'

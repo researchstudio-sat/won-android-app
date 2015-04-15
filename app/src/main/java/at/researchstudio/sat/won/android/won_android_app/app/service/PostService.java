@@ -16,14 +16,18 @@
 package at.researchstudio.sat.won.android.won_android_app.app.service;
 
 import android.util.Log;
-import at.researchstudio.sat.won.android.won_android_app.app.constants.Mock;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
+import com.hp.hpl.jena.rdf.model.Model;
+import won.protocol.message.WonMessage;
+import won.protocol.message.WonMessageBuilder;
 import won.protocol.model.ConnectionState;
 import won.protocol.model.NeedState;
+import won.protocol.util.NeedModelBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -158,9 +162,7 @@ public class PostService {
     }
 
     public Post savePost(Post newPost){
-        Mock.myMockPosts.put(newPost.getURI(),newPost);
-        //TODO: SAVE THIS POST N STUFF REFACTOR THIS IT IS ONLY MOCKED NOW
-        return newPost; //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+        return dataService.savePost(newPost);
     }
 
     public Post closePost(String postIdString){
@@ -168,13 +170,15 @@ public class PostService {
     }
 
     public Post closePost(URI postId){
-        //TODO: DOESNT CHANGE THE CURRENT ELEMENT WITHOUT UPDATE
         return dataService.changePostState(postId, NeedState.INACTIVE); //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
     }
 
     public Post reOpenPost(URI postId){
-        //TODO: DOESNT CHANGE THE CURRENT ELEMENT WITHOUT UPDATE
         return dataService.changePostState(postId, NeedState.ACTIVE); //RETURN STMT SHOULD RETURN THE NEW POST SO WE KNOW WHICH ID IT ACTUALLY HAD
+    }
+
+    public Post createDraft(URI postId) {
+        return createDraft(postId, Constants.TEMP_PLACEHOLDER_URI);
     }
 
     public Post createDraft(URI postId, URI newId) {
@@ -183,9 +187,9 @@ public class PostService {
 
         //TODO: IMPL THIS WHOLE THING CORRECTLY (WITH A BUILDER OR SOMETHING)
         newPost.setTitle(oldPost.getTitle());
-        newPost.setTags(new ArrayList<String>(oldPost.getTags()));
+        newPost.setTags(new ArrayList<>(oldPost.getTags()));
         newPost.setDescription(oldPost.getDescription());
-        newPost.setImageUrls(new ArrayList<String>(oldPost.getImageUrls()));
+        newPost.setImageUrls(new ArrayList<>(oldPost.getImageUrls()));
         newPost.setType(oldPost.getType());
         newPost.setRepeat(oldPost.getRepeat());
         newPost.setStartTime(oldPost.getStartTime());

@@ -18,6 +18,7 @@ package at.researchstudio.sat.won.android.won_android_app.app.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.RepeatType;
 import com.google.android.gms.maps.model.LatLng;
 import won.protocol.model.BasicNeedType;
@@ -76,6 +77,10 @@ public class Post extends Model implements Parcelable {
 
     public Post(BasicNeedType type, String title, String description, List<String> tags, int matches, int conversations, int requests, List<String> imageUrls, int titleImageIndex, LatLng location, long startTime, long stopTime, RepeatType repeat, NeedState needState) {
         this(null, type, title, description, tags, matches, conversations, requests, imageUrls, titleImageIndex, location, startTime, stopTime, repeat, needState);
+    }
+
+    public Post() {
+        this(Constants.TEMP_PLACEHOLDER_URI);
     }
 
     public Post(URI uri){

@@ -18,6 +18,7 @@ package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;
 import android.content.Context;
 import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.WonQueriesLocal;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
@@ -25,11 +26,9 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemMo
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
-import com.github.jsonldjava.core.RDFDatasetUtils;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
 import com.hp.hpl.jena.sparql.path.PathParser;
@@ -37,28 +36,36 @@ import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
 import com.hp.hpl.jena.update.UpdateAction;
-import com.hp.hpl.jena.update.UpdateRequest;
+import com.hp.hpl.jena.vocabulary.RDF;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
-import won.protocol.exception.*;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
+import won.cryptography.service.RandomNumberService;
+import won.cryptography.service.SecureRandomNumberServiceImpl;
 import won.protocol.message.WonMessage;
+import won.protocol.message.WonMessageBuilder;
+import won.protocol.message.WonMessageDecoder;
+import won.protocol.message.WonMessageEncoder;
 import won.protocol.model.*;
-import won.protocol.owner.OwnerProtocolNeedService;
-import won.protocol.service.NeedInformationService;
+import won.protocol.service.impl.WonNodeInformationServiceImpl;
 import won.protocol.util.NeedModelBuilder;
 import won.protocol.util.RdfUtils;
 import won.protocol.util.linkeddata.LinkedDataSource;
-import won.protocol.vocabulary.GEO;
 import won.protocol.vocabulary.WON;
-import won.protocol.vocabulary.sparql.WonQueries;
 
 import java.net.URI;
 import java.util.*;
@@ -78,12 +85,21 @@ public class DataService {
     private Vector<Dataset> retrievedDatasets;
     private LinkedDataSource linkedDataSourceAsync;
 
+    private WonNodeInformationServiceImpl wonNodeInformationService;
+
     private SockJsClient sockJsClient;
+    private ListenableFuture<WebSocketSession> listenableFuture;
 
     public DataService(AuthenticationService authService){
         this.context = authService.getContext(); //used for stringresource retrieval
         requestFactory = authService.getRequestFactory(); //used for cookie handling within connections
         linkedDataSourceAsync = new AsyncLinkedDataSource();
+        wonNodeInformationService = new WonNodeInformationServiceImpl();
+
+        wonNodeInformationService.setDefaultWonNodeUri(URI.create(context.getString(R.string.default_wonnode)));
+        wonNodeInformationService.setLinkedDataSource(linkedDataSourceAsync);
+        wonNodeInformationService.setRandomNumberService(new SecureRandomNumberServiceImpl());
+
         restTemplate = new RestTemplate(true, requestFactory);
         retrievedDatasets = new Vector<Dataset>();
 
@@ -106,7 +122,7 @@ public class DataService {
             myneeds = new ArrayList<URI>();
 
             ExecutorService es = Executors.newFixedThreadPool(4);
-            for(String uriString : response.getBody()) { //COULD BE IMPLEMENTED IN AN ASYNCHRONOUS WAY
+            for(String uriString : response.getBody()) {
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
 
@@ -130,7 +146,8 @@ public class DataService {
             sockJsClient = new SockJsClient(Collections.singletonList((Transport)transport));
 
             //TODO: SET HANDLER SOMEHOW (HTTPHEADER) --> change null value OR USE OTHER DOHANDSHAKE METHOD
-            sockJsClient.doHandshake(new WonWebSocketHandler(), null, URI.create(context.getString(R.string.base_uri) + context.getString(R.string.websocket_path))); //TODO: NOT SURE IF THIS IS THE WAY OR POSITION WHERE ITS SUPPOSED TO BE
+            listenableFuture = sockJsClient.doHandshake(new WonWebSocketHandler(), null, URI.create(context.getString(R.string.base_uri) + context.getString(R.string.websocket_path))); //TODO: NOT SURE IF THIS IS THE WAY OR POSITION WHERE ITS SUPPOSED TO BE
+
             sockJsClient.start();
             sp.stop();
             Log.d(LOG_TAG, "WebSocket is running: "+sockJsClient.isRunning()+ " took: "+sp.toString());
@@ -318,6 +335,8 @@ public class DataService {
             retrieveInitialDataset();
         }
 
+        Log.d(LOG_TAG,"MY POST ID: "+uri);
+
         Map<URI,Post> postMap = new HashMap<URI,Post>();
 
         if(myneeds.size()>0) {
@@ -498,5 +517,54 @@ public class DataService {
             Log.d(LOG_TAG, sb.toString());
         }
         Log.d(LOG_TAG, "---------------------------------------------------------------------");
+    }
+
+    public Post savePost(Post post){
+        Log.d(LOG_TAG, "Trying to save post");
+        if(post.getURI().equals(Constants.TEMP_PLACEHOLDER_URI)){
+            post.setURI(wonNodeInformationService.generateNeedURI());
+        }
+        NeedModelBuilder needBuilder = new NeedModelBuilder();
+        //TODO: Put the correct values into the needBuilder from the Post
+        Model needModel = needBuilder.build();
+
+
+        WonMessageBuilder builder = new WonMessageBuilder();
+        WonMessage wonMessage = builder.setMessagePropertiesForCreate(wonNodeInformationService.generateEventURI(), post.getURI(), wonNodeInformationService.getDefaultWonNodeURI()).addContent(needModel, null).build();
+
+        String wonMessageJsonLdString = WonMessageEncoder.encodeAsJsonLd(wonMessage);
+        WebSocketMessage<String> webSocketMessage = new TextMessage(wonMessageJsonLdString);
+
+        try {
+            listenableFuture.get().sendMessage(webSocketMessage);
+        }catch(Exception e){
+            e.printStackTrace();
+            //TODO: ERROR HANDLING
+            return null;
+        }
+        //TODO: NOT SURE IF THE ABOVE THINGY IS CORRECT
+        //TODO: Send Message with needcreation and wait for ok message
+
+        ExecutorService es = Executors.newFixedThreadPool(4);
+
+        retrievedDatasets = new Vector<Dataset>();
+
+        try {
+            RetrievalThread rt = new RetrievalThread(post.getURI(), linkedDataSourceAsync);
+            es.execute(rt);
+
+            es.shutdown();
+            boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
+
+            myneeds.add(post.getURI());
+
+            for (Dataset ds : retrievedDatasets) {
+                RdfUtils.addDatasetToDataset(initialDataset, ds, true);
+            }
+        }catch(InterruptedException e){
+            Log.e(LOG_TAG, "Interrupted save of new Post");
+        }
+
+        return getMyPostById(post.getURI());
     }
 }

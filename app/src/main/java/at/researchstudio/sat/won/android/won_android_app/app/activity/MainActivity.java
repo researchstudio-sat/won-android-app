@@ -35,6 +35,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.WelcomeScreenPagerAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
 import at.researchstudio.sat.won.android.won_android_app.app.fragment.*;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.service.ImageLoaderService;
@@ -46,7 +47,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.Dat
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import won.protocol.service.impl.WonNodeInformationServiceImpl;
 
 import java.net.URI;
 
@@ -87,7 +87,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
             tempPost = savedInstanceState.getParcelable(TEMPPOST_REF);
             appAlreadyStarted = savedInstanceState.getBoolean(APP_STARTED_REF, false);
         }else{
-            tempPost = new Post(URI.create("INVALIDPOSTID")); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
+            tempPost = new Post();
             appAlreadyStarted = false;
         }
 
@@ -355,7 +355,7 @@ public class MainActivity extends FragmentActivity implements NavigationDrawerFr
     public void createDraft(URI postId) {
         Toast.makeText(this, getString(R.string.toast_create_draft), Toast.LENGTH_SHORT).show();
 
-        tempPost = postService.createDraft(postId, URI.create("INVALIDPOSTID")); //TODO: REFACTOR THIS TO ENCAPSULATE REAL CREATED POSTID
+        tempPost = postService.createDraft(postId);
         Log.d(LOG_TAG,"Creating Draft from: "+tempPost);
 
         Fragment fragment = new CreateFragment();

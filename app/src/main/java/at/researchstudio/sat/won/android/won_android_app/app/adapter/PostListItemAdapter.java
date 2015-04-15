@@ -54,8 +54,9 @@ public class PostListItemAdapter extends ArrayAdapter {
     }
 
     public void swapItem(Post postListItem, int position) {
-        super.remove(postListItem);
+        super.remove(postListItem); //TODO: REFACTOR THE SUPER CALL (DONT FORGET TO POST NOTIFY DATASET CHANGED)
         super.insert(postListItem, position);
+        objects.set(position,postListItem);
     }
 
 

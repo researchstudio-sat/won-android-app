@@ -270,7 +270,8 @@ public class PostFragment extends Fragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                activity.setTempPost(activity.getPostService().closePost(postId)); //TODO: DOES NOT REALLY CLOSE THE POST YET...
+                //TODO: CAN CAUSE CONCURRENTMODIFICATIONEXCEPTION BECAUSE OF THE INITIALDATASET AND THE BACKGROUND RETRIEVAL OF THE CONNECTIONS/REQUESTS/CONVERSATIONS OF THE VISIBLE POST
+                activity.setTempPost(activity.getPostService().closePost(postId));
                 Toast.makeText(activity, getString(R.string.toast_close_mypost), Toast.LENGTH_SHORT).show();
                 activity.popBackStackIfPossible();
             }
