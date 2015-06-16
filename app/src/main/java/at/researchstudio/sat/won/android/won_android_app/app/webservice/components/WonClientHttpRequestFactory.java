@@ -53,7 +53,6 @@ public class WonClientHttpRequestFactory extends SimpleClientHttpRequestFactory 
         super.prepareConnection(connection, httpMethod);
     }
 
-
     public String getCookieValue() {
         return cookieValue;
     }

@@ -61,14 +61,14 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
         if (dataset == null) {
             try {
                 dataset = linkedDataRestClient.readResourceData(resourceURI);
-                Log.d(LOG_TAG, "Cache PUT uri: " + resourceURI);
+                Log.v(LOG_TAG, "Cache PUT uri: " + resourceURI);
                 myCache.put(resourceURI, dataset);
             }catch(RestClientException e){
                 Log.e(LOG_TAG, "Error while retrieving from URI: "+resourceURI);
                 return null;
             }
         } else {
-            Log.d(LOG_TAG, "Cache GOT uri: " + resourceURI);
+            Log.v(LOG_TAG, "Cache GOT uri: " + resourceURI);
         }
 
         if (dataset instanceof Dataset) return (Dataset) dataset;
@@ -189,7 +189,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                 if (dataset == null) {
                     try {
                         dataset = linkedDataRestClient.readResourceData(uri);
-                        Log.d(LOG_TAG, this.getId() + " Cache PUT uri: " + uri);
+                        Log.v(LOG_TAG, this.getId() + " Cache PUT uri: " + uri);
                         myCache.put(uri, dataset);
                     }catch(RestClientException e){
                         Log.e(LOG_TAG, this.getId() + " Error while retrieving from URI: "+uri);
@@ -200,7 +200,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
                         throw new NullPointerException();
                     }
                 } else {
-                    Log.d(LOG_TAG, this.getId() + " Cache GOT uri: " + uri);
+                    Log.v(LOG_TAG, this.getId() + " Cache GOT uri: " + uri);
                 }
 
                 if (dataset instanceof Dataset) {
@@ -276,7 +276,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     }
 
     public static Dataset makeDataset() {
-        Log.d(LOG_TAG,"Creating tdb dataset...");
+        Log.v(LOG_TAG,"Creating tdb dataset...");
         DatasetGraph dsg = TDBFactory.createDatasetGraph();
         dsg.getContext().set(TDB.symUnionDefaultGraph, new NodeValueBoolean(true));
         return DatasetFactory.create(dsg);

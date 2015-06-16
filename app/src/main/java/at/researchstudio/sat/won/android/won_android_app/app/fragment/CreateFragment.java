@@ -53,6 +53,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sleepbot.datetimepicker.time.RadialPickerLayout;
 import com.sleepbot.datetimepicker.time.TimePickerDialog;
 import com.viewpagerindicator.IconPageIndicator;
+import de.greenrobot.event.EventBus;
 import won.protocol.model.BasicNeedType;
 
 import java.io.IOException;
@@ -197,6 +198,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
     public void onStart() {
         Log.d(LOG_TAG,"onStart");
         super.onStart();
+        EventBus.getDefault().register(this);
         createTask = new CreateTask();
         createTask.execute();
     }
@@ -217,6 +219,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
     @Override
     public void onStop() {
         Log.d(LOG_TAG,"onStop");
+        EventBus.getDefault().unregister(this);
         super.onStop();
     }
 
@@ -284,6 +287,7 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        activity.showLoading();
                         Log.d(LOG_TAG, "Saving the post");
                         SaveTask saveTask = new SaveTask();
                         saveTask.execute();
@@ -353,9 +357,9 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
         }
     }
 
-    private class SaveTask extends AsyncTask<String, Integer, Post> {
+    private class SaveTask extends AsyncTask<String, Integer, Boolean> {
         @Override
-        protected Post doInBackground(String... params) {
+        protected Boolean doInBackground(String... params) {
             Log.d(LOG_TAG, "Trying to save Post started AsyncTask");
             if(!mDateTimeSwitch.isChecked()){
                 activity.getTempPost().setStartTime(0);
@@ -372,31 +376,38 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
             if(!mLocationSwitch.isChecked()){
                 activity.getTempPost().setLocation(null);
             }
-
-            return activity.getPostService().savePost(activity.getTempPost());
+            try{
+                activity.getPostService().savePost(activity.getTempPost());
+                return true;
+            }catch(Exception e){
+                e.printStackTrace(); //HANDLE EXCEPTION BETTER
+                return false;
+            }
         }
 
         @Override
-        protected void onPostExecute(Post post) {
+        protected void onPostExecute(Boolean saved) {
             Log.d(LOG_TAG, "Post Saved");
             Toast.makeText(activity, getString(R.string.toast_create_saved), Toast.LENGTH_SHORT).show();
             activity.setTempPost(new Post());
-
-            Fragment fragment;
-
-            Bundle args = new Bundle();
-
-            fragment = new MyPostFragment();
-
-            args.putString(Post.ID_REF, post.getURIString());
-
-            fragment.setArguments(args);
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.container, fragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
         }
+    }
+
+    public void onEvent(Post post){
+        Fragment fragment;
+
+        Bundle args = new Bundle();
+
+        fragment = new MyPostFragment();
+
+        args.putString(Post.ID_REF, post.getURIString());
+
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     private class CreateTask extends AsyncTask<String, Integer, Post> {

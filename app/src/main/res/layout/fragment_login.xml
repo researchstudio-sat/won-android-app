@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
-            android:text="fabian.suda@researchstudio.at"
+            android:text="fsuda@researchstudio.at"
             android:ems="10"
             android:id="@+id/login_username" android:layout_gravity="center_horizontal"/>
     <TextView

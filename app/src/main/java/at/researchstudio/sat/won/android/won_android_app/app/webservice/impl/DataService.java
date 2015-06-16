@@ -37,6 +37,7 @@ import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
 import com.hp.hpl.jena.update.UpdateAction;
 import com.hp.hpl.jena.vocabulary.RDF;
+import de.greenrobot.event.EventBus;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -56,6 +57,7 @@ import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import won.cryptography.service.RandomNumberService;
 import won.cryptography.service.SecureRandomNumberServiceImpl;
+import won.owner.protocol.message.base.MessageExtractingWonMessageHandlerAdapter;
 import won.protocol.message.WonMessage;
 import won.protocol.message.WonMessageBuilder;
 import won.protocol.message.WonMessageDecoder;
@@ -75,6 +77,8 @@ import java.util.concurrent.TimeUnit;
 
 public class DataService {
     private static final String LOG_TAG = DataService.class.getSimpleName();
+
+    public MessageExtractingWonMessageHandlerAdapter messageHandlerAdapter = new MessageExtractingWonMessageHandlerAdapter(new OwnerCallbackImpl());
 
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
@@ -105,6 +109,14 @@ public class DataService {
 
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        EventBus.getDefault().unregister(this);
+        super.finalize();
     }
 
     public void retrieveInitialDataset(){
@@ -519,15 +531,16 @@ public class DataService {
         Log.d(LOG_TAG, "---------------------------------------------------------------------");
     }
 
-    public Post savePost(Post post){
+
+    public void savePost(Post post) throws Exception{
         Log.d(LOG_TAG, "Trying to save post");
         if(post.getURI().equals(Constants.TEMP_PLACEHOLDER_URI)){
             post.setURI(wonNodeInformationService.generateNeedURI());
         }
         NeedModelBuilder needBuilder = new NeedModelBuilder();
+
         //TODO: Put the correct values into the needBuilder from the Post
         Model needModel = needBuilder.build();
-
 
         WonMessageBuilder builder = new WonMessageBuilder();
         WonMessage wonMessage = builder.setMessagePropertiesForCreate(wonNodeInformationService.generateEventURI(), post.getURI(), wonNodeInformationService.getDefaultWonNodeURI()).addContent(needModel, null).build();
@@ -535,13 +548,8 @@ public class DataService {
         String wonMessageJsonLdString = WonMessageEncoder.encodeAsJsonLd(wonMessage);
         WebSocketMessage<String> webSocketMessage = new TextMessage(wonMessageJsonLdString);
 
-        try {
-            listenableFuture.get().sendMessage(webSocketMessage);
-        }catch(Exception e){
-            e.printStackTrace();
-            //TODO: ERROR HANDLING
-            return null;
-        }
+        listenableFuture.get().sendMessage(webSocketMessage);
+        /*
         //TODO: NOT SURE IF THE ABOVE THINGY IS CORRECT
         //TODO: Send Message with needcreation and wait for ok message
 
@@ -565,6 +573,16 @@ public class DataService {
             Log.e(LOG_TAG, "Interrupted save of new Post");
         }
 
-        return getMyPostById(post.getURI());
+        return getMyPostById(post.getURI());*/
+    }
+
+    public void onEvent(WebSocketMessage<?> message){
+        Log.d(LOG_TAG,"handleMessage");
+        Log.d(LOG_TAG,"msg:"+message);
+        Log.d(LOG_TAG,"msg:"+message.getPayload());
+
+        EventBus.getDefault().post(messageHandlerAdapter.process(WonMessageDecoder.decode(Lang.JSONLD, message.getPayload().toString())));
+
+        //TODO: HANDLE EVENTS/INCL. SAVE AND INVOKE EVENTS TO THE BUS ACCORDINGLY
     }
 }

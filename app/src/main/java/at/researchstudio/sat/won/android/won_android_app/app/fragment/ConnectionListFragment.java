@@ -30,6 +30,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivi
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ConnectionListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import de.greenrobot.event.util.AsyncExecutor;
 
 import java.util.ArrayList;
 

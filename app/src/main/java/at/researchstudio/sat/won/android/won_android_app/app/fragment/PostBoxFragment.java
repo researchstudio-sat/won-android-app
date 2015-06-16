@@ -30,6 +30,8 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.util.AsyncExecutor;
 import won.protocol.model.NeedState;
 
 import java.net.URI;
@@ -39,7 +41,6 @@ public class PostBoxFragment extends Fragment{
     private static final String LOG_TAG = PostBoxFragment.class.getSimpleName();
 
     private SwipeRefreshLayout swipeLayout;
-    private CreateListTask createListTask;
     private ListView mNeedListView;
     private PostListItemAdapter mPostListItemAdapter;
     private MainActivity activity;
@@ -123,8 +124,7 @@ public class PostBoxFragment extends Fragment{
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh() {
-                createListTask = new CreateListTask();
-                createListTask.execute();
+                AsyncExecutor.create().execute(new DataRetrieval());
             }
         });
     }
@@ -132,9 +132,9 @@ public class PostBoxFragment extends Fragment{
     @Override
     public void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
         swipeLayout.setRefreshing(true);
-        createListTask = new CreateListTask();
-        createListTask.execute();
+        AsyncExecutor.create().execute(new DataRetrieval());
     }
 
     @Override
@@ -143,12 +143,14 @@ public class PostBoxFragment extends Fragment{
     }
 
     @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-
-        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createListTask.cancel(true);
-        }
     }
     //*************************************************************************************************************
 
@@ -247,38 +249,6 @@ public class PostBoxFragment extends Fragment{
         }
     }
 
-    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Post>> {
-        @Override
-        protected ArrayList<Post> doInBackground(String... params) {
-            if(isPostBox()) {
-                return activity.getPostService().getMyPosts();
-            }else{
-                return activity.getPostService().getMatchesByPostId(postId);
-            }
-        }
-
-        @Override
-        protected void onCancelled(ArrayList<Post> linkArray) {
-            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            swipeLayout.setRefreshing(false);
-        }
-
-        protected void onPostExecute(ArrayList<Post> linkArray) {
-            putListInView(linkArray);
-        }
-
-        private void putListInView(ArrayList<Post> linkArray) {
-            mPostListItemAdapter = new PostListItemAdapter(getActivity());
-            for(Post post : linkArray) {
-                mPostListItemAdapter.addItem(post);
-            }
-
-            mNeedListView.setAdapter(mPostListItemAdapter);
-            swipeLayout.setRefreshing(false);
-            styleActionBar();
-        }
-    }
-
     /**
      * Updates the view of the given position
      * @param position
@@ -310,5 +280,28 @@ public class PostBoxFragment extends Fragment{
      */
     public boolean isPostBox(){
         return postId == null;
+    }
+
+    public void onEventMainThread(ArrayList<Post> linkArray) {
+        mPostListItemAdapter = new PostListItemAdapter(getActivity());
+        for(Post post : linkArray) {
+            mPostListItemAdapter.addItem(post);
+        }
+
+        mNeedListView.setAdapter(mPostListItemAdapter);
+        swipeLayout.setRefreshing(false);
+        activity.hideLoading();
+        styleActionBar();
+    }
+
+    private class DataRetrieval implements AsyncExecutor.RunnableEx {
+        @Override
+        public void run() throws Exception {
+            if(isPostBox()) {
+                activity.getPostService().getMyPosts();
+            }else{
+                activity.getPostService().getMatchesByPostId(postId);
+            }
+        }
     }
 }

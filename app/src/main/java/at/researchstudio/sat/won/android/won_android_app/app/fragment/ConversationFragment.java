@@ -35,6 +35,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import de.greenrobot.event.EventBus;
 
 import java.util.ArrayList;
 
@@ -128,8 +129,15 @@ public class ConversationFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
         createListTask = new CreateListTask();
         createListTask.execute();
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -199,16 +207,21 @@ public class ConversationFragment extends Fragment {
         }
     }
 
+
+
     private void sendMessage(){
+        Log.d(LOG_TAG,"Sending Message");
         String messageText = mMessageText.getText().toString();
 
         if(messageText!= null && !"".equals(messageText.trim())) {
             MessageItemModel message = new MessageItemModel(MessageType.SEND, mMessageText.getText().toString());
 
             //TODO: SEND MESSAGE IN BACKGROUND
-            mMessageListItemAdapter.addItem(message);
+            /*mMessageListItemAdapter.addItem(message);
             mMessageListView.setAdapter(mMessageListItemAdapter);
-            mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
+            mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);*/
+
+            EventBus.getDefault().post(message);
         }
 
         mMessageText.setText("");
@@ -233,5 +246,12 @@ public class ConversationFragment extends Fragment {
 
             ab.setIcon(new BitmapDrawable(getResources(), letterTile));
         }
+    }
+
+    public void onEvent(MessageItemModel message){
+        Log.d(LOG_TAG, "MESSAGE CREATED");
+        mMessageListItemAdapter.addItem(message);
+        mMessageListView.setAdapter(mMessageListItemAdapter);
+        mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
     }
 }

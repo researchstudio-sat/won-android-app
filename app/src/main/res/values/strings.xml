@@ -53,6 +53,7 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="loading">Loading&#8230;</string>
+    <string name="processing">Processing&#8230;</string>
     <string name="closed">closed</string>
     <string name="username">Email address</string>
     <string name="password">Password</string>

@@ -23,6 +23,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
 import com.hp.hpl.jena.rdf.model.Model;
+import de.greenrobot.event.EventBus;
 import won.protocol.message.WonMessage;
 import won.protocol.message.WonMessageBuilder;
 import won.protocol.model.ConnectionState;
@@ -81,11 +82,11 @@ public class PostService {
         return requests;
     }
 
-    public ArrayList<Post> getMyPosts() {
+    public void getMyPosts() {
         Log.d(LOG_TAG, "Retrieve My Posts");
         Map<URI, Post> myPosts = dataService.getMyPosts();
 
-        return new ArrayList<Post>(myPosts.values());
+        EventBus.getDefault().post(new ArrayList<Post>(myPosts.values()));
     }
 
     public ArrayList<Connection> getConversationsByPostId(String postId){
@@ -119,11 +120,11 @@ public class PostService {
         return dataService.getMessagesByConnectionId(conversationId);
     }
 
-    public ArrayList<Post> getMatchesByPostId(String postId) {
-        return getMatchesByPostId(URI.create(postId));
+    public void getMatchesByPostId(String postId) {
+        getMatchesByPostId(URI.create(postId));
     }
 
-    public ArrayList<Post> getMatchesByPostId(URI postId) {
+    public void getMatchesByPostId(URI postId) {
         List<Connection> connections = dataService.getConnectionsByPostAndState(postId, Collections.singletonList(ConnectionState.SUGGESTED.getURI()));
 
         ArrayList<Post> matches = new ArrayList<Post>();
@@ -134,7 +135,7 @@ public class PostService {
             }
         }
         Log.d(LOG_TAG, "Getting Matches by postid: "+postId+" ("+connections.size()+" Connections / "+matches.size()+" Matches)");
-        return matches;
+        EventBus.getDefault().post(matches);
     }
 
     public Connection getConversationById(String id){
@@ -161,8 +162,8 @@ public class PostService {
         return dataService.getPostById(id);
     }
 
-    public Post savePost(Post newPost){
-        return dataService.savePost(newPost);
+    public void savePost(Post newPost) throws Exception{
+        dataService.savePost(newPost);
     }
 
     public Post closePost(String postIdString){
