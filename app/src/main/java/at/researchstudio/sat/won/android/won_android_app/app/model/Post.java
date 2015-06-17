@@ -35,6 +35,7 @@ import java.util.List;
  * Created by fsuda on 10.10.2014.
  */
 public class Post extends Model implements Parcelable {
+    public static final String REF = "post_ref";
     public static final String ID_REF = "post_id_ref";
     public static final String TYPE_REF = "post_type_ref";
     public static final String TITLE_REF = "post_title_ref";

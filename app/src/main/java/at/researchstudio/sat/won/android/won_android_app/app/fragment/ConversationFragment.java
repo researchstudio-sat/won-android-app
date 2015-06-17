@@ -32,6 +32,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivi
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MessageEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
@@ -221,7 +222,7 @@ public class ConversationFragment extends Fragment {
             mMessageListView.setAdapter(mMessageListItemAdapter);
             mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);*/
 
-            EventBus.getDefault().post(message);
+            EventBus.getDefault().post(new MessageEvent(message));
         }
 
         mMessageText.setText("");
@@ -248,9 +249,9 @@ public class ConversationFragment extends Fragment {
         }
     }
 
-    public void onEvent(MessageItemModel message){
+    public void onEvent(MessageEvent event){
         Log.d(LOG_TAG, "MESSAGE CREATED");
-        mMessageListItemAdapter.addItem(message);
+        mMessageListItemAdapter.addItem(event.getMessage());
         mMessageListView.setAdapter(mMessageListItemAdapter);
         mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
     }

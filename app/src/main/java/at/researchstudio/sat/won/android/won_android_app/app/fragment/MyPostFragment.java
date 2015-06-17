@@ -28,8 +28,12 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MyPostPagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import com.viewpagerindicator.TabPageIndicator;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.util.AsyncExecutor;
+import de.greenrobot.event.util.ThrowableFailureEvent;
 
 import java.util.ArrayList;
 
@@ -40,7 +44,6 @@ public class MyPostFragment extends Fragment {
     private static final String LOG_TAG = MyPostFragment.class.getSimpleName();
 
     private MainActivity activity;
-    private CreatePostTask createPostTask;
 
     private MyPostPagerAdapter mMyPostPagerAdapter;
     private ViewPager mMyPostViewPager;
@@ -64,6 +67,7 @@ public class MyPostFragment extends Fragment {
         this.container = container;
         rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
 
+        EventBus.getDefault().register(this);
         return rootView;
     }
 
@@ -76,8 +80,7 @@ public class MyPostFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        createPostTask = new CreatePostTask();
-        createPostTask.execute();
+        AsyncExecutor.create().execute(new DataRetrieval());
     }
 
     @Override
@@ -86,12 +89,14 @@ public class MyPostFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStop() {
+        super.onStop();
+    }
 
-        if(createPostTask != null && createPostTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createPostTask.cancel(true);
-        }
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
     //*********************************************************************************************************
 
@@ -101,40 +106,35 @@ public class MyPostFragment extends Fragment {
         super.onLowMemory();
     }
 
-    private class CreatePostTask extends AsyncTask<String, Integer, Post> {
+    private class DataRetrieval implements AsyncExecutor.RunnableEx {
         @Override
-        protected Post doInBackground(String... params) {
-            return activity.getPostService().getMyPostById(postId);
+        public void run() {
+            activity.getPostService().getMyPostById(postId);
         }
+    }
 
-        @Override
-        protected void onCancelled(Post post) {
-            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            //TODO: DO TOAST OR SOMETHING
-        }
+    public void onEventMainThread(MyPostEvent event) {
+        Log.d(LOG_TAG, "MyPostEvent received");
+        mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
+        mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
 
-        protected void onPostExecute(Post post) {
-            putListInView(post);
-        }
+        //Initialize ViewPager
+        mMyPostPagerAdapter = new MyPostPagerAdapter(activity, event.getPost());
 
-        private void putListInView(Post post) {
-            mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
-            mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);
+        Parcelable state = mMyPostPagerAdapter.saveState();
 
-            //Initialize ViewPager
-            mMyPostPagerAdapter = new MyPostPagerAdapter(activity, post);
+        mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
+        mMyPostViewPager.setOffscreenPageLimit(1);
+        mMyPostViewPager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
+        //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
 
-            Parcelable state = mMyPostPagerAdapter.saveState();
+        mIndicator.setViewPager(mMyPostViewPager);
 
-            mMyPostViewPager.setAdapter(mMyPostPagerAdapter);
-            mMyPostViewPager.setOffscreenPageLimit(1);
-            mMyPostViewPager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
-            //TODO: SET CURRENT TAB TO THE PAGE IT WAS SET
+        mIndicator.setVisibility(View.VISIBLE);
+        mMyPostViewPager.setVisibility(View.VISIBLE);
+    }
 
-            mIndicator.setViewPager(mMyPostViewPager);
-
-            mIndicator.setVisibility(View.VISIBLE);
-            mMyPostViewPager.setVisibility(View.VISIBLE);
-        }
+    public void onEventMainThread(ThrowableFailureEvent event) {
+        Log.e(LOG_TAG,event.getThrowable()+ " - "+event.getExecutionScope());
     }
 }

@@ -21,6 +21,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.WonQueriesLocal;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
+import at.researchstudio.sat.won.android.won_android_app.app.event.WebSocketEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
@@ -134,12 +135,15 @@ public class DataService {
             myneeds = new ArrayList<URI>();
 
             ExecutorService es = Executors.newFixedThreadPool(4);
+
+            int i = 1; //TODO: REMOVE THIS
             for(String uriString : response.getBody()) {
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
 
                 RetrievalThread rt = new RetrievalThread(uri, linkedDataSourceAsync);
                 es.execute(rt);
+                if(i++>3) {break;} //TODO: REMOVE THIS
             }
             es.shutdown();
             boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
@@ -576,12 +580,12 @@ public class DataService {
         return getMyPostById(post.getURI());*/
     }
 
-    public void onEvent(WebSocketMessage<?> message){
+    public void onEvent(WebSocketEvent event){
         Log.d(LOG_TAG,"handleMessage");
-        Log.d(LOG_TAG,"msg:"+message);
-        Log.d(LOG_TAG,"msg:"+message.getPayload());
+        Log.d(LOG_TAG,"msg:"+event.getMessage());
+        Log.d(LOG_TAG,"msg:"+event.getMessage().getPayload());
 
-        EventBus.getDefault().post(messageHandlerAdapter.process(WonMessageDecoder.decode(Lang.JSONLD, message.getPayload().toString())));
+        //EventBus.getDefault().post(messageHandlerAdapter.process(WonMessageDecoder.decode(Lang.JSONLD, event.getMessage().getPayload().toString())));
 
         //TODO: HANDLE EVENTS/INCL. SAVE AND INVOKE EVENTS TO THE BUS ACCORDINGLY
     }

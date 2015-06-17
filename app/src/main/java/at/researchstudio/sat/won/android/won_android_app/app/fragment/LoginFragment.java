@@ -19,20 +19,20 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
+import at.researchstudio.sat.won.android.won_android_app.app.event.AuthenticationEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.util.AsyncExecutor;
 
 /**
  * Created by fsuda on 25.08.2014.
@@ -61,6 +61,18 @@ public class LoginFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         activity = (MainActivity) getActivity();
@@ -69,7 +81,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 activity.showLoading();
-                new LoginTask().execute();
+                AsyncExecutor.create().execute(new LoginTask());
             }
         });
 
@@ -88,34 +100,29 @@ public class LoginFragment extends Fragment {
 
     //*************************************************************************************************
 
-    private class LoginTask extends AsyncTask<Void, Void, Integer> {
+    private class LoginTask implements AsyncExecutor.RunnableEx {
 
         @Override
-        protected Integer doInBackground(Void... params) {
+        public void run() throws Exception {
             InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mUsername.getWindowToken(), 0);
-            return activity.getAuthService().login(mUsername.getText().toString(), mPassword.getText().toString());
+            EventBus.getDefault().post(new AuthenticationEvent(activity.getAuthService().login(mUsername.getText().toString(), mPassword.getText().toString())));
         }
+    }
 
-        @Override
-        protected void onCancelled(Integer responseCode) {
-            activity.hideLoading();
-        }
-
-        protected void onPostExecute(Integer responseCode) {
-            switch(responseCode){
-                case ResponseCode.LOGIN_SUCCESS:
-                    activity.showMainMenu();
-                    break;
-                case ResponseCode.LOGIN_NOUSER:
-                    activity.hideLoading();
-                    Toast.makeText(activity, activity.getText(R.string.error_login_failed), Toast.LENGTH_LONG).show();
-                    break;
-                case ResponseCode.CONNECTION_ERR:
-                    activity.hideLoading();
-                    Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
-                    break;
-            }
+    public void onEventMainThread(AuthenticationEvent event) {
+        switch(event.getAuthenticationCode()){
+            case ResponseCode.LOGIN_SUCCESS:
+                activity.showMainMenu();
+                break;
+            case ResponseCode.LOGIN_NOUSER:
+                activity.hideLoading();
+                Toast.makeText(activity, activity.getText(R.string.error_login_failed), Toast.LENGTH_LONG).show();
+                break;
+            case ResponseCode.CONNECTION_ERR:
+                activity.hideLoading();
+                Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
+                break;
         }
     }
 }

@@ -16,6 +16,7 @@
 package at.researchstudio.sat.won.android.won_android_app.app.webservice.impl;
 
 import android.util.Log;
+import at.researchstudio.sat.won.android.won_android_app.app.event.WebSocketEvent;
 import de.greenrobot.event.EventBus;
 import org.apache.jena.riot.Lang;
 import org.springframework.web.socket.CloseStatus;
@@ -44,7 +45,7 @@ public class WonWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        EventBus.getDefault().post(message);
+        EventBus.getDefault().post(new WebSocketEvent(message));
     }
 
     @Override

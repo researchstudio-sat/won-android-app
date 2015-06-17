@@ -29,6 +29,8 @@ import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MatchesEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostsEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.util.AsyncExecutor;
@@ -69,6 +71,8 @@ public class PostBoxFragment extends Fragment{
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
+        EventBus.getDefault().register(this);
         return rootView;
     }
 
@@ -132,7 +136,7 @@ public class PostBoxFragment extends Fragment{
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+        Log.d(LOG_TAG,"PostBoxFragment started");
         swipeLayout.setRefreshing(true);
         AsyncExecutor.create().execute(new DataRetrieval());
     }
@@ -144,12 +148,13 @@ public class PostBoxFragment extends Fragment{
 
     @Override
     public void onStop() {
-        EventBus.getDefault().unregister(this);
+        Log.d(LOG_TAG,"PostBoxFragment stopped");
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
     //*************************************************************************************************************
@@ -282,7 +287,9 @@ public class PostBoxFragment extends Fragment{
         return postId == null;
     }
 
-    public void onEventMainThread(ArrayList<Post> linkArray) {
+    private void putListInView(ArrayList<Post> linkArray) {
+        Log.d(LOG_TAG,"POSTBOX ARRAYLIST EVENT RECEIVED");
+
         mPostListItemAdapter = new PostListItemAdapter(getActivity());
         for(Post post : linkArray) {
             mPostListItemAdapter.addItem(post);
@@ -292,6 +299,14 @@ public class PostBoxFragment extends Fragment{
         swipeLayout.setRefreshing(false);
         activity.hideLoading();
         styleActionBar();
+    }
+
+    public void onEventMainThread(MyPostsEvent event) {
+        putListInView(event.getMyPostsEvent());
+    }
+
+    public void onEventMainThread(MatchesEvent event) {
+        putListInView(event.getMatches());
     }
 
     private class DataRetrieval implements AsyncExecutor.RunnableEx {

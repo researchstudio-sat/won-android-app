@@ -45,6 +45,7 @@ public class MyPostPagerAdapter extends FragmentStatePagerAdapter {
         Fragment fragment;
         Bundle args = new Bundle();
         args.putString(Post.ID_REF, post.getURI().toString());
+        args.putParcelable(Post.REF, post);
 
         //This will be used to determine where the post came from
         switch (position) {

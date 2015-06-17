@@ -17,7 +17,6 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,9 +29,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
+import at.researchstudio.sat.won.android.won_android_app.app.event.AuthenticationEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.constants.ResponseCode;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.model.User;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.util.AsyncExecutor;
 
 /**
  * Created by fsuda on 25.08.2014.
@@ -66,6 +68,18 @@ public class RegisterFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        EventBus.getDefault().register(this);
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         activity = (MainActivity) getActivity();
@@ -89,7 +103,7 @@ public class RegisterFragment extends Fragment {
                 }else{
                     activity.showLoading();
                     mErrorText.setVisibility(View.GONE);
-                    new RegisterTask().execute();
+                    AsyncExecutor.create().execute(new RegisterTask());
                 }
             }
         });
@@ -104,36 +118,31 @@ public class RegisterFragment extends Fragment {
 
     //*************************************************************************************************
 
-    private class RegisterTask extends AsyncTask<Void, Void, Integer> {
+    private class RegisterTask implements AsyncExecutor.RunnableEx {
 
         @Override
-        protected Integer doInBackground(Void... params) {
+        public void run() throws Exception {
             InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mUsername.getWindowToken(), 0);
-            return activity.getAuthService().register(new User(mUsername.getText().toString(), mPassword.getText().toString()));
+            EventBus.getDefault().post(new AuthenticationEvent(activity.getAuthService().register(new User(mUsername.getText().toString(), mPassword.getText().toString()))));
         }
+    }
 
-        @Override
-        protected void onCancelled(Integer responseCode) {
-            activity.hideLoading();
-        }
-
-        protected void onPostExecute(Integer responseCode) {
-            switch(responseCode){
-                case ResponseCode.LOGIN_SUCCESS:
-                    Toast.makeText(activity, activity.getText(R.string.toast_register_success), Toast.LENGTH_LONG).show();
-                    activity.showMainMenu();
-                    break;
-                case ResponseCode.REGISTER_USEREXISTS:
-                    activity.hideLoading();
-                    Toast.makeText(activity, activity.getText(R.string.error_register_email_registered), Toast.LENGTH_LONG).show();
-                    break;
-                case ResponseCode.CONNECTION_ERR:
-                    Log.d(LOG_TAG, "CONNECTION ERROR");
-                    activity.hideLoading();
-                    Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
-                    break;
-            }
+    public void onEventMainThread(AuthenticationEvent event) {
+        switch(event.getAuthenticationCode()){
+            case ResponseCode.LOGIN_SUCCESS:
+                Toast.makeText(activity, activity.getText(R.string.toast_register_success), Toast.LENGTH_LONG).show();
+                activity.showMainMenu();
+                break;
+            case ResponseCode.REGISTER_USEREXISTS:
+                activity.hideLoading();
+                Toast.makeText(activity, activity.getText(R.string.error_register_email_registered), Toast.LENGTH_LONG).show();
+                break;
+            case ResponseCode.CONNECTION_ERR:
+                Log.d(LOG_TAG, "CONNECTION ERROR");
+                activity.hideLoading();
+                Toast.makeText(activity, activity.getText(R.string.error_server_not_found), Toast.LENGTH_LONG).show();
+                break;
         }
     }
 }

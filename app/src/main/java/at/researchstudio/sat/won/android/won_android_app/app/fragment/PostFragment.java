@@ -23,7 +23,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
@@ -34,6 +33,9 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MatchEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.PostEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
@@ -42,6 +44,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.viewpagerindicator.IconPageIndicator;
 import com.wefika.flowlayout.FlowLayout;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.util.AsyncExecutor;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,8 +57,6 @@ import java.util.Locale;
 public class PostFragment extends Fragment {
     private static final String LOG_TAG = PostFragment.class.getSimpleName();
     private static final String MAP_STATE_KEY = "POST_MAP_STATE";
-
-    private CreateTask createTask;
 
     private String postId;
     private String refPostTitle; //title of the reference post
@@ -95,7 +97,12 @@ public class PostFragment extends Fragment {
         if(args!=null){
             postId=args.getString(Post.ID_REF);
             refPostTitle=args.getString(Post.TITLE_REF);
+            Post tempPost = args.getParcelable(Post.REF);
+            if(tempPost!=null){
+                post = tempPost;
+            }
         }else{
+            post=null;
             postId=null;
             refPostTitle=null;
         }
@@ -116,6 +123,7 @@ public class PostFragment extends Fragment {
 
         mScrollView = (ScrollView) rootView.findViewById(R.id.post_scrollview);
 
+        EventBus.getDefault().register(this);
         return rootView;
     }
 
@@ -124,7 +132,7 @@ public class PostFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         activity = (MainActivity) getActivity();
-        activity.showLoading();//TODO: BUG SHOWS LOADING IF AN ADJACENT TAB IS CURRENTLY VISIBLE DUE TO THE PAGER HOLDING 3 VIEWS AT A TIME
+        activity.showLoading();
 
         tileProvider = new LetterTileProvider(activity);
 
@@ -181,9 +189,9 @@ public class PostFragment extends Fragment {
 
     @Override
     public void onStart() {
+        Log.d(LOG_TAG,"PostFragment started");
         super.onStart();
-        createTask = new CreateTask();
-        createTask.execute();
+        AsyncExecutor.create().execute(new DataRetrieval());
     }
 
     @Override
@@ -193,12 +201,16 @@ public class PostFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        Log.d(LOG_TAG,"PostFragment stopped");
+        super.onStop();
+    }
+
+    @Override
     public void onDestroy() {
-        super.onDestroy();
         mMapView.onDestroy();
-        if(createTask != null && createTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createTask.cancel(true);
-        }
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
     //*************************************************************************************************************
 
@@ -287,146 +299,148 @@ public class PostFragment extends Fragment {
         dialog.show();
     }
 
-    private class CreateTask extends AsyncTask<String, Integer, Post> {
+    private class DataRetrieval implements AsyncExecutor.RunnableEx {
         @Override
-        protected Post doInBackground(String... params) {
-            return !isMyPost()? activity.getPostService().getMatchById(postId) : activity.getPostService().getMyPostById(postId);
+        public void run() {
+            if (isMyPost()) {
+                EventBus.getDefault().post(post); //NO DATA RETRIEVAL NECESSARY
+            } else {
+                activity.getPostService().getMatchById(postId);
+            }
+        }
+    }
+
+    public void onEventMainThread(MatchEvent event) {
+        putPostInView(event.getMatch());
+    }
+
+    public void onEventMainThread(Post post) {
+        Log.d(LOG_TAG, "PostEvent received");
+        putPostInView(post);
+    }
+
+    private void putPostInView(Post tempPost) {
+        Log.d(LOG_TAG, "PostFragment EVENT RECEIVED");
+        post = tempPost;
+
+        //Set PostType
+        switch(post.getType()){
+            case SUPPLY:
+                postType.setImageResource(R.drawable.offer_light);
+                postTypeText.setText(R.string.type_offer);
+                break;
+            case DEMAND:
+                postType.setImageResource(R.drawable.want_light);
+                postTypeText.setText(R.string.type_want);
+                break;
+            case DO_TOGETHER:
+                postType.setImageResource(R.drawable.activity_light);
+                postTypeText.setText(R.string.type_activity);
+                break;
+            case CRITIQUE:
+                postType.setImageResource(R.drawable.change_light);
+                postTypeText.setText(R.string.type_change);
+                break;
         }
 
-        @Override
-        protected void onCancelled(Post tempPost) {
-            //TODO: INSERT CACHED RESULTS, WITHOUT CALL OF NEW THINGY
-            //putPostInView(tempPost);
+        //Set RepeatType
+        switch(post.getRepeat()){
+            case NONE:
+                postDateType.setImageResource(R.drawable.calendar);
+                break;
+            case WEEKLY:
+                postDateType.setImageResource(R.drawable.calendar_repeat);
+                break;
+            case MONTHLY:
+                postDateType.setImageResource(R.drawable.calendar_repeat);
+                break;
+        }
+        postDate.setText(post.getFormattedDate());
+
+        //Set Tags
+        FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        params.setMargins(10,10,10,10);
+
+        int margin = (int) getResources().getDimension(R.dimen.create_edit_margin_lr);
+        params.setMargins(margin, margin, margin, margin);
+
+        if(postTagHolder.getChildCount()>0) {
+            postTagHolder.removeAllViews();
         }
 
-        protected void onPostExecute(Post tempPost) {
-            putPostInView(tempPost);
-            /*TODO: BUG putPostInView is called even though the view isnt visible --> (probably due to some backStack issue)
-            leads to the styleActionBar() method even though its not supposed to execute anything --> happens on app resume (postfragment view must have been visible once already)*/
+        for(String tag : post.getTags()) {
+            TextView tv = new TextView(activity);
+            tv.setText(tag);
+            tv.setTextColor(getResources().getColor(R.color.post_tag_text));
+            tv.setLayoutParams(params);
+            tv.setBackgroundResource(R.drawable.tag_bg);
+            postTagHolder.addView(tv);
         }
 
-        private void putPostInView(Post tempPost) {
-            post = tempPost;
+        //Set Description
+        postDescription.setText(post.getDescription());
 
-            //Set PostType
-            switch(post.getType()){
-                case SUPPLY:
-                    postType.setImageResource(R.drawable.offer_light);
-                    postTypeText.setText(R.string.type_offer);
-                    break;
-                case DEMAND:
-                    postType.setImageResource(R.drawable.want_light);
-                    postTypeText.setText(R.string.type_want);
-                    break;
-                case DO_TOGETHER:
-                    postType.setImageResource(R.drawable.activity_light);
-                    postTypeText.setText(R.string.type_activity);
-                    break;
-                case CRITIQUE:
-                    postType.setImageResource(R.drawable.change_light);
-                    postTypeText.setText(R.string.type_change);
-                    break;
-            }
+        //Set Images
+        mImagePagerAdapter = new ImagePagerAdapter(activity, false);
+        mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
 
-            //Set RepeatType
-            switch(post.getRepeat()){
-                case NONE:
-                    postDateType.setImageResource(R.drawable.calendar);
-                    break;
-                case WEEKLY:
-                    postDateType.setImageResource(R.drawable.calendar_repeat);
-                    break;
-                case MONTHLY:
-                    postDateType.setImageResource(R.drawable.calendar_repeat);
-                    break;
-            }
-            postDate.setText(post.getFormattedDate());
+        int imageCount = 0;
 
-            //Set Tags
-            FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
-            params.setMargins(10,10,10,10);
+        if(post.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
+            mImagePagerAdapter.addItem(post.getTitleImageUrl());
+            imageCount++;
+        }
 
-            int margin = (int) getResources().getDimension(R.dimen.create_edit_margin_lr);
-            params.setMargins(margin, margin, margin, margin);
+        for (String imgUrl : post.getOtherImageUrls()) {
+            mImagePagerAdapter.addItem(imgUrl);
+            imageCount++;
+        }
 
-            if(postTagHolder.getChildCount()>0) {
-                postTagHolder.removeAllViews();
-            }
+        if(imageCount>0) {
+            imageContainer.setVisibility(View.VISIBLE);
+            mIconPageIndicator.setVisibility(imageCount>1? View.VISIBLE : View.GONE);
+            mImagePager.setAdapter(mImagePagerAdapter);
+            mIconPageIndicator.setViewPager(mImagePager);
+            mIconPageIndicator.notifyDataSetChanged();
+            imageContainer.setBackgroundResource(R.color.post_images);
+        }else{
+            imageContainer.setVisibility(View.GONE);
+        }
 
-            for(String tag : post.getTags()) {
-                TextView tv = new TextView(activity);
-                tv.setText(tag);
-                tv.setTextColor(getResources().getColor(R.color.post_tag_text));
-                tv.setLayoutParams(params);
-                tv.setBackgroundResource(R.drawable.tag_bg);
-                postTagHolder.addView(tv);
-            }
-
-            //Set Description
-            postDescription.setText(post.getDescription());
-
-            //Set Images
-            mImagePagerAdapter = new ImagePagerAdapter(activity, false);
-            mImagePager.setSaveFromParentEnabled(false); //This is necessary because it prevents the ViewPager from being messed up on pagechanges and popbackstack's
-
-            int imageCount = 0;
-
-            if(post.getTitleImageUrl()!=null && tempPost.getTitleImageUrl().trim().length()>0) {
-                mImagePagerAdapter.addItem(post.getTitleImageUrl());
-                imageCount++;
-            }
-
-            for (String imgUrl : post.getOtherImageUrls()) {
-                mImagePagerAdapter.addItem(imgUrl);
-                imageCount++;
-            }
-
-            if(imageCount>0) {
-                imageContainer.setVisibility(View.VISIBLE);
-                mIconPageIndicator.setVisibility(imageCount>1? View.VISIBLE : View.GONE);
-                mImagePager.setAdapter(mImagePagerAdapter);
-                mIconPageIndicator.setViewPager(mImagePager);
-                mIconPageIndicator.notifyDataSetChanged();
-                imageContainer.setBackgroundResource(R.color.post_images);
+        //Set Location
+        try {
+            LatLng lng = post.getLocation();
+            if(lng == null || (lng.latitude == 0.0 && lng.longitude == 0.0)){
+                Log.d(LOG_TAG,"the adress is null do not show the map");
+                mapLayout.setVisibility(View.GONE);
             }else{
-                imageContainer.setVisibility(View.GONE);
-            }
+                mapLayout.setVisibility(View.VISIBLE);
+                List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
 
-            //Set Location
-            try {
-                LatLng lng = post.getLocation();
-                if(lng == null || (lng.latitude == 0.0 && lng.longitude == 0.0)){
-                    Log.d(LOG_TAG,"the adress is null do not show the map");
-                    mapLayout.setVisibility(View.GONE);
+                String address;
+
+                if(adresses!=null && adresses.size()>0){
+                    address = StringUtils.getFormattedAddress(adresses.get(0));
                 }else{
-                    mapLayout.setVisibility(View.VISIBLE);
-                    List<Address> adresses = mGeocoder.getFromLocation(post.getLocation().latitude, post.getLocation().longitude, 1);
-
-                    String address;
-
-                    if(adresses!=null && adresses.size()>0){
-                        address = StringUtils.getFormattedAddress(adresses.get(0));
-                    }else{
-                        Log.d(LOG_TAG, "No Address found");
-                        address=post.getTitle();
-                    }
-
-                    Marker marker = map.addMarker(new MarkerOptions()
-                            .position(post.getLocation())
-                            .title(post.getTitle())
-                            .snippet(address)
-                            .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
-                    map.animateCamera(cameraUpdate);
+                    Log.d(LOG_TAG, "No Address found");
+                    address=post.getTitle();
                 }
-            }catch (IOException ioe){
-                mapLayout.setVisibility(View.GONE); //No ErrorToast just pretend there was never a location anyway
-                Log.e(LOG_TAG,ioe.getMessage());
+
+                Marker marker = map.addMarker(new MarkerOptions()
+                        .position(post.getLocation())
+                        .title(post.getTitle())
+                        .snippet(address)
+                        .draggable(false)); //TODO: MultiLine Snippet see --> http://stackoverflow.com/questions/13904651/android-google-maps-v2-how-to-add-marker-with-multiline-snippet
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(post.getLocation(), 10);
+                map.animateCamera(cameraUpdate);
             }
-            styleActionBar();
-            activity.hideLoading();
+        }catch (IOException ioe){
+            mapLayout.setVisibility(View.GONE); //No ErrorToast just pretend there was never a location anyway
+            Log.e(LOG_TAG,ioe.getMessage());
         }
+        styleActionBar();
+        activity.hideLoading();
     }
 }

@@ -17,6 +17,10 @@ package at.researchstudio.sat.won.android.won_android_app.app.service;
 
 import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MatchEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MatchesEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostsEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
@@ -86,7 +90,7 @@ public class PostService {
         Log.d(LOG_TAG, "Retrieve My Posts");
         Map<URI, Post> myPosts = dataService.getMyPosts();
 
-        EventBus.getDefault().post(new ArrayList<Post>(myPosts.values()));
+        EventBus.getDefault().post(new MyPostsEvent(new ArrayList<Post>(myPosts.values())));
     }
 
     public ArrayList<Connection> getConversationsByPostId(String postId){
@@ -135,7 +139,7 @@ public class PostService {
             }
         }
         Log.d(LOG_TAG, "Getting Matches by postid: "+postId+" ("+connections.size()+" Connections / "+matches.size()+" Matches)");
-        EventBus.getDefault().post(matches);
+        EventBus.getDefault().post(new MatchesEvent(matches));
     }
 
     public Connection getConversationById(String id){
@@ -146,20 +150,18 @@ public class PostService {
         return dataService.getConnectionById(id);
     }
 
-    public Post getMyPostById(String id) {
-        return getMyPostById(URI.create(id));
+    public void getMyPostById(String id) { getMyPostById(URI.create(id)); }
+
+    public void getMyPostById(URI id) {
+        EventBus.getDefault().post(new MyPostEvent(dataService.getMyPostById(id)));
     }
 
-    public Post getMyPostById(URI id) {
-        return dataService.getMyPostById(id);
+    public void getMatchById(String id){
+        getMatchById(URI.create(id));
     }
 
-    public Post getMatchById(String id){
-        return getMatchById(URI.create(id));
-    }
-
-    public Post getMatchById(URI id){
-        return dataService.getPostById(id);
+    public void getMatchById(URI id){
+        EventBus.getDefault().post(new MatchEvent(dataService.getPostById(id)));
     }
 
     public void savePost(Post newPost) throws Exception{
