@@ -34,9 +34,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.webservice.constant
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.util.AsyncExecutor;
 
-/**
- * Created by fsuda on 25.08.2014.
- */
 public class LoginFragment extends Fragment {
     private static final String LOG_TAG = LoginFragment.class.getSimpleName();
 

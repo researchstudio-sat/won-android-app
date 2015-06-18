@@ -20,8 +20,8 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 /**
  * Created by fsuda on 17.06.2015.
  */
-public class MyPostEvent extends PostEvent {
-    public MyPostEvent(Post post){
+public class ReceivedMyPostEvent extends ReceivedPostEvent {
+    public ReceivedMyPostEvent(Post post){
         super(post);
     }
 }

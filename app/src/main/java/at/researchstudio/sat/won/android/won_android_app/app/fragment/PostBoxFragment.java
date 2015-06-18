@@ -17,7 +17,6 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.*;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -29,8 +28,8 @@ import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MatchesEvent;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostsEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedMatchesEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedMyPostsEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.util.AsyncExecutor;
@@ -72,11 +71,9 @@ public class PostBoxFragment extends Fragment{
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this); //TODO: EVENT IS ALREADY REGISTERED EXCEPTION WHEN RETURNING TO POSTBOX :-(
         return rootView;
     }
-
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -301,11 +298,11 @@ public class PostBoxFragment extends Fragment{
         styleActionBar();
     }
 
-    public void onEventMainThread(MyPostsEvent event) {
+    public void onEventMainThread(ReceivedMyPostsEvent event) {
         putListInView(event.getMyPostsEvent());
     }
 
-    public void onEventMainThread(MatchesEvent event) {
+    public void onEventMainThread(ReceivedMatchesEvent event) {
         putListInView(event.getMatches());
     }
 

@@ -17,22 +17,15 @@ package at.researchstudio.sat.won.android.won_android_app.app.service;
 
 import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.constants.Constants;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MatchEvent;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MatchesEvent;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostEvent;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostsEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.*;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.impl.DataService;
 import com.google.android.gms.maps.model.LatLng;
-import com.hp.hpl.jena.rdf.model.Model;
 import de.greenrobot.event.EventBus;
-import won.protocol.message.WonMessage;
-import won.protocol.message.WonMessageBuilder;
 import won.protocol.model.ConnectionState;
 import won.protocol.model.NeedState;
-import won.protocol.util.NeedModelBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -48,7 +41,7 @@ public class PostService {
         this.dataService = dataService;
     }
 
-    public ArrayList<Connection> getConversations() {
+    public void getConversations() {
         List<URI> states = new ArrayList<URI>();
         states.add(ConnectionState.REQUEST_SENT.getURI());
         states.add(ConnectionState.CONNECTED.getURI());
@@ -63,14 +56,14 @@ public class PostService {
         }
         Log.d(LOG_TAG, "Getting Conversations : ("+connections.size()+" Connections / "+conversations.size()+" Conversations)");
 
-        return conversations;
+        EventBus.getDefault().post(new ReceivedConversationsEvent(conversations));
     }
 
-    public ArrayList<Connection> getRequestsByPostId(String postId){
-        return getRequestsByPostId(URI.create(postId));
+    public void getRequestsByPostId(String postId){
+        getRequestsByPostId(URI.create(postId));
     }
 
-    public ArrayList<Connection> getRequestsByPostId(URI postId){
+    public void getRequestsByPostId(URI postId){
         List<Connection> connections = dataService.getConnectionsByPostAndState(postId, Collections.singletonList(ConnectionState.REQUEST_RECEIVED.getURI()));
 
         ArrayList<Connection> requests = new ArrayList<Connection>();
@@ -83,21 +76,21 @@ public class PostService {
         }
         Log.d(LOG_TAG, "Getting Requests by postid: "+postId+" ("+connections.size()+" Connections / "+requests.size()+" Requests)");
 
-        return requests;
+        EventBus.getDefault().post(new ReceivedRequestsEvent(requests));
     }
 
     public void getMyPosts() {
         Log.d(LOG_TAG, "Retrieve My Posts");
         Map<URI, Post> myPosts = dataService.getMyPosts();
 
-        EventBus.getDefault().post(new MyPostsEvent(new ArrayList<Post>(myPosts.values())));
+        EventBus.getDefault().post(new ReceivedMyPostsEvent(new ArrayList<Post>(myPosts.values())));
     }
 
-    public ArrayList<Connection> getConversationsByPostId(String postId){
-        return getConversationsByPostId(URI.create(postId));
+    public void getConversationsByPostId(String postId){
+        getConversationsByPostId(URI.create(postId));
     }
 
-    public ArrayList<Connection> getConversationsByPostId(URI postId) {
+    public void getConversationsByPostId(URI postId) {
         List<URI> states = new ArrayList<URI>();
         states.add(ConnectionState.REQUEST_SENT.getURI());
         states.add(ConnectionState.CONNECTED.getURI());
@@ -113,7 +106,7 @@ public class PostService {
         }
         Log.d(LOG_TAG, "Getting Conversations by postid: "+postId+" ("+connections.size()+" Connections / "+conversations.size()+" Conversations)");
 
-        return conversations;
+        EventBus.getDefault().post(new ReceivedConversationsEvent(conversations));
     }
 
     public ArrayList<MessageItemModel> getMessagesByConversationId(String conversationId){
@@ -139,21 +132,24 @@ public class PostService {
             }
         }
         Log.d(LOG_TAG, "Getting Matches by postid: "+postId+" ("+connections.size()+" Connections / "+matches.size()+" Matches)");
-        EventBus.getDefault().post(new MatchesEvent(matches));
+        EventBus.getDefault().post(new ReceivedMatchesEvent(matches));
     }
 
-    public Connection getConversationById(String id){
-        return getConversationById(URI.create(id));
+    public void getConversationById(String id){
+        getConversationById(URI.create(id));
     }
 
-    public Connection getConversationById(URI id){
-        return dataService.getConnectionById(id);
+    public void getConversationById(URI id){
+        Connection con = dataService.getConnectionById(id);
+        con.setMessages(getMessagesByConversationId(id));
+
+        EventBus.getDefault().post(new ConversationEvent(con));
     }
 
     public void getMyPostById(String id) { getMyPostById(URI.create(id)); }
 
     public void getMyPostById(URI id) {
-        EventBus.getDefault().post(new MyPostEvent(dataService.getMyPostById(id)));
+        EventBus.getDefault().post(new ReceivedMyPostEvent(dataService.getMyPostById(id)));
     }
 
     public void getMatchById(String id){
@@ -161,7 +157,7 @@ public class PostService {
     }
 
     public void getMatchById(URI id){
-        EventBus.getDefault().post(new MatchEvent(dataService.getPostById(id)));
+        EventBus.getDefault().post(new ReceivedMatchEvent(dataService.getPostById(id)));
     }
 
     public void savePost(Post newPost) throws Exception{

@@ -20,18 +20,18 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 /**
  * Created by fsuda on 17.06.2015.
  */
-public class PostEvent {
-    private Post post;
+public class ReceivedMatchEvent {
+    private Post match;
 
-    public PostEvent(Post post) {
-        this.post = post;
+    public ReceivedMatchEvent(Post match) {
+        this.match = match;
     }
 
-    public Post getPost() {
-        return post;
+    public Post getMatch() {
+        return match;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
+    public void setMatch(Post match) {
+        this.match = match;
     }
 }

@@ -33,9 +33,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ImagePagerAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MatchEvent;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostEvent;
-import at.researchstudio.sat.won.android.won_android_app.app.event.PostEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedMatchEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import at.researchstudio.sat.won.android.won_android_app.app.util.StringUtils;
 import com.google.android.gms.maps.*;
@@ -310,7 +308,7 @@ public class PostFragment extends Fragment {
         }
     }
 
-    public void onEventMainThread(MatchEvent event) {
+    public void onEventMainThread(ReceivedMatchEvent event) {
         putPostInView(event.getMatch());
     }
 

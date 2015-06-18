@@ -19,7 +19,6 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,22 +31,18 @@ import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivi
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MessageEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ConversationEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.SendMessageEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import de.greenrobot.event.EventBus;
+import de.greenrobot.event.util.AsyncExecutor;
 
-import java.util.ArrayList;
-
-/**
- * Created by fsuda on 14.10.2014.
- */
 public class ConversationFragment extends Fragment {
     private static final String LOG_TAG = ConversationFragment.class.getSimpleName();
     private MainActivity activity;
 
-    private CreateListTask createListTask;
     private ListView mMessageListView;
     private ImageButton mSendMessage;
     private EditText mMessageText;
@@ -131,8 +126,7 @@ public class ConversationFragment extends Fragment {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
-        createListTask = new CreateListTask();
-        createListTask.execute();
+        AsyncExecutor.create().execute(new DataRetrieval());
     }
 
     @Override
@@ -145,9 +139,6 @@ public class ConversationFragment extends Fragment {
     public void onDestroy() {
         Log.d(LOG_TAG, "onDestroy trying to cancel createListTask");
         super.onDestroy();
-        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createListTask.cancel(true);
-        }
     }
     //*************************************************************
     @Override
@@ -179,42 +170,32 @@ public class ConversationFragment extends Fragment {
         }
     }
 
-    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<MessageItemModel>> {
+    private class DataRetrieval implements AsyncExecutor.RunnableEx{
         @Override
-        protected ArrayList<MessageItemModel> doInBackground(String... params) {
-            connection = activity.getPostService().getConversationById(conversationId);
-            return activity.getPostService().getMessagesByConversationId(conversationId);
-        }
-
-        @Override
-        protected void onCancelled(ArrayList<MessageItemModel> linkArray) {
-            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            //putConversationInView(linkArray);
-        }
-
-        protected void onPostExecute(ArrayList<MessageItemModel> linkArray) {
-            putConversationInView(linkArray);
-        }
-
-        private void putConversationInView(ArrayList<MessageItemModel> linkArray) {
-            mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
-            for (MessageItemModel message : linkArray) {
-                mMessageListItemAdapter.addItem(message);
-            }
-            mMessageListView.setAdapter(mMessageListItemAdapter);
-            mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
-            styleActionBar();
-            activity.hideLoading();
+        public void run() {
+            activity.getPostService().getConversationById(conversationId);
         }
     }
 
+    public void onEventMainThread(ConversationEvent event) {
+        connection = event.getConnection();
+
+        mMessageListItemAdapter = new MessageListItemAdapter(getActivity());
+        for (MessageItemModel message : connection.getMessages()) {
+            mMessageListItemAdapter.addItem(message);
+        }
+        mMessageListView.setAdapter(mMessageListItemAdapter);
+        mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);
+        styleActionBar();
+        activity.hideLoading();
+    }
 
 
     private void sendMessage(){
         Log.d(LOG_TAG,"Sending Message");
         String messageText = mMessageText.getText().toString();
 
-        if(messageText!= null && !"".equals(messageText.trim())) {
+        if(!"".equals(messageText.trim())) {
             MessageItemModel message = new MessageItemModel(MessageType.SEND, mMessageText.getText().toString());
 
             //TODO: SEND MESSAGE IN BACKGROUND
@@ -222,7 +203,7 @@ public class ConversationFragment extends Fragment {
             mMessageListView.setAdapter(mMessageListItemAdapter);
             mMessageListView.setSelection(mMessageListItemAdapter.getCount() - 1);*/
 
-            EventBus.getDefault().post(new MessageEvent(message));
+            EventBus.getDefault().post(new SendMessageEvent(message));
         }
 
         mMessageText.setText("");
@@ -230,26 +211,28 @@ public class ConversationFragment extends Fragment {
 
     private void styleActionBar(){
         ActionBar ab = activity.getActionBar();
-        Post post = connection.getMatchedPost();
-        Post post2 = connection.getMyPost();
+        if(ab!=null) {
+            Post post = connection.getMatchedPost();
+            Post post2 = connection.getMyPost();
 
-        String titleImageUrl = post.getTitleImageUrl();
+            String titleImageUrl = post.getTitleImageUrl();
 
-        activity.setDrawerToggle(false); //DISABLE THE NAVDRAWER -> POSTFRAGMENT IS A LOWLEVEL VIEW
-        ab.setTitle(post.getTitle());
-        ab.setSubtitle(post2.getTitle() != null ? getString(R.string.to)+" "+post2.getTitle(): null);
+            activity.setDrawerToggle(false); //DISABLE THE NAVDRAWER -> POSTFRAGMENT IS A LOWLEVEL VIEW
+            ab.setTitle(post.getTitle());
+            ab.setSubtitle(post2.getTitle() != null ? getString(R.string.to) + " " + post2.getTitle() : null);
 
-        if(titleImageUrl!=null) {
-            ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
-        }else{
-            final int tileSize = getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
-            final Bitmap letterTile = tileProvider.getLetterTile(post.getTitle(), post.getTitle(), tileSize, tileSize);
+            if (titleImageUrl != null) {
+                ab.setIcon(new BitmapDrawable(getResources(), activity.getImageLoaderService().getCroppedBitmap(titleImageUrl)));
+            } else {
+                final int tileSize = getResources().getDimensionPixelSize(R.dimen.letter_tile_size);
+                final Bitmap letterTile = tileProvider.getLetterTile(post.getTitle(), post.getTitle(), tileSize, tileSize);
 
-            ab.setIcon(new BitmapDrawable(getResources(), letterTile));
+                ab.setIcon(new BitmapDrawable(getResources(), letterTile));
+            }
         }
     }
 
-    public void onEvent(MessageEvent event){
+    public void onEvent(SendMessageEvent event){
         Log.d(LOG_TAG, "MESSAGE CREATED");
         mMessageListItemAdapter.addItem(event.getMessage());
         mMessageListView.setAdapter(mMessageListItemAdapter);

@@ -16,7 +16,6 @@
 package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.Fragment;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.ViewPager;
@@ -27,15 +26,12 @@ import android.view.ViewGroup;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MyPostPagerAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.adapter.PostListItemAdapter;
-import at.researchstudio.sat.won.android.won_android_app.app.event.MyPostEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedMyPostEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import com.viewpagerindicator.TabPageIndicator;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.util.AsyncExecutor;
 import de.greenrobot.event.util.ThrowableFailureEvent;
-
-import java.util.ArrayList;
 
 /**
  * Created by fsuda on 10.10.2014.
@@ -113,7 +109,7 @@ public class MyPostFragment extends Fragment {
         }
     }
 
-    public void onEventMainThread(MyPostEvent event) {
+    public void onEventMainThread(ReceivedMyPostEvent event) {
         Log.d(LOG_TAG, "MyPostEvent received");
         mIndicator = (TabPageIndicator) rootView.findViewById(R.id.mypost_viewpager_indicator);
         mMyPostViewPager = (ViewPager) rootView.findViewById(R.id.mypost_viewpager);

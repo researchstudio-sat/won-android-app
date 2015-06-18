@@ -20,10 +20,10 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemMo
 /**
  * Created by fsuda on 17.06.2015.
  */
-public class MessageEvent {
+public class SendMessageEvent {
     private MessageItemModel message;
 
-    public MessageEvent(MessageItemModel message) {
+    public SendMessageEvent(MessageItemModel message) {
         this.message = message;
     }
 

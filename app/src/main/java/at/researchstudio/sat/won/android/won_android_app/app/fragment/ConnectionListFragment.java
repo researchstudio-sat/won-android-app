@@ -17,7 +17,6 @@ package at.researchstudio.sat.won.android.won_android_app.app.fragment;
 
 import android.app.ActionBar;
 import android.app.Fragment;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -28,8 +27,11 @@ import android.widget.SearchView;
 import at.researchstudio.sat.won.android.won_android_app.app.R;
 import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivity;
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.ConnectionListItemAdapter;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedConversationsEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedRequestsEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import de.greenrobot.event.EventBus;
 import de.greenrobot.event.util.AsyncExecutor;
 
 import java.util.ArrayList;
@@ -42,7 +44,6 @@ public class ConnectionListFragment extends Fragment {
     private static final String LOG_TAG = ConnectionListFragment.class.getSimpleName();
 
     private MainActivity activity;
-    private CreateListTask createListTask;
     private SwipeRefreshLayout swipeLayout;
     private ListView mConnectionListView;
     private ConnectionListItemAdapter mConnectionListItemAdapter;
@@ -114,8 +115,7 @@ public class ConnectionListFragment extends Fragment {
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh() {
-                createListTask = new CreateListTask();
-                createListTask.execute();
+                AsyncExecutor.create().execute(new DataRetrieval());
             }
         });
     }
@@ -123,17 +123,15 @@ public class ConnectionListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        createListTask = new CreateListTask();
-        createListTask.execute();
+        EventBus.getDefault().register(this);
+        AsyncExecutor.create().execute(new DataRetrieval());
     }
 
     @Override
     public void onDestroy() {
         Log.d(LOG_TAG,"onDestroy trying to cancel createListTask");
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
-        if(createListTask != null && createListTask.getStatus() == AsyncTask.Status.RUNNING) {
-            createListTask.cancel(true);
-        }
     }
     //***********************************************************
 
@@ -142,7 +140,7 @@ public class ConnectionListFragment extends Fragment {
         if(activity.isDrawerOpen()){
             super.onCreateOptionsMenu(menu, inflater);
         }else {
-            menu.clear(); //THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
+            menu.clear(); //TODO: THIS IS ALL A LITTLE WEIRD STILL NOT SURE IF THIS IS AT ALL BEST PRACTICE
             getActivity().getMenuInflater().inflate(R.menu.list, menu);
             MenuItem searchViewItem = menu.findItem(R.id.action_search);
             SearchView searchView = (SearchView) searchViewItem.getActionView();
@@ -170,37 +168,35 @@ public class ConnectionListFragment extends Fragment {
         return postId==null;
     }
 
-    private class CreateListTask extends AsyncTask<String, Integer, ArrayList<Connection>> {
+    private class DataRetrieval implements AsyncExecutor.RunnableEx {
         @Override
-        protected ArrayList<Connection> doInBackground(String... params) {
-
+        public void run(){
             if(isMailbox()) {
-                return activity.getPostService().getConversations();
+                activity.getPostService().getConversations();
             }else if(receivedRequestsOnly) {
-                return activity.getPostService().getRequestsByPostId(postId);
+                activity.getPostService().getRequestsByPostId(postId);
             }else{
-                return activity.getPostService().getConversationsByPostId(postId);
+                activity.getPostService().getConversationsByPostId(postId);
             }
         }
+    }
 
-        @Override
-        protected void onCancelled(ArrayList<Connection> linkArray) {
-            Log.d(LOG_TAG, "ON CANCELED WAS CALLED");
-            //putListInView(linkArray);
-        }
+    public void onEventMainThread(ReceivedConversationsEvent event){
+        putListInView(event.getConnections());
+    }
 
-        protected void onPostExecute(ArrayList<Connection> linkArray) {
-            putListInView(linkArray);
-        }
+    public void onEventMainThread(ReceivedRequestsEvent event){
 
-        private void putListInView(ArrayList<Connection> linkArray){
-            mConnectionListItemAdapter = new ConnectionListItemAdapter(getActivity(), isMailbox(), receivedRequestsOnly);
-            for(Connection connection : linkArray) {
-                mConnectionListItemAdapter.addItem(connection);
-            }
-            mConnectionListView.setAdapter(mConnectionListItemAdapter);
-            swipeLayout.setRefreshing(false);
+        putListInView(event.getConnections());
+    }
+
+    private void putListInView(ArrayList<Connection> linkArray){
+        mConnectionListItemAdapter = new ConnectionListItemAdapter(getActivity(), isMailbox(), receivedRequestsOnly);
+        for(Connection connection : linkArray) {
+            mConnectionListItemAdapter.addItem(connection);
         }
+        mConnectionListView.setAdapter(mConnectionListItemAdapter);
+        swipeLayout.setRefreshing(false);
     }
 
     private void styleActionBar() {

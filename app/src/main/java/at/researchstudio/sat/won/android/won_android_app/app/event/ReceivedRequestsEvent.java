@@ -15,25 +15,25 @@
 
 package at.researchstudio.sat.won.android.won_android_app.app.event;
 
-import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 
 import java.util.ArrayList;
 
 /**
  * Created by fsuda on 17.06.2015.
  */
-public class MyPostsEvent {
-    private ArrayList<Post> myPostsEvent;
+public class ReceivedRequestsEvent {
+    ArrayList<Connection> connections;
 
-    public MyPostsEvent(ArrayList<Post> myPostsEvent) {
-        this.myPostsEvent = myPostsEvent;
+    public ReceivedRequestsEvent(ArrayList<Connection> connections) {
+        this.connections = connections;
     }
 
-    public ArrayList<Post> getMyPostsEvent() {
-        return myPostsEvent;
+    public ArrayList<Connection> getConnections() {
+        return connections;
     }
 
-    public void setMyPostsEvent(ArrayList<Post> myPostsEvent) {
-        this.myPostsEvent = myPostsEvent;
+    public void setConnections(ArrayList<Connection> connections) {
+        this.connections = connections;
     }
 }
