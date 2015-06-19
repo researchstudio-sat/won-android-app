@@ -143,7 +143,7 @@ public class PostService {
         Connection con = dataService.getConnectionById(id);
         con.setMessages(getMessagesByConversationId(id));
 
-        EventBus.getDefault().post(new ConversationEvent(con));
+        EventBus.getDefault().post(new ReceivedConversationEvent(con));
     }
 
     public void getMyPostById(String id) { getMyPostById(URI.create(id)); }

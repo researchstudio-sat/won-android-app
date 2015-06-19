@@ -31,7 +31,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.activity.MainActivi
 import at.researchstudio.sat.won.android.won_android_app.app.adapter.MessageListItemAdapter;
 import at.researchstudio.sat.won.android.won_android_app.app.components.LetterTileProvider;
 import at.researchstudio.sat.won.android.won_android_app.app.enums.MessageType;
-import at.researchstudio.sat.won.android.won_android_app.app.event.ConversationEvent;
+import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedConversationEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.event.SendMessageEvent;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
@@ -177,7 +177,7 @@ public class ConversationFragment extends Fragment {
         }
     }
 
-    public void onEventMainThread(ConversationEvent event) {
+    public void onEventMainThread(ReceivedConversationEvent event) {
         connection = event.getConnection();
 
         mMessageListItemAdapter = new MessageListItemAdapter(getActivity());

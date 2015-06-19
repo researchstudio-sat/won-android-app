@@ -16,17 +16,11 @@
 package at.researchstudio.sat.won.android.won_android_app.app.event;
 
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
-import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 
-import java.util.ArrayList;
-
-/**
- * Created by fsuda on 17.06.2015.
- */
-public class ConversationEvent {
+public class ReceivedConversationEvent {
     private Connection connection;
 
-    public ConversationEvent(Connection conversation) {
+    public ReceivedConversationEvent(Connection conversation) {
         this.connection = conversation;
     }
 
