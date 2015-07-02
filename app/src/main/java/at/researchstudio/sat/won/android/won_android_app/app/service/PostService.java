@@ -82,7 +82,7 @@ public class PostService {
     public void getMyPosts() {
         Log.d(LOG_TAG, "Retrieve My Posts");
         Map<URI, Post> myPosts = dataService.getMyPosts();
-
+        Log.d(LOG_TAG, "RETRIEVED POSTS SENDING EVENT CALL");
         EventBus.getDefault().post(new ReceivedMyPostsEvent(new ArrayList<Post>(myPosts.values())));
     }
 
@@ -162,6 +162,7 @@ public class PostService {
 
     public void savePost(Post newPost) throws Exception{
         dataService.savePost(newPost);
+        EventBus.getDefault().post(new SavePostEvent(newPost)); //TODO remove this
     }
 
     public Post closePost(String postIdString){

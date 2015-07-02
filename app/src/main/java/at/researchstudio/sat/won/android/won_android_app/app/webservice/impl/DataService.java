@@ -25,6 +25,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.event.WebSocketEven
 import at.researchstudio.sat.won.android.won_android_app.app.model.Connection;
 import at.researchstudio.sat.won.android.won_android_app.app.model.MessageItemModel;
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
+import at.researchstudio.sat.won.android.won_android_app.app.model.builder.PostModelBuilder;
 import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
 import com.hp.hpl.jena.query.*;
@@ -132,18 +133,16 @@ public class DataService {
             verboseLogOutput(response);
 
             initialDataset = AsyncLinkedDataSource.makeDataset();
-            myneeds = new ArrayList<URI>();
+            myneeds = new ArrayList<>();
 
             ExecutorService es = Executors.newFixedThreadPool(4);
 
-            int i = 1; //TODO: REMOVE THIS
             for(String uriString : response.getBody()) {
                 URI uri = URI.create(uriString);
                 myneeds.add(uri);
 
                 RetrievalThread rt = new RetrievalThread(uri, linkedDataSourceAsync);
                 es.execute(rt);
-                if(i++>3) {break;} //TODO: REMOVE THIS
             }
             es.shutdown();
             boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
@@ -153,7 +152,7 @@ public class DataService {
             }
 
             sp.stop();
-            Log.d(LOG_TAG, "Retrieved all initialDatasets in: "+sp.toString());
+            Log.d(LOG_TAG, "Retrieved all initialDatasets in: " + sp.toString());
             sp.reset();
             sp.start();
 
@@ -172,7 +171,7 @@ public class DataService {
             Log.e(LOG_TAG, e.getResponseBodyAsString(), e);
         } catch (ResourceAccessException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             Log.e(LOG_TAG, e.getLocalizedMessage(), e);
         }
     }
@@ -320,9 +319,6 @@ public class DataService {
         Post p = null;
 
         for(QuerySolution soln : executeQuery(initialDataset, RdfUtils.setSparqlVars(WonQueriesLocal.SPARQL_NEEDS_FILTERED_BY_URI, "need", uri))){
-            StringBuilder sb = new StringBuilder();
-            Iterator<String> it = soln.varNames();
-
             p = new Post(URI.create(soln.get("need").toString()));
             p.setTitle(soln.get("title").toString());
             p.setDescription(soln.get("desc").toString());
@@ -542,17 +538,35 @@ public class DataService {
             post.setURI(wonNodeInformationService.generateNeedURI());
         }
         NeedModelBuilder needBuilder = new NeedModelBuilder();
+        PostModelBuilder postModelBuilder = new PostModelBuilder();
+        postModelBuilder.copyValuesFromProduct(post);
+        postModelBuilder.copyValuesToBuilder(needBuilder);
 
-        //TODO: Put the correct values into the needBuilder from the Post
-        Model needModel = needBuilder.build();
+        WonMessage wonMessage = new WonMessageBuilder()
+                                .setMessagePropertiesForCreate(
+                                        wonNodeInformationService.generateEventURI(),
+                                        post.getURI(),
+                                        wonNodeInformationService.getDefaultWonNodeURI()
+                                )
+                                .addContent(needBuilder.build(), null)
+                                .build();
 
-        WonMessageBuilder builder = new WonMessageBuilder();
-        WonMessage wonMessage = builder.setMessagePropertiesForCreate(wonNodeInformationService.generateEventURI(), post.getURI(), wonNodeInformationService.getDefaultWonNodeURI()).addContent(needModel, null).build();
 
         String wonMessageJsonLdString = WonMessageEncoder.encodeAsJsonLd(wonMessage);
+        Log.d(LOG_TAG, wonMessageJsonLdString);
         WebSocketMessage<String> webSocketMessage = new TextMessage(wonMessageJsonLdString);
 
-        listenableFuture.get().sendMessage(webSocketMessage);
+        Log.d(LOG_TAG,"WS-Message: ");
+        Log.d(LOG_TAG,webSocketMessage.getPayload());
+
+        WebSocketSession wss = listenableFuture.get();
+        Log.d(LOG_TAG,"protocol: "+wss.getAcceptedProtocol());
+        Log.d(LOG_TAG,"hs-headers: "+wss.getHandshakeHeaders().toString());
+        Log.d(LOG_TAG,"wss-uri: "+wss.getUri().toString());
+        Log.d(LOG_TAG,"Wss: "+wss.toString());
+
+        wss.sendMessage(webSocketMessage);
+
         /*
         //TODO: NOT SURE IF THE ABOVE THINGY IS CORRECT
         //TODO: Send Message with needcreation and wait for ok message
@@ -578,6 +592,7 @@ public class DataService {
         }
 
         return getMyPostById(post.getURI());*/
+
     }
 
     public void onEvent(WebSocketEvent event){

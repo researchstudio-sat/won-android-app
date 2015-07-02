@@ -71,7 +71,9 @@ public class PostBoxFragment extends Fragment{
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        EventBus.getDefault().register(this); //TODO: EVENT IS ALREADY REGISTERED EXCEPTION WHEN RETURNING TO POSTBOX :-(
+        if(!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         return rootView;
     }
 

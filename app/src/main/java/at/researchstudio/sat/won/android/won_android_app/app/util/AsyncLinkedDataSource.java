@@ -81,7 +81,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
     public Dataset getDataForResource(URI resourceURI, List<URI> properties, int maxRequest, int maxDepth) {
         Set<URI> crawledURIs = new HashSet<URI>();
         Set<URI> newlyDiscoveredURIs = new HashSet<URI>();
-        Set<URI> urisToCrawl = null;
+        Set<URI> urisToCrawl;
         newlyDiscoveredURIs.add(resourceURI);
         int depth = 0;
         int requests = 0;
@@ -115,7 +115,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
      public Dataset getDataForResourceWithPropertyPath(URI resourceURI, List<Path> properties, int maxRequest, int maxDepth, boolean moveAllTriplesInDefaultGraph){
         Set<URI> crawledURIs = new HashSet<URI>();
         Set<URI> newlyDiscoveredURIs = new HashSet<URI>();
-        Set<URI> urisToCrawl = null;
+        Set<URI> urisToCrawl;
         newlyDiscoveredURIs.add(resourceURI);
         int depth = 0;
         int requests = 0;
@@ -137,7 +137,7 @@ public class AsyncLinkedDataSource implements LinkedDataSource {
 
             es.shutdown();
             try {
-                boolean finished = es.awaitTermination(30, TimeUnit.MINUTES);
+                es.awaitTermination(30, TimeUnit.MINUTES);
             }catch (InterruptedException e){
                 Log.e(LOG_TAG, e.getLocalizedMessage(), e);
                 return resultDataset; //TODO: NOT SURE IF THIS IS NECESSARY

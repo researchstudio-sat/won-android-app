@@ -30,6 +30,7 @@ import at.researchstudio.sat.won.android.won_android_app.app.event.ReceivedMyPos
 import at.researchstudio.sat.won.android.won_android_app.app.model.Post;
 import com.viewpagerindicator.TabPageIndicator;
 import de.greenrobot.event.EventBus;
+import de.greenrobot.event.EventBusException;
 import de.greenrobot.event.util.AsyncExecutor;
 import de.greenrobot.event.util.ThrowableFailureEvent;
 
@@ -63,7 +64,10 @@ public class MyPostFragment extends Fragment {
         this.container = container;
         rootView = inflater.inflate(R.layout.fragment_mypost, container, false);
 
-        EventBus.getDefault().register(this);
+        if(!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+
         return rootView;
     }
 

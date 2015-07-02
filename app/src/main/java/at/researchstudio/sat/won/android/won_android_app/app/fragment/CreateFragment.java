@@ -395,9 +395,9 @@ public class CreateFragment extends Fragment implements OnDateSetListener, TimeP
         fragmentTransaction.commit();
     }
 
-    protected void onEventMainThread(Post tempPost) {
+    public void onEventMainThread(ReceivedPostEvent event) {
         addListeners();
-        putPostInView(tempPost);
+        putPostInView(event.getPost());
     }
 
     private void addListeners(){

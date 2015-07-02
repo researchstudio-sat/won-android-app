@@ -13,6 +13,7 @@ import java.util.Arrays;
  * Created by fsuda on 25.02.2015.
  */
 public class PostModelBuilder extends NeedBuilderBase<Post> {
+    //TODO: FULL IMPL
     private static final String LOG_TAG = PostModelBuilder.class.getSimpleName();
 
     @Override
@@ -29,25 +30,22 @@ public class PostModelBuilder extends NeedBuilderBase<Post> {
 
         post.setTags(Arrays.asList(getTagsArray()));
         post.setType(getBasicNeedTypeBNT());
-
-        Log.d(LOG_TAG, ""+getURI());
-
         post.setNeedState(getStateNS());
 
-        //TODO: FULL IMPLEMENTATION
         return post;
     }
 
     @Override
     public void copyValuesFromProduct(Post post) {
+        setUri(post.getURI());
         setDescription(post.getDescription());
         setTitle(post.getTitle());
-        setTags((String[])post.getTags().toArray());
-        //setAvailableAtLocation(post.getLocation().latitude,post.getLocation().longitude);
-
+        setTags(post.getTags().toArray(new String[post.getTags().size()]));
         setState(post.getNeedState());
-        //TODO: FULL IMPLEMENTATION
         setBasicNeedType(post.getType());
-        setUri(post.getURI());
+        setState(post.getNeedState());
+        if(post.getLocation()!=null) {
+            setAvailableAtLocation((float) post.getLocation().latitude, (float) post.getLocation().longitude); //TODO: NOT SURE IF LOCATION IS LOST SOMEHOW DUE TO DOUBLE TO FLOAT CAST
+        }
     }
 }

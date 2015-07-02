@@ -121,7 +121,9 @@ public class PostFragment extends Fragment {
 
         mScrollView = (ScrollView) rootView.findViewById(R.id.post_scrollview);
 
-        EventBus.getDefault().register(this);
+        if(!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         return rootView;
     }
 
