@@ -109,7 +109,6 @@ dependencies {
 
     /*Other dependencies*/
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
-    compile 'com.github.tavendo:AutobahnAndroid:v0.5.2'
 
     compile(group:'webofneeds', name:'won-owner', version:'0.2-SNAPSHOT', changing: true) {
         exclude module: 'aopalliance'

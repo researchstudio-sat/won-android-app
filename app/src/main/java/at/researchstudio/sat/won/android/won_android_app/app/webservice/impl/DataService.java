@@ -29,7 +29,6 @@ import at.researchstudio.sat.won.android.won_android_app.app.model.builder.PostM
 import at.researchstudio.sat.won.android.won_android_app.app.util.AsyncLinkedDataSource;
 import at.researchstudio.sat.won.android.won_android_app.app.webservice.components.WonClientHttpRequestFactory;
 import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.path.Path;
@@ -38,11 +37,8 @@ import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
 import com.hp.hpl.jena.update.UpdateAction;
-import com.hp.hpl.jena.vocabulary.RDF;
 import de.greenrobot.event.EventBus;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -56,13 +52,10 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
-import org.springframework.web.socket.sockjs.transport.SockJsSession;
-import won.cryptography.service.RandomNumberService;
 import won.cryptography.service.SecureRandomNumberServiceImpl;
 import won.owner.protocol.message.base.MessageExtractingWonMessageHandlerAdapter;
 import won.protocol.message.WonMessage;
 import won.protocol.message.WonMessageBuilder;
-import won.protocol.message.WonMessageDecoder;
 import won.protocol.message.WonMessageEncoder;
 import won.protocol.model.*;
 import won.protocol.service.impl.WonNodeInformationServiceImpl;
@@ -80,8 +73,6 @@ import java.util.concurrent.TimeUnit;
 public class DataService {
     private static final String LOG_TAG = DataService.class.getSimpleName();
 
-    public MessageExtractingWonMessageHandlerAdapter messageHandlerAdapter = new MessageExtractingWonMessageHandlerAdapter(new OwnerCallbackImpl());
-
     private WonClientHttpRequestFactory requestFactory;
     private RestTemplate restTemplate;
     private Context context; //used for string resources
@@ -94,6 +85,7 @@ public class DataService {
     private WonNodeInformationServiceImpl wonNodeInformationService;
 
     private SockJsClient sockJsClient;
+
     private ListenableFuture<WebSocketSession> listenableFuture;
 
     public DataService(AuthenticationService authService){
@@ -157,7 +149,6 @@ public class DataService {
             sp.start();
 
             RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
-
             sockJsClient = new SockJsClient(Collections.singletonList((Transport)transport));
 
             //TODO: SET HANDLER SOMEHOW (HTTPHEADER) --> change null value OR USE OTHER DOHANDSHAKE METHOD
@@ -564,9 +555,11 @@ public class DataService {
         Log.d(LOG_TAG,"hs-headers: "+wss.getHandshakeHeaders().toString());
         Log.d(LOG_TAG,"wss-uri: "+wss.getUri().toString());
         Log.d(LOG_TAG,"Wss: "+wss.toString());
+        Log.d(LOG_TAG,"Wss: "+wss.getBinaryMessageSizeLimit());
+        Log.d(LOG_TAG,"Wss: "+wss.getTextMessageSizeLimit());
+
 
         wss.sendMessage(webSocketMessage);
-
         /*
         //TODO: NOT SURE IF THE ABOVE THINGY IS CORRECT
         //TODO: Send Message with needcreation and wait for ok message

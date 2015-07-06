@@ -19,13 +19,12 @@ import android.util.Log;
 import at.researchstudio.sat.won.android.won_android_app.app.event.WebSocketEvent;
 import de.greenrobot.event.EventBus;
 import org.apache.jena.riot.Lang;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import won.owner.protocol.message.base.MessageExtractingWonMessageHandlerAdapter;
 import won.protocol.message.WonMessage;
+import won.protocol.message.WonMessageBuilder;
 import won.protocol.message.WonMessageDecoder;
+import won.protocol.message.WonMessageEncoder;
 
 import java.util.Collections;
 
@@ -33,6 +32,8 @@ import java.util.Collections;
  * Created by fsuda on 19.03.2015.
  */
 public class WonWebSocketHandler implements WebSocketHandler {
+    private MessageExtractingWonMessageHandlerAdapter messageHandlerAdapter = new MessageExtractingWonMessageHandlerAdapter(new OwnerCallbackImpl());
+
     private static final String LOG_TAG = WonWebSocketHandler.class.getSimpleName();
 
     @Override
@@ -46,6 +47,9 @@ public class WonWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         EventBus.getDefault().post(new WebSocketEvent(message));
+        Log.d(LOG_TAG,"##################################################################");
+        messageHandlerAdapter.process(WonMessageDecoder.decodeFromJsonLd((String) message.getPayload()));
+        Log.d(LOG_TAG,"##################################################################");
     }
 
     @Override
